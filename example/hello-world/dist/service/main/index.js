@@ -1,16 +1,11 @@
 const express = require('express')
+const common = require('./lib/common')
+
 const app = express()
-const name = "main"
 const port = 3000
+const handler = main
 
-app.get('/', (req, res) => {
-  const result = main()
-  res.send(result)
-})
-
-app.listen(port, () => {
-  console.log(`${name}: ${port}`)
-})
+common.startService(app, port, handler)
 
 function main() {
   return capitalizeWords("hello, world!")
