@@ -1,4 +1,5 @@
 const express = require('express')
+const http = require('http')
 const fetch = require('node-fetch')
 
 // main
@@ -76,9 +77,8 @@ for (let setup_function of _setup_functions) {
   setup_function(app)
 }
 
-app.listen(3000, async () => {
-  const result = await main() 
-  if (typeof result != 'undefined') {
-    console.log(result)
-  }
+const server = http.createServer(app)
+server.listen(3000, async () => {
+  console.log(await main())
+  server.close()
 })
