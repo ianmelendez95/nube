@@ -11,39 +11,34 @@ import Data.Char
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 
+import qualified JS.Syntax as S
+
 type Parser = Parsec Void T.Text
 
-parseJsFile :: FilePath -> IO [T.Text]
+parseJsFile :: FilePath -> IO [S.Fun]
 parseJsFile path = do 
   content <- TIO.readFile path
   let result = either (error . errorBundlePretty) id $ runParser jsFunctions path content
   pure result
 
-jsFunctions :: Parser [T.Text]
-jsFunctions = many (lexeme asyncFunction)
+jsFunctions :: Parser [S.Fun]
+jsFunctions = many asyncFunction
 
-asyncFunction :: Parser T.Text
+asyncFunction :: Parser S.Fun
 asyncFunction = do 
-  _ <- symbol "async" >> symbol "function"
-  ident  <- lexeme identifier
-  params <- lexeme parameters
-  bdy    <- body
-  pure $ ident <> params <> bdy
+  _ <- symbol' "async" >> symbol' "function"
+  S.Fun <$> lexeme' identifier
+        <*> lexeme' parameters
+        <*> body
   where 
     -- Parameters of the function
     parameters :: Parser T.Text
-    parameters = do 
-      opar   <- symbol "(" 
-      params <- takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')')
-      cpar   <- symbol ")"
-      pure $ opar <> params <> cpar
+    parameters = between' (symbol' "(") 
+                         (symbol' ")")
+                         (takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')'))
 
     body :: Parser T.Text
-    body = do 
-      ocurl <- symbol "{"
-      bdy   <- bodyContent
-      ccurl <- symbol "}"
-      pure $ ocurl <> bdy <> ccurl
+    body = between' (symbol' "{") (symbol' "}") bodyContent
 
     bodyContent :: Parser T.Text
     bodyContent = do 
@@ -61,11 +56,17 @@ identifier :: Parser T.Text
 identifier = do 
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
 
-symbol :: T.Text -> Parser T.Text
-symbol = L.symbol space'
+between' :: Parser T.Text -> Parser T.Text -> Parser T.Text -> Parser T.Text
+between' bra cket p = T.concat <$> sequence [bra, p, cket]
 
-lexeme :: Parser a -> Parser a
-lexeme = L.lexeme space'
+symbol' :: T.Text -> Parser T.Text
+symbol' sym = lexeme' (string sym)
 
-space' :: Parser ()
-space' = L.space space1 empty empty
+lexeme' :: Parser T.Text -> Parser T.Text
+lexeme' p = (<>) <$> p <*> space'
+
+space' :: Parser T.Text
+space' = takeWhileP (Just "whitespace") isSpace
+
+space1' :: Parser T.Text
+space1' = takeWhile1P (Just "whitespace") isSpace 
