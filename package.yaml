@@ -35,6 +35,10 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - megaparsec
+  - mtl
+  - text 
 
 executables:
   nube-exe:
