@@ -7,12 +7,12 @@ import qualified Lambda.Gen as G
 import qualified JS.Parse as P
 
 js_file :: FilePath
-js_file = "example/capitalizeWord/src.js"
+js_file = "example/capitalizeWords/src.js"
 
 lambda_file :: FilePath
-lambda_file = "example/capitalizeWord/index.js"
+lambda_file = "example/capitalizeWords/index.js"
 
 main :: IO ()
 main = do 
-  js <- head <$> P.parseJsFile js_file
-  TIO.writeFile lambda_file $ G.jsFunToHandlerScript js
+  js <- P.parseJsFile js_file
+  TIO.writeFile lambda_file $ G.jsFunsToScript (head js) (tail js)
