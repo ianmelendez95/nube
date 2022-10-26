@@ -1,4 +1,4 @@
-const index = require('./index.js')
+const { handler } = require('./capitalizeWords.js')
 
-index.handler({ body: JSON.stringify(["hello there world"]) })
+handler({ body: JSON.stringify(["hello there world"]) })
   .then(x => console.log("Result: ", x))
