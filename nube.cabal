@@ -27,6 +27,7 @@ library
   exposed-modules:
       JS.Parse
       JS.Syntax
+      Lambda.Gen
       Lib
   other-modules:
       Paths_nube
