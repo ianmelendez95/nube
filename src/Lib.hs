@@ -6,6 +6,8 @@ import qualified Data.Text.IO as TIO
 import qualified Lambda.Gen as G
 import qualified JS.Parse as P
 
+import System.FilePath
+
 js_paths :: [(FilePath, FilePath)]
 js_paths = 
   [ ( "example/capitalizeWords/src.js"
@@ -17,9 +19,10 @@ js_paths =
   ]
 
 main :: IO ()
-main = mapM_ (uncurry compileFile) js_paths
+main = mapM_ (compileFile . fst) js_paths
 
-compileFile :: FilePath -> FilePath -> IO ()
-compileFile src dest = do
+compileFile :: FilePath -> IO ()
+compileFile src = do
   js <- P.parseJsFile src
-  TIO.writeFile dest $ G.jsFunsToScript (head js) (tail js)
+  let scripts = G.jsFunsToScripts js
+  G.writeScripts (takeDirectory src </> "dist") scripts

@@ -3,16 +3,43 @@
 module Lambda.Gen where 
 
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import qualified JS.Syntax as S
 
-jsFunsToScript :: S.Fun -> [S.Fun] -> T.Text
+import System.Directory
+import JS.Syntax (Fun(funName))
+
+data Script = Script 
+  { scriptName :: T.Text
+  , scriptContent :: T.Text
+  }
+
+writeScripts :: FilePath -> [Script] -> IO ()
+writeScripts dist scripts = do
+  createDirectoryIfMissing True dist
+  mapM_ doScript scripts
+  where 
+    doScript :: Script -> IO ()
+    doScript script = do 
+      let file_name = dist <> "/" <> T.unpack (scriptName script) <> ".js"
+      TIO.writeFile file_name (scriptContent script)
+
+jsFunsToScripts :: [S.Fun] -> [Script]
+jsFunsToScripts = go []
+  where 
+    go _ [] = []
+    go xs (y:ys) = jsFunsToScript y (xs ++ ys) : go (y:xs) ys
+
+jsFunsToScript :: S.Fun -> [S.Fun] -> Script
 jsFunsToScript main_fun helper_funs = 
-  T.unlines $ [ "const https = require('https')"
-              , "const { Buffer } = require('node:buffer')"
-              , ""
-              , "exports.handler = " <> jsFunToHandler main_fun 
-              , S.funText main_fun
-              ] ++ map jsFunToProxy helper_funs
+  let content = T.unlines $
+        [ "const https = require('https')"
+        , "const { Buffer } = require('node:buffer')"
+        , ""
+        , "exports.handler = " <> jsFunToHandler main_fun 
+        , S.funText main_fun
+        ] ++ map jsFunToProxy helper_funs
+   in Script (funName main_fun) content
 
 jsFunToHandler :: S.Fun -> T.Text
 jsFunToHandler fun = mkHandlerFun (S.funName fun)

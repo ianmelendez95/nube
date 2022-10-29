@@ -39,6 +39,8 @@ library:
   - megaparsec
   - mtl
   - text 
+  - directory
+  - filepath
 
 executables:
   nube-exe:
