@@ -14,15 +14,22 @@ data Script = Script
   , scriptContent :: T.Text
   }
 
-writeScripts :: FilePath -> [Script] -> IO ()
-writeScripts dist scripts = do
+writeScripts :: FilePath -> T.Text -> [Script] -> IO ()
+writeScripts dist deploy_script js_scripts = do
   createDirectoryIfMissing True dist
-  mapM_ doScript scripts
+  writeDistFile "deploy.sh" deploy_script
+  mapM_ doScript js_scripts
   where 
     doScript :: Script -> IO ()
-    doScript script = do 
-      let file_name = dist <> "/" <> T.unpack (scriptName script) <> ".js"
-      TIO.writeFile file_name (scriptContent script)
+    doScript script = writeDistFile (T.unpack (scriptName script) <> ".js") 
+                                    (scriptContent script)
+    
+    writeDistFile :: FilePath -> T.Text -> IO ()
+    writeDistFile file_name =
+      TIO.writeFile (dist <> "/" <> file_name)
+
+jsFunsToDeployScript :: [S.Fun] -> T.Text
+jsFunsToDeployScript funs = mkDeployScript (map funName funs)
 
 jsFunsToScripts :: [S.Fun] -> [Script]
 jsFunsToScripts = go []
@@ -38,6 +45,7 @@ jsFunsToScript main_fun helper_funs =
         , ""
         , "exports.handler = " <> jsFunToHandler main_fun 
         , S.funText main_fun
+        , ""
         ] ++ map jsFunToProxy helper_funs
    in Script (funName main_fun) content
 
@@ -104,4 +112,70 @@ mkProxyFun impl_fun_name impl_fun_params = T.unlines
   , "    req.end(argsString)"
   , "  })"
   , "}"
+  ]
+
+mkDeployScript :: [T.Text] -> T.Text
+mkDeployScript names = T.unlines $ 
+  [ "#!/usr/bin/env bash "
+  , ""
+  , "ROLE_ARN=\"arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7\""
+  , ""
+  , "package () {"
+  , "  FUN_NAME=\"$1\""
+  , ""
+  , "  ZIP_FILE=\"$FUN_NAME-aws.zip\""
+  , ""
+  , "  echo \"Creating ZIP package: $ZIP_FILE\""
+  , "  zip \"$ZIP_FILE\" \"$FUN_NAME.js\""
+  , "}"
+  , ""
+  , "create () {"
+  , "  FUN_NAME=\"$1\""
+  , ""
+  , "  echo \"Creating: $FUN_NAME\""
+  , ""
+  , "  ZIP_FILE=\"$FUN_NAME-aws.zip\""
+  , ""
+  , "  aws lambda create-function \\"
+  , "    --function-name \"$FUN_NAME\" \\"
+  , "    --role \"$ROLE_ARN\" \\"
+  , "    --runtime nodejs16.x \\"
+  , "    --package-type Zip \\"
+  , "    --zip-file \"fileb://$ZIP_FILE\" \\"
+  , "    --handler \"$FUN_NAME.handler\" \\"
+  , "    > \"$FUN_NAME-result.json\" 2>&1"
+  , "}"
+  , ""
+  , "update () {"
+  , "  FUN_NAME=\"$1\""
+  , ""
+  , "  echo \"Updating: $FUN_NAME\""
+  , ""
+  , "  ZIP_FILE=\"$FUN_NAME-aws.zip\""
+  , ""
+  , "  aws lambda update-function-code \\"
+  , "    --function-name \"$FUN_NAME\" \\"
+  , "    --zip-file \"fileb://$ZIP_FILE\" \\"
+  , "    > \"$FUN_NAME-result.json\" 2>&1"
+  , "}"
+  , ""
+  , "deploy () {"
+  , "  FUN_NAME=\"$1\""
+  , ""
+  , "  echo \"Deploying: $FUN_NAME\""
+  , ""
+  , "  package $FUN_NAME"
+  , ""
+  , "  if aws lambda get-function --function-name \"$FUN_NAME\" > /dev/null; then "
+  , "    update $FUN_NAME"
+  , "  else "
+  , "    create $FUN_NAME"
+  , "  fi"
+  , "}"
+  , ""
+  , "FUN_NAMES=\"" <> T.unlines names <> "\""
+  , ""
+  , "for f in $FUN_NAMES; do "
+  , "  deploy \"$f\""
+  , "done"
   ]

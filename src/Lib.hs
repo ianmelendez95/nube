@@ -8,21 +8,12 @@ import qualified JS.Parse as P
 
 import System.FilePath
 
-js_paths :: [(FilePath, FilePath)]
-js_paths = 
-  [ ( "example/capitalizeWords/src.js"
-    , "example/capitalizeWords/capitalizeWords.js" 
-    )
-  , ( "example/capitalizeWord/src.js"
-    , "example/capitalizeWords/capitalizeWord.js" 
-    )
-  ]
-
 main :: IO ()
-main = mapM_ (compileFile . fst) js_paths
+main = compileFile "example/capitalizeWords/src.js"
 
 compileFile :: FilePath -> IO ()
 compileFile src = do
   js <- P.parseJsFile src
   let scripts = G.jsFunsToScripts js
-  G.writeScripts (takeDirectory src </> "dist") scripts
+      deploy_script = G.jsFunsToDeployScript js
+  G.writeScripts (takeDirectory src </> "dist") deploy_script scripts
