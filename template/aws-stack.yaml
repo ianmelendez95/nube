@@ -1,0 +1,78 @@
+Parameters:
+  CapitalizeWordsRole:  
+    Type: String
+    Default: arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7
+  CapitalizeWordsBucket: 
+    Type: String
+    Default: capitalizewords-bucket
+
+Resources:
+  CapitalizeWordLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref CapitalizeWordsBucket
+        S3Key: capitalizeWord-aws.zip
+        S3ObjectVersion: t8tFL3A.hUL8fsglJz64WCPLrlajjd.x
+      FunctionName: capitalizeWord
+      Handler: capitalizeWord.handler
+      Role: !Ref CapitalizeWordsRole
+      Runtime: nodejs16.x
+  # CapitalizeWordsLambda:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     Code:
+  #       S3Bucket: !Ref CapitalizeWordsBucket
+  #       S3Key: capitalizeWords-aws.zip
+  #       S3ObjectVersion: zmDJ0myDb.TeekN1A6LLacKZOYqJno.g
+  #     FunctionName: capitalizeWords
+  #     Handler: capitalizeWords.handler
+  #     Role: !Ref CapitalizeWordsRole
+  #     Runtime: nodejs16.x
+  CapitalizeWordsApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: capitalizeWords-api
+      ProtocolType: HTTP
+  CapitalizeWordsApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref CapitalizeWordsApi
+      AutoDeploy: True
+      StageName: '$default'
+  # CapitalizeWordsApiIntegration:
+  #   Type: AWS::ApiGatewayV2::Integration
+  #   Properties:
+  #     ApiId: !Ref CapitalizeWordsApi
+  #     ConnectionType: INTERNET
+  #     IntegrationMethod: POST
+  #     IntegrationType: AWS_PROXY
+  #     IntegrationUri: !GetAtt CapitalizeWordsLambda.Arn
+  #     PayloadFormatVersion: '2.0'
+  CapitalizeWordApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref CapitalizeWordsApi
+      IntegrationMethod: POST
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt CapitalizeWordLambda.Arn
+      PayloadFormatVersion: '2.0'
+  # CapitalizeWordsApiRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref CapitalizeWordsApi
+  #     RouteKey: 'POST /capitalizeWords'
+  #     Target: !Ref CapitalizeWordsApiIntegration
+  CapitalizeWordApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref CapitalizeWordsApi
+      RouteKey: 'POST /capitalizeWord'
+      Target: !Sub 'integrations/${CapitalizeWordApiIntegration}' 
+  CapitalizeWordApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CapitalizeWordLambda.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CapitalizeWordsApi}/${CapitalizeWordsApiStage}/POST/capitalizeWord' 
