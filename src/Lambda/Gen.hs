@@ -12,6 +12,7 @@ import System.Directory
 import JS.Syntax (Fun(funName))
 
 import Text.Julius hiding (renderJavascript)
+import Data.Yaml
 
 data Script = Script 
   { scriptName :: T.Text
@@ -60,10 +61,10 @@ jsFunToProxy :: S.Fun -> T.Text
 jsFunToProxy fun = mkProxyFun (S.funName fun) (S.funParams fun)
 
 mkHandlerFun :: T.Text -> T.Text 
-mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/handler.julius")
+mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/js/handler.julius")
 
 mkProxyFun :: T.Text -> T.Text -> T.Text
-mkProxyFun impl_fun_name impl_fun_params = renderJavascript $(juliusFile "template/proxy.julius")
+mkProxyFun impl_fun_name impl_fun_params = renderJavascript $(juliusFile "template/js/proxy.julius")
 
 mkDeployScript :: [T.Text] -> T.Text
 mkDeployScript names = T.unlines $ 
