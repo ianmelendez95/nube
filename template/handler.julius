@@ -1,0 +1,11 @@
+async function(event) {
+  try {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(await #{rawJS impl_fun_name}.apply(null, JSON.parse(event.body)))
+    }
+  } catch (e) {
+    console.log(e)
+    return e
+  }
+}

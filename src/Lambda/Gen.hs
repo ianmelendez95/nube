@@ -60,19 +60,7 @@ jsFunToProxy :: S.Fun -> T.Text
 jsFunToProxy fun = mkProxyFun (S.funName fun) (S.funParams fun)
 
 mkHandlerFun :: T.Text -> T.Text 
-mkHandlerFun impl_fun_name = T.unlines
-  [ "async function(event) {"
-  , "  try {"
-  , "    return {"
-  , "      statusCode: 200,"
-  , "      body: JSON.stringify(await " <> impl_fun_name <> ".apply(null, JSON.parse(event.body)))"
-  , "    }"
-  , "  } catch (e) {"
-  , "    console.log(e)"
-  , "    return e"
-  , "  }"
-  , "}"
-  ]
+mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/handler.julius")
 
 mkProxyFun :: T.Text -> T.Text -> T.Text
 mkProxyFun impl_fun_name impl_fun_params = renderJavascript $(juliusFile "template/proxy.julius")
