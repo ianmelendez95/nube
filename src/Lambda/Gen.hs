@@ -1,13 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Lambda.Gen where 
 
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TLazy
 import qualified Data.Text.IO as TIO
 import qualified JS.Syntax as S
 
 import System.Directory
 import JS.Syntax (Fun(funName))
+
+import Text.Julius hiding (renderJavascript)
 
 data Script = Script 
   { scriptName :: T.Text
@@ -71,48 +75,7 @@ mkHandlerFun impl_fun_name = T.unlines
   ]
 
 mkProxyFun :: T.Text -> T.Text -> T.Text
-mkProxyFun impl_fun_name impl_fun_params = T.unlines 
-  [ "async function " <> impl_fun_name <> impl_fun_params <> " {"
-  , "  const argsString = JSON.stringify("
-  , "    Array.from(arguments).slice(0, " <> impl_fun_name <> ".length))"
-  , ""
-  , "  const options = {"
-  , "    hostname: process.env.AWS_GATEWAY_HOST,"
-  , "    port: 443,"
-  , "    path: '/" <> impl_fun_name <> "',"
-  , "    method: 'POST'"
-  , "  };"
-  , ""
-  , "  return new Promise((resolve, reject) => {"
-  , "    const req = https.request(options, (res) => {"
-  , "      let data = ''"
-  , ""
-  , "      res.on('data', (chunk) => {"
-  , "        data += chunk"
-  , "      })"
-  , ""
-  , "      res.on('end', () => {"
-  , "        resolve(JSON.parse(data))"
-  , "      })"
-  , ""
-  , "      res.on('error', (e) => {"
-  , "        console.error('Response Error: ', e)"
-  , "        reject(e)"
-  , "      })"
-  , "    })"
-  , ""
-  , "    req.setHeader('Content-Type', 'application/json')"
-  , "    req.setHeader('Content-Length', Buffer.byteLength(argsString))"
-  , ""
-  , "    req.on('error', (e) => {"
-  , "      console.error('Request Error: ', e)"
-  , "      reject(e)"
-  , "    })"
-  , ""
-  , "    req.end(argsString)"
-  , "  })"
-  , "}"
-  ]
+mkProxyFun impl_fun_name impl_fun_params = renderJavascript $(juliusFile "template/proxy.julius")
 
 mkDeployScript :: [T.Text] -> T.Text
 mkDeployScript names = T.unlines $ 
@@ -179,3 +142,6 @@ mkDeployScript names = T.unlines $
   , "  deploy \"$f\""
   , "done"
   ]
+
+renderJavascript :: JavascriptUrl a -> T.Text
+renderJavascript = TLazy.toStrict . renderJavascriptUrl (\_ _ -> error "Can't resolve URLs") 

@@ -41,6 +41,8 @@ library:
   - text 
   - directory
   - filepath
+  - shakespeare
+  - yaml
 
 executables:
   nube-exe:
