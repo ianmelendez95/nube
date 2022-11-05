@@ -25,9 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Gen.CF
+      Gen.Lambda
       JS.Parse
       JS.Syntax
-      Lambda.Gen
       Lib
   other-modules:
       Paths_nube
@@ -35,14 +36,16 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
     , directory
     , filepath
     , megaparsec
     , mtl
     , shakespeare
     , text
-    , yaml
   default-language: Haskell2010
 
 executable nube-exe
