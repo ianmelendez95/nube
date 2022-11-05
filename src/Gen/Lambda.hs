@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Lambda.Gen where 
+module Gen.Lambda where 
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TLazy
@@ -12,7 +12,6 @@ import System.Directory
 import JS.Syntax (Fun(funName))
 
 import Text.Julius hiding (renderJavascript)
-import Data.Yaml
 
 data Script = Script 
   { scriptName :: T.Text
