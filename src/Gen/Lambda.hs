@@ -45,9 +45,9 @@ jsFunsToScript :: S.Fun -> [S.Fun] -> Script
 jsFunsToScript main_fun helper_funs = 
   let content = T.unlines $
         [ "const https = require('https')"
-        , "const { Buffer } = require('node:buffer')"
-        , ""
+        , "const { Buffer } = require('node:buffer')\n"
         , "exports.handler = " <> jsFunToHandler main_fun 
+        , ""
         , S.funText main_fun
         , ""
         ] ++ map jsFunToProxy helper_funs

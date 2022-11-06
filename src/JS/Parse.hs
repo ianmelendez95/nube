@@ -10,35 +10,36 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import Data.Char
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+import System.FilePath
 
 import qualified JS.Syntax as S
 
 type Parser = Parsec Void T.Text
 
-parseJsFile :: FilePath -> IO [S.Fun]
+parseJsFile :: FilePath -> IO S.Script
 parseJsFile path = do 
   content <- TIO.readFile path
   let result = either (error . errorBundlePretty) id $ runParser jsFunctions path content
-  pure result
+  pure $ S.Script (T.pack $ takeBaseName path) result
 
 jsFunctions :: Parser [S.Fun]
 jsFunctions = many asyncFunction
 
 asyncFunction :: Parser S.Fun
 asyncFunction = do 
-  _ <- symbol' "async" >> symbol' "function"
-  S.Fun <$> lexeme' identifier
-        <*> lexeme' parameters
+  _ <- symbol "async" >> symbol "function"
+  S.Fun <$> lexeme identifier
+        <*> lexeme parameters
         <*> body
   where 
     -- Parameters of the function
     parameters :: Parser T.Text
     parameters = between' (symbol' "(") 
-                         (symbol' ")")
-                         (takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')'))
+                          (symbol' ")")
+                          (takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')'))
 
     body :: Parser T.Text
-    body = between' (symbol' "{") (symbol' "}") bodyContent
+    body = between' (symbol' "{") (symbol "}") bodyContent
 
     bodyContent :: Parser T.Text
     bodyContent = do 
@@ -62,8 +63,17 @@ between' bra cket p = T.concat <$> sequence [bra, p, cket]
 symbol' :: T.Text -> Parser T.Text
 symbol' sym = lexeme' (string sym)
 
+symbol :: T.Text -> Parser T.Text
+symbol sym = lexeme (string sym)
+
+lexeme :: Parser a -> Parser a
+lexeme p = p <* space'
+
 lexeme' :: Parser T.Text -> Parser T.Text
 lexeme' p = (<>) <$> p <*> space'
+
+spaceConsumer :: Parser ()
+spaceConsumer = L.space space1 mempty mempty
 
 space' :: Parser T.Text
 space' = takeWhileP (Just "whitespace") isSpace

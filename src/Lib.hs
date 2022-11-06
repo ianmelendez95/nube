@@ -5,6 +5,7 @@ import qualified Data.Text.IO as TIO
 
 import qualified Gen.Lambda as GL
 import qualified JS.Parse as P
+import qualified JS.Syntax as S
 
 import qualified Data.Aeson as J
 import qualified Data.ByteString.Lazy as BS
@@ -23,8 +24,9 @@ main = compileFile
 
 compileFile :: IO ()
 compileFile = do
-  js <- P.parseJsFile js_file
-  let scripts = GL.jsFunsToScripts js
+  script <- P.parseJsFile js_file
+  let js = S.scriptFuncs script
+      scripts = GL.jsFunsToScripts js
       deploy_script = GL.jsFunsToDeployScript js
   GL.writeScripts (takeDirectory js_file </> "dist") deploy_script scripts
 
