@@ -31,7 +31,7 @@ data Template = Template {
   tplParams :: [Named Param],
   tplApi    :: Named RApi,
   tplStage  :: Named RStage,
-  tplFuns   :: [Named RFun]
+  tplFuns   :: [LambdaRGroup]
 }
 
 newtype Param = Param {
@@ -46,15 +46,30 @@ newtype RStage = RStage {
   stageApi:: Ref
 }
 
+-- | Lambda Resource Group
+-- | Includes all resources for enabling a given Lambda within the API
+data LambdaRGroup = LambdaRGroup {
+  lamFun :: Named RFun, -- Function
+  lamInt :: Named RInt  -- Integration
+}
+
 -- | Lambda Function Resource
 data RFun = RFun {
   funName :: T.Text,
   funApi  :: Ref
 }
 
+-- | API Integration
+data RInt = RInt {
+  intFun :: Ref,  -- Lambda Function Logical ID
+  intApi :: Ref   -- API Gateway Logical ID
+}
+
 newtype Ref = Ref { refId :: T.Text }
 
 newtype Sub = Sub T.Text
+
+newtype GetArn = GetArn T.Text
 
 instance ToJSON Template where 
   toJSON (Template params api stage funs) = object 
@@ -62,7 +77,7 @@ instance ToJSON Template where
     , "Resources"  .= object (
         [ namedKV api
         , namedKV stage
-        ] ++ map namedKV funs
+        ] ++ concatMap lambdaRGroupKVs funs
       )
     ]
 
@@ -108,11 +123,26 @@ instance ToJSON RFun where
         ]
     ]
 
+instance ToJSON RInt where 
+  toJSON (RInt fun api) = object 
+    [ "Type" .= fromText "AWS::ApiGatewayV2::Integration"
+    , "Properties" .= object 
+        [ "ApiId" .= api
+        , "IntegrationMethod" .= fromText "POST"
+        , "IntegrationType" .= fromText "AWS_PROXY"
+        , "IntegrationUri" .= GetArn (refId fun)
+        , "PayloadFormatVersion" .= fromText "2.0"
+        ]
+    ]
+
 instance ToJSON Ref where 
   toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
 
 instance ToJSON Sub where 
   toJSON (Sub ref_id) = object [ "Fn::Sub" .= fromText ref_id ]
+
+instance ToJSON GetArn where 
+  toJSON (GetArn ref_id) = object [ "Fn::GetAtt" .= fromText (ref_id <> ".Arn") ]
 
 templateFromScript :: S.Script -> Template
 templateFromScript script = 
@@ -122,10 +152,22 @@ templateFromScript script =
       funs  = map (jsFunToLambda (namedRef api)) (S.scriptFuns script)
    in Template test_params api stage funs
 
-jsFunToLambda :: Ref -> S.Fun -> Named RFun
+jsFunToLambda :: Ref -> S.Fun -> LambdaRGroup
 jsFunToLambda api_ref fun = 
-  let name = S.funName fun
-   in Named (capitalizeFirst name <> "Function") $ RFun name api_ref
+  let fun_name :: T.Text
+      fun_name = S.funName fun
+
+      fun_res :: Named RFun
+      fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ RFun fun_name api_ref
+
+      int_res :: Named RInt
+      int_res = Named (capitalizeFirst fun_name <> "Integration") $ RInt (namedRef fun_res) api_ref
+   in LambdaRGroup fun_res int_res
+
+-- Lambda Group
+
+lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
+lambdaRGroupKVs (LambdaRGroup fun int) = [namedKV fun, namedKV int]
 
 -- API
 
