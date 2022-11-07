@@ -45,6 +45,7 @@ library:
   - shakespeare
   - aeson
   - aeson-pretty
+  - containers
 
 executables:
   nube-exe:

@@ -40,6 +40,7 @@ library
     , aeson-pretty
     , base >=4.7 && <5
     , bytestring
+    , containers
     , directory
     , filepath
     , megaparsec
