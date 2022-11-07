@@ -1,24 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Gen.CF where 
 
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 
 import Data.Aeson
 import Data.Aeson.Key
-import qualified Data.Aeson.Encode.Pretty as JSONPretty
-import Data.String (fromString)
 import Data.Char
-
-import Data.Text.Encoding (decodeUtf8)
-import qualified Data.ByteString.Lazy.Char8 as BS
-
-import Data.Map (Map)
-import qualified Data.Map as Map
-
-import Util.Aeson
 
 import qualified JS.Syntax as S
 
@@ -51,7 +39,8 @@ newtype RStage = RStage {
 data LambdaRGroup = LambdaRGroup {
   lamFun   :: Named RFun,   -- Function
   lamInt   :: Named RInt,   -- Integration
-  lamRoute :: Named RRoute  -- Route
+  lamRoute :: Named RRoute, -- Route
+  lamPerm  :: Named RPerm   --
 }
 
 -- | Lambda Function Resource
@@ -70,6 +59,14 @@ data RRoute = RRoute {
   routeFunName :: T.Text,  -- Function Name
   routeApi :: Ref,    -- API Gateway Logical ID
   routeInt :: Ref     -- API Integration Logical ID
+}
+
+-- | Lambda Permission
+data RPerm = RPerm {
+  permFunName :: T.Text,
+  permApi   :: Ref,
+  permStage :: Ref,
+  permFun   :: Ref
 }
 
 newtype Ref = Ref { refId :: T.Text }
@@ -152,6 +149,17 @@ instance ToJSON RRoute where
         ]
     ]
 
+instance ToJSON RPerm where 
+  toJSON (RPerm fname api stage fun) = object 
+    [ "Type" .= fromText "AWS::Lambda::Permission"
+    , "Properties" .= object 
+        [ "Action" .= fromText "lambda:InvokeFunction"
+        , "FunctionName" .= GetArn (refId fun)
+        , "Principal" .= fromText "apigateway.amazonaws.com"
+        , "SourceArn" .= endpointSubFromRefs api stage fname
+        ]
+    ]
+
 instance ToJSON Ref where 
   toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
 
@@ -166,11 +174,11 @@ templateFromScript script =
   let name  = S.scriptName script
       api   = apiFromScriptName name
       stage = stageFromApi api
-      funs  = map (jsFunToLambda (namedRef api)) (S.scriptFuns script)
+      funs  = map (jsFunToLambda (namedRef api) (namedRef stage)) (S.scriptFuns script)
    in Template test_params api stage funs
 
-jsFunToLambda :: Ref -> S.Fun -> LambdaRGroup
-jsFunToLambda api_ref fun = 
+jsFunToLambda :: Ref -> Ref -> S.Fun -> LambdaRGroup
+jsFunToLambda api_ref stage_ref fun = 
   let fun_name :: T.Text
       fun_name = S.funName fun
 
@@ -185,12 +193,17 @@ jsFunToLambda api_ref fun =
       route_res :: Named RRoute
       route_res = Named (capitalizeFirst fun_name <> "Route") $ 
         RRoute fun_name api_ref (namedRef int_res)
-   in LambdaRGroup fun_res int_res route_res
+
+      perm_res :: Named RPerm
+      perm_res = Named (capitalizeFirst fun_name <> "Permission") $
+        RPerm fun_name api_ref stage_ref (namedRef fun_res)
+   in LambdaRGroup fun_res int_res route_res perm_res
 
 -- Lambda Group
 
 lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
-lambdaRGroupKVs (LambdaRGroup fun int route) = [namedKV fun, namedKV int, namedKV route]
+lambdaRGroupKVs (LambdaRGroup fun int route perm) = 
+  [namedKV fun, namedKV int, namedKV route, namedKV perm]
 
 -- API
 
@@ -210,6 +223,17 @@ hostFromApiRef ref =
 targetFromIntRef :: Ref -> Sub
 targetFromIntRef ref = 
   Sub $ "integrations/${" <> refId ref <> "}"
+
+endpointSubFromRefs :: Ref -> Ref -> T.Text -> Sub
+endpointSubFromRefs api stage fun_name = 
+  Sub $ T.concat 
+    [ "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${"
+    , refId api
+    , "}/${" 
+    , refId stage
+    , "}/POST/"
+    , fun_name
+    ]
 
 -- Named
 
