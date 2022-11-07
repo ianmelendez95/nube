@@ -18,11 +18,19 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import Data.Map (Map)
 import qualified Data.Map as Map
 
+import Util.Aeson
+
 import qualified JS.Syntax as S
 
 data Named a = Named {
   namedName :: T.Text,
   namedItem :: a
+}
+
+data Template = Template {
+  tplParams :: [Named Param],
+  tplApi    :: Named RApi,
+  tplStage  :: Named RStage
 }
 
 newtype Param = Param {
@@ -33,8 +41,26 @@ newtype RApi = RApi {
   apiName :: T.Text
 }
 
+newtype RStage = RStage {
+  stageApi:: Ref
+}
+
+newtype Ref = Ref T.Text
+
+instance ToJSON Template where 
+  toJSON (Template params api stage) = object 
+    [ "Parameters" .= object (map namedKV params)
+    , "Resources"  .= object 
+        [ namedKV api
+        , namedKV stage
+        ]
+    ]
+
 instance ToJSON Param where 
   toJSON (Param def) = object [ "Type" .= fromText "String", "Default" .= def ]
+
+instance ToJSON Ref where 
+  toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
 
 instance ToJSON RApi where 
   toJSON (RApi name) =
@@ -45,13 +71,26 @@ instance ToJSON RApi where
                ]
            ]
 
-templateFromScript :: S.Script -> T.Text
-templateFromScript script = 
-  let name = S.scriptName script
-      api  = apiFromScriptName name
-   in encodePretty (mkCfTemplate test_params api)
+instance ToJSON RStage where 
+  toJSON (RStage api) = 
+    object [ "Type" .= fromText "AWS::ApiGatewayV2::Stage" 
+           , "Properties" .= object 
+               [ "ApiId"      .= toJSON api 
+               , "AutoDeploy" .= True
+               , "StageName"  .= fromText "$default"
+               ]
+           ]
 
-mkCfTemplate :: [Named Param] -> Named RApi -> Value
+templateFromScript :: S.Script -> Template
+templateFromScript script = 
+  let name  = S.scriptName script
+      api   = apiFromScriptName name
+      stage = stageFromApi api
+   in Template test_params api stage
+
+mkCfTemplate :: [Named Param] 
+             -> Named RApi 
+             -> Value
 mkCfTemplate params api = object 
   [ "Parameters" .= object (map namedKV params)
   , "Resources" .= object 
@@ -63,15 +102,17 @@ mkCfTemplate params api = object
 apiFromScriptName :: T.Text -> Named RApi
 apiFromScriptName name = Named (capitalizeFirst name <> "Api") (RApi (name <> "-api")) 
 
+stageFromApi :: Named RApi -> Named RStage
+stageFromApi api = 
+  let api_name = namedName api
+   in Named (api_name <> "Stage") $ RStage (Ref api_name)
+
 -- Named
 
 namedKV :: ToJSON a => Named a -> (Key, Value)
 namedKV (Named name value) = (fromText name, toJSON value)
 
 -- Text 
-
-encodePretty :: ToJSON a => a -> T.Text
-encodePretty = decodeUtf8 . BS.toStrict . JSONPretty.encodePretty
 
 capitalizeFirst :: T.Text -> T.Text
 capitalizeFirst txt = 

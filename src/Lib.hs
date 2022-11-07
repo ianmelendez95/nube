@@ -17,6 +17,8 @@ import qualified Data.ByteString.Lazy as BS
 import System.FilePath
 import qualified Gen.CF as CF
 
+import Util.Aeson
+
 js_file = "example/capitalizeWords/capitalizeWords.js"
 
 yaml_file = "example/capitalizeWords/dist-bck/aws-stack.yaml"
@@ -35,8 +37,8 @@ compileFile = do
       deploy_script = GL.jsFunsToDeployScript js
   GL.writeScripts (takeDirectory js_file </> "dist") deploy_script scripts
 
-  let cf_txt = CF.templateFromScript script
-  TIO.writeFile (templateFilePath $ S.scriptName script) cf_txt
+  let template = CF.templateFromScript script
+  writeFileJSON (templateFilePath $ S.scriptName script) template
   where 
     templateFilePath script_name = 
       dist_dir </> T.unpack (script_name <> "-template.json")

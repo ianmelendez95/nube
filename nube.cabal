@@ -30,6 +30,7 @@ library
       JS.Parse
       JS.Syntax
       Lib
+      Util.Aeson
   other-modules:
       Paths_nube
   hs-source-dirs:
