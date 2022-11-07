@@ -49,8 +49,9 @@ newtype RStage = RStage {
 -- | Lambda Resource Group
 -- | Includes all resources for enabling a given Lambda within the API
 data LambdaRGroup = LambdaRGroup {
-  lamFun :: Named RFun, -- Function
-  lamInt :: Named RInt  -- Integration
+  lamFun   :: Named RFun,   -- Function
+  lamInt   :: Named RInt,   -- Integration
+  lamRoute :: Named RRoute  -- Route
 }
 
 -- | Lambda Function Resource
@@ -63,6 +64,12 @@ data RFun = RFun {
 data RInt = RInt {
   intFun :: Ref,  -- Lambda Function Logical ID
   intApi :: Ref   -- API Gateway Logical ID
+}
+
+data RRoute = RRoute {
+  routeFunName :: T.Text,  -- Function Name
+  routeApi :: Ref,    -- API Gateway Logical ID
+  routeInt :: Ref     -- API Integration Logical ID
 }
 
 newtype Ref = Ref { refId :: T.Text }
@@ -134,6 +141,16 @@ instance ToJSON RInt where
         , "PayloadFormatVersion" .= fromText "2.0"
         ]
     ]
+  
+instance ToJSON RRoute where 
+  toJSON (RRoute fname api int) = object 
+    [ "Type" .= fromText "AWS::ApiGatewayV2::Route"
+    , "Properties" .= object 
+        [ "ApiId"    .= api
+        , "RouteKey" .= fromText ("POST /" <> fname)
+        , "Target"   .= targetFromIntRef int
+        ]
+    ]
 
 instance ToJSON Ref where 
   toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
@@ -158,16 +175,22 @@ jsFunToLambda api_ref fun =
       fun_name = S.funName fun
 
       fun_res :: Named RFun
-      fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ RFun fun_name api_ref
+      fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
+        RFun fun_name api_ref
 
       int_res :: Named RInt
-      int_res = Named (capitalizeFirst fun_name <> "Integration") $ RInt (namedRef fun_res) api_ref
-   in LambdaRGroup fun_res int_res
+      int_res = Named (capitalizeFirst fun_name <> "Integration") $ 
+        RInt (namedRef fun_res) api_ref
+
+      route_res :: Named RRoute
+      route_res = Named (capitalizeFirst fun_name <> "Route") $ 
+        RRoute fun_name api_ref (namedRef int_res)
+   in LambdaRGroup fun_res int_res route_res
 
 -- Lambda Group
 
 lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
-lambdaRGroupKVs (LambdaRGroup fun int) = [namedKV fun, namedKV int]
+lambdaRGroupKVs (LambdaRGroup fun int route) = [namedKV fun, namedKV int, namedKV route]
 
 -- API
 
@@ -183,6 +206,10 @@ stageFromApi api =
 hostFromApiRef :: Ref -> Sub
 hostFromApiRef ref = 
   Sub $ "${" <> refId ref <> "}.execute-api.${AWS::Region}.amazonaws.com"
+
+targetFromIntRef :: Ref -> Sub
+targetFromIntRef ref = 
+  Sub $ "integrations/${" <> refId ref <> "}"
 
 -- Named
 
