@@ -7,7 +7,7 @@ import qualified Data.Text as T
 
 data Script = Script {
   scriptName :: T.Text,  -- file name
-  scriptFuncs :: [Fun]
+  scriptFuns :: [Fun]
 }
 
 data Fun = Fun { 

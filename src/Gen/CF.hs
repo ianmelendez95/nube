@@ -30,7 +30,8 @@ data Named a = Named {
 data Template = Template {
   tplParams :: [Named Param],
   tplApi    :: Named RApi,
-  tplStage  :: Named RStage
+  tplStage  :: Named RStage,
+  tplFuns   :: [Named RFun]
 }
 
 newtype Param = Param {
@@ -45,22 +46,28 @@ newtype RStage = RStage {
   stageApi:: Ref
 }
 
-newtype Ref = Ref T.Text
+-- | Lambda Function Resource
+data RFun = RFun {
+  funName :: T.Text,
+  funApi  :: Ref
+}
+
+newtype Ref = Ref { refId :: T.Text }
+
+newtype Sub = Sub T.Text
 
 instance ToJSON Template where 
-  toJSON (Template params api stage) = object 
+  toJSON (Template params api stage funs) = object 
     [ "Parameters" .= object (map namedKV params)
-    , "Resources"  .= object 
+    , "Resources"  .= object (
         [ namedKV api
         , namedKV stage
-        ]
+        ] ++ map namedKV funs
+      )
     ]
 
 instance ToJSON Param where 
   toJSON (Param def) = object [ "Type" .= fromText "String", "Default" .= def ]
-
-instance ToJSON Ref where 
-  toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
 
 instance ToJSON RApi where 
   toJSON (RApi name) =
@@ -75,27 +82,50 @@ instance ToJSON RStage where
   toJSON (RStage api) = 
     object [ "Type" .= fromText "AWS::ApiGatewayV2::Stage" 
            , "Properties" .= object 
-               [ "ApiId"      .= toJSON api 
+               [ "ApiId"      .= api 
                , "AutoDeploy" .= True
                , "StageName"  .= fromText "$default"
                ]
            ]
+
+instance ToJSON RFun where 
+  toJSON (RFun name api) = object 
+    [ "Type" .= fromText "AWS::Lambda::Function" 
+    , "Properties" .= object 
+        [ "Code" .= object 
+            [ "S3Bucket" .= test_bucket_ref
+            , "S3Key"    .= fromText (name <> "-code.zip")
+            ]
+        , "Environment" .= object 
+            [ "Variables" .= object 
+                [ "AWS_GATEWAY_HOST" .= hostFromApiRef api
+                ]
+            ]
+        , "FunctionName" .= name
+        , "Handler" .= fromText (name <> ".handler")
+        , "Role" .= test_role_ref
+        , "Runtime" .= fromText "nodejs16.x"
+        ]
+    ]
+
+instance ToJSON Ref where 
+  toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
+
+instance ToJSON Sub where 
+  toJSON (Sub ref_id) = object [ "Fn::Sub" .= fromText ref_id ]
 
 templateFromScript :: S.Script -> Template
 templateFromScript script = 
   let name  = S.scriptName script
       api   = apiFromScriptName name
       stage = stageFromApi api
-   in Template test_params api stage
+      funs  = map (jsFunToLambda (namedRef api)) (S.scriptFuns script)
+   in Template test_params api stage funs
 
-mkCfTemplate :: [Named Param] 
-             -> Named RApi 
-             -> Value
-mkCfTemplate params api = object 
-  [ "Parameters" .= object (map namedKV params)
-  , "Resources" .= object 
-      [ namedKV api ]
-  ]
+jsFunToLambda :: Ref -> S.Fun -> Named RFun
+jsFunToLambda api_ref fun = 
+  let name = S.funName fun
+   in Named (capitalizeFirst name <> "Function") $ RFun name api_ref
 
 -- API
 
@@ -106,11 +136,19 @@ stageFromApi :: Named RApi -> Named RStage
 stageFromApi api = 
   let api_name = namedName api
    in Named (api_name <> "Stage") $ RStage (Ref api_name)
+  
+-- | name here is the resource name/logical id
+hostFromApiRef :: Ref -> Sub
+hostFromApiRef ref = 
+  Sub $ "${" <> refId ref <> "}.execute-api.${AWS::Region}.amazonaws.com"
 
 -- Named
 
 namedKV :: ToJSON a => Named a -> (Key, Value)
 namedKV (Named name value) = (fromText name, toJSON value)
+
+namedRef :: Named a -> Ref
+namedRef = Ref . namedName
 
 -- Text 
 
@@ -124,15 +162,13 @@ capitalizeFirst txt =
 
 test_params :: [Named Param]
 test_params = 
-  [ Named "CapitalizeWordsBucket" $ Param "capitalizewords-bucket"
-  , Named "CapitalizeWordsRole"   $ Param "arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7"
+  [ Named (refId test_bucket_ref) $ Param "capitalizewords-bucket"
+  , Named (refId test_role_ref)   $ Param "arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7"
   ]
 
-test_api_res :: Named RApi
-test_api_res = Named "CapitalizeWordsApi" (RApi "capitalizeWords-api")
+test_bucket_ref :: Ref
+test_bucket_ref = Ref "CapitalizeWordsBucket"
 
--- test_gen :: IO ()
--- test_gen = do 
---   let temp = mkCfTemplate test_params
---   TIO.putStrLn (encodePretty temp)
+test_role_ref :: Ref
+test_role_ref = Ref "CapitalizeWordsRole"
  

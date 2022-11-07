@@ -32,7 +32,7 @@ main = compileFile
 compileFile :: IO ()
 compileFile = do
   script <- P.parseJsFile js_file
-  let js = S.scriptFuncs script
+  let js = S.scriptFuns script
       scripts = GL.jsFunsToScripts js
       deploy_script = GL.jsFunsToDeployScript js
   GL.writeScripts (takeDirectory js_file </> "dist") deploy_script scripts
