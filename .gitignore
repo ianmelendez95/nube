@@ -3,4 +3,5 @@
 
 node_modules/
 
-example/**/dist/
+/example/**/dist/*.zip
+/example/**/dist/*.sh
