@@ -19,6 +19,7 @@ data Template = Template {
   tplParams :: [Named Param],
   tplApi    :: Named RApi,
   tplStage  :: Named RStage,
+  tplRole   :: Named RRole,
   tplFuns   :: [LambdaRGroup]
 }
 
@@ -34,6 +35,10 @@ newtype RStage = RStage {
   stageApi:: Ref
 }
 
+newtype RRole = RRole { 
+  roleName :: T.Text
+}
+
 -- | Lambda Resource Group
 -- | Includes all resources for enabling a given Lambda within the API
 data LambdaRGroup = LambdaRGroup {
@@ -46,7 +51,8 @@ data LambdaRGroup = LambdaRGroup {
 -- | Lambda Function Resource
 data RFun = RFun {
   funName :: T.Text,
-  funApi  :: Ref
+  funApi  :: Ref,
+  funRole :: Ref
 }
 
 -- | API Integration
@@ -76,11 +82,12 @@ newtype Sub = Sub T.Text
 newtype GetArn = GetArn T.Text
 
 instance ToJSON Template where 
-  toJSON (Template params api stage funs) = object 
+  toJSON (Template params api stage role funs) = object 
     [ "Parameters" .= object (map namedKV params)
     , "Resources"  .= object (
         [ namedKV api
         , namedKV stage
+        , namedKV role
         ] ++ concatMap lambdaRGroupKVs funs
       )
     ]
@@ -107,8 +114,27 @@ instance ToJSON RStage where
                ]
            ]
 
+instance ToJSON RRole where 
+  toJSON (RRole name) = object 
+    [ "Type" .= fromText "AWS::IAM::Role" 
+    , "Properties" .= object 
+        [ "AssumeRolePolicyDocument" .= object 
+            [ "Version" .= fromText "2012-10-17"
+            , "Statement" .= [ object 
+                [ "Effect" .= fromText "Allow"
+                , "Principal" .= object 
+                    [ "Service" .= fromText "lambda.amazonaws.com" ]
+                , "Action" .= fromText "sts:AssumeRole"
+                ]]
+            ]
+        , "MaxSessionDuration" .= (3600 :: Int)
+        , "Path" .= fromText "/service-role/"
+        , "RoleName" .= fromText name
+        ]
+    ]
+
 instance ToJSON RFun where 
-  toJSON (RFun name api) = object 
+  toJSON (RFun name api role) = object 
     [ "Type" .= fromText "AWS::Lambda::Function" 
     , "Properties" .= object 
         [ "Code" .= object 
@@ -122,7 +148,7 @@ instance ToJSON RFun where
             ]
         , "FunctionName" .= name
         , "Handler" .= fromText (name <> ".handler")
-        , "Role" .= test_role_ref
+        , "Role" .= GetArn (refId role)
         , "Runtime" .= fromText "nodejs16.x"
         ]
     ]
@@ -174,17 +200,21 @@ templateFromScript script =
   let name  = S.scriptName script
       api   = apiFromScriptName name
       stage = stageFromApi api
-      funs  = map (jsFunToLambda (namedRef api) (namedRef stage)) (S.scriptFuns script)
-   in Template test_params api stage funs
+      role  = roleFromScriptName name
+      funs  = map (jsFunToLambda (namedRef api) 
+                                 (namedRef stage) 
+                                 (namedRef role)) 
+                  (S.scriptFuns script)
+   in Template test_params api stage role funs
 
-jsFunToLambda :: Ref -> Ref -> S.Fun -> LambdaRGroup
-jsFunToLambda api_ref stage_ref fun = 
+jsFunToLambda :: Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
+jsFunToLambda api_ref stage_ref role_ref fun = 
   let fun_name :: T.Text
       fun_name = S.funName fun
 
       fun_res :: Named RFun
       fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
-        RFun fun_name api_ref
+        RFun fun_name api_ref role_ref
 
       int_res :: Named RInt
       int_res = Named (capitalizeFirst fun_name <> "Integration") $ 
@@ -214,6 +244,9 @@ stageFromApi :: Named RApi -> Named RStage
 stageFromApi api = 
   let api_name = namedName api
    in Named (api_name <> "Stage") $ RStage (Ref api_name)
+
+roleFromScriptName :: T.Text -> Named RRole
+roleFromScriptName name = Named (capitalizeFirst name <> "Role") (RRole (name <> "-role"))
   
 -- | name here is the resource name/logical id
 hostFromApiRef :: Ref -> Sub
@@ -255,9 +288,7 @@ capitalizeFirst txt =
 
 test_params :: [Named Param]
 test_params = 
-  [ Named (refId test_bucket_ref) $ Param "capitalizewords-bucket"
-  , Named (refId test_role_ref)   $ Param "arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7"
-  ]
+  [ Named (refId test_bucket_ref) $ Param "capitalizewords-bucket" ]
 
 test_bucket_ref :: Ref
 test_bucket_ref = Ref "CapitalizeWordsBucket"
