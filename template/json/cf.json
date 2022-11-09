@@ -3,10 +3,6 @@
     "CapitalizeWordsBucket": {
       "Default": "capitalizewords-bucket",
       "Type": "String"
-    },
-    "CapitalizeWordsRole": {
-      "Default": "arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7",
-      "Type": "String"
     }
   },
   "Resources": {
@@ -27,6 +23,26 @@
       },
       "Type": "AWS::ApiGatewayV2::Stage"
     },
+    "CapitalizeWordsRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "MaxSessionDuration": 3600,
+        "Path": "/service-role/",
+        "RoleName": "capitalizeWords-role"
+      }
+    },
 
     "CapitalizeWordLambda": {
       "Type": "AWS::Lambda::Function",
@@ -43,7 +59,7 @@
         },
         "FunctionName": "capitalizeWord",
         "Handler": "capitalizeWord.handler",
-        "Role": { "Ref": "CapitalizeWordsRole" },
+        "Role": { "Fn::GetAtt": "CapitalizeWordsRole.Arn" },
         "Runtime": "nodejs16.x"
       }
     },
@@ -97,7 +113,7 @@
         },
         "FunctionName": "capitalizeWords",
         "Handler": "capitalizeWords.handler",
-        "Role": { "Ref": "CapitalizeWordsRole" },
+        "Role": { "Fn::GetAtt": "CapitalizeWordsRole.Arn" },
         "Runtime": "nodejs16.x"
       }
     },
