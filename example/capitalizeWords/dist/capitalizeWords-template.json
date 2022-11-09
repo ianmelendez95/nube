@@ -3,10 +3,6 @@
         "CapitalizeWordsBucket": {
             "Default": "capitalizewords-bucket",
             "Type": "String"
-        },
-        "CapitalizeWordsRole": {
-            "Default": "arn:aws:iam::565652071321:role/service-role/hello-aws-role-aoys6qk7",
-            "Type": "String"
         }
     },
     "Resources": {
@@ -42,7 +38,7 @@
                 "FunctionName": "capitalizeWord",
                 "Handler": "capitalizeWord.handler",
                 "Role": {
-                    "Ref": "CapitalizeWordsRole"
+                    "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
                 "Runtime": "nodejs16.x"
             },
@@ -122,7 +118,7 @@
                 "FunctionName": "capitalizeWords",
                 "Handler": "capitalizeWords.handler",
                 "Role": {
-                    "Ref": "CapitalizeWordsRole"
+                    "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
                 "Runtime": "nodejs16.x"
             },
@@ -140,6 +136,26 @@
                 }
             },
             "Type": "AWS::Lambda::Permission"
+        },
+        "CapitalizeWordsRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "MaxSessionDuration": 3600,
+                "Path": "/service-role/",
+                "RoleName": "capitalizeWords-role"
+            },
+            "Type": "AWS::IAM::Role"
         },
         "CapitalizeWordsRoute": {
             "Properties": {
