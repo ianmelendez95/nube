@@ -25,11 +25,11 @@ source-repository head
 
 library
   exposed-modules:
+      Compile
       Gen.CF
       Gen.Lambda
       JS.Parse
       JS.Syntax
-      Lib
       Util.Aeson
   other-modules:
       Paths_nube
