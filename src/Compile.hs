@@ -19,18 +19,10 @@ import qualified Gen.CF as CF
 
 import Util.Aeson
 
-js_file = "example/capitalizeWords/capitalizeWords.js"
+-- test_js_file = "example/capitalizeWords/capitalizeWords.js"
 
-yaml_file = "example/capitalizeWords/dist-bck/aws-stack.yaml"
-
-json_file = "example/capitalizeWords/dist-bck/aws-stack.json"
-
-main :: IO ()
-main = compileFile
--- main = convertYaml
-
-compileFile :: IO ()
-compileFile = do
+compileFile :: FilePath -> IO ()
+compileFile js_file = do
   script <- P.parseJsFile js_file
   let js = S.scriptFuns script
       scripts = GL.jsFunsToScripts js
@@ -44,17 +36,4 @@ compileFile = do
       dist_dir </> T.unpack (GL.templateNameFromScriptName script_name)
 
     dist_dir = takeDirectory js_file </> "dist"
-
-
-
-
--- convertYaml :: IO ()
--- convertYaml = do 
---   yaml <- readYamlFile yaml_file
---   let json_txt = J.encode yaml
---   BS.writeFile json_file json_txt
-  -- where 
-  --   readYamlFile :: FilePath -> IO J.Value
-  --   readYamlFile = Y.decodeFileThrow
-
 
