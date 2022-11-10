@@ -4,4 +4,3 @@
 node_modules/
 
 /example/**/dist/*.zip
-/example/**/dist/*.sh
