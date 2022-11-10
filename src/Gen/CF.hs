@@ -5,7 +5,7 @@ module Gen.CF where
 import qualified Data.Text as T
 
 import Data.Aeson
-import Data.Aeson.Key
+import Data.Aeson.Key ( fromText )
 import Data.Char
 
 import qualified JS.Syntax as S
@@ -16,15 +16,15 @@ data Named a = Named {
 }
 
 data Template = Template {
-  tplParams :: [Named Param],
+  tplBucket :: Named PBucket,
   tplApi    :: Named RApi,
   tplStage  :: Named RStage,
   tplRole   :: Named RRole,
   tplFuns   :: [LambdaRGroup]
 }
 
-newtype Param = Param {
-  paramDefault :: T.Text
+newtype PBucket = PBucket {
+  bucketName :: T.Text
 }
 
 newtype RApi = RApi {
@@ -51,6 +51,7 @@ data LambdaRGroup = LambdaRGroup {
 -- | Lambda Function Resource
 data RFun = RFun {
   funName :: T.Text,
+  funBucket :: Ref,
   funApi  :: Ref,
   funRole :: Ref
 }
@@ -82,8 +83,8 @@ newtype Sub = Sub T.Text
 newtype GetArn = GetArn T.Text
 
 instance ToJSON Template where 
-  toJSON (Template params api stage role funs) = object 
-    [ "Parameters" .= object (map namedKV params)
+  toJSON (Template bucket api stage role funs) = object 
+    [ "Parameters" .= object [ namedKV bucket ]
     , "Resources"  .= object (
         [ namedKV api
         , namedKV stage
@@ -92,8 +93,11 @@ instance ToJSON Template where
       )
     ]
 
-instance ToJSON Param where 
-  toJSON (Param def) = object [ "Type" .= fromText "String", "Default" .= def ]
+instance ToJSON PBucket where 
+  toJSON (PBucket name) = object 
+    [ "Type" .= fromText "String"
+    , "Default" .= name 
+    ]
 
 instance ToJSON RApi where 
   toJSON (RApi name) =
@@ -134,11 +138,11 @@ instance ToJSON RRole where
     ]
 
 instance ToJSON RFun where 
-  toJSON (RFun name api role) = object 
+  toJSON (RFun name bucket api role) = object 
     [ "Type" .= fromText "AWS::Lambda::Function" 
     , "Properties" .= object 
         [ "Code" .= object 
-            [ "S3Bucket" .= test_bucket_ref
+            [ "S3Bucket" .= bucket
             , "S3Key"    .= fromText (name <> "-code.zip")
             ]
         , "Environment" .= object 
@@ -197,24 +201,26 @@ instance ToJSON GetArn where
 
 templateFromScript :: S.Script -> Template
 templateFromScript script = 
-  let name  = S.scriptName script
-      api   = apiFromScriptName name
-      stage = stageFromApi api
-      role  = roleFromScriptName name
-      funs  = map (jsFunToLambda (namedRef api) 
-                                 (namedRef stage) 
-                                 (namedRef role)) 
-                  (S.scriptFuns script)
-   in Template test_params api stage role funs
+  let name   = S.scriptName script
+      bucket = bucketFromScriptName name
+      api    = apiFromScriptName name
+      stage  = stageFromApi api
+      role   = roleFromScriptName name
+      funs   = map (jsFunToLambda (namedRef bucket) 
+                                  (namedRef api) 
+                                  (namedRef stage) 
+                                  (namedRef role)) 
+                   (S.scriptFuns script)
+   in Template bucket api stage role funs
 
-jsFunToLambda :: Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
-jsFunToLambda api_ref stage_ref role_ref fun = 
+jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
+jsFunToLambda bucket_ref api_ref stage_ref role_ref fun = 
   let fun_name :: T.Text
       fun_name = S.funName fun
 
       fun_res :: Named RFun
       fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
-        RFun fun_name api_ref role_ref
+        RFun fun_name bucket_ref api_ref role_ref
 
       int_res :: Named RInt
       int_res = Named (capitalizeFirst fun_name <> "Integration") $ 
@@ -235,7 +241,15 @@ lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
 lambdaRGroupKVs (LambdaRGroup fun int route perm) = 
   [namedKV fun, namedKV int, namedKV route, namedKV perm]
 
--- API
+-- Resources
+
+bucketFromScriptName :: T.Text -> Named PBucket
+bucketFromScriptName name = 
+  Named (capitalizeFirst name <> "Bucket") 
+        (PBucket $ bucketNameFromScriptName name)
+
+bucketNameFromScriptName :: T.Text -> T.Text
+bucketNameFromScriptName name = T.toLower name <> "-bucket"
 
 apiFromScriptName :: T.Text -> Named RApi
 apiFromScriptName name = Named (capitalizeFirst name <> "Api") (RApi (name <> "-api")) 
@@ -283,16 +297,3 @@ capitalizeFirst txt =
   case T.uncons txt of 
     Nothing -> txt
     Just (c, cs) -> toUpper c `T.cons` cs
-
--- Test Misc.
-
-test_params :: [Named Param]
-test_params = 
-  [ Named (refId test_bucket_ref) $ Param "capitalizewords-bucket" ]
-
-test_bucket_ref :: Ref
-test_bucket_ref = Ref "CapitalizeWordsBucket"
-
-test_role_ref :: Ref
-test_role_ref = Ref "CapitalizeWordsRole"
- 

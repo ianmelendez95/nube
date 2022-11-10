@@ -6,7 +6,7 @@ module JS.Syntax where
 import qualified Data.Text as T
 
 data Script = Script {
-  scriptName :: T.Text,  -- file name
+  scriptName :: T.Text,  -- file basename
   scriptFuns :: [Fun]
 }
 

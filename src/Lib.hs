@@ -34,16 +34,18 @@ compileFile = do
   script <- P.parseJsFile js_file
   let js = S.scriptFuns script
       scripts = GL.jsFunsToScripts js
-      deploy_script = GL.jsFunsToDeployScript js
+      deploy_script = GL.jsScriptToDeployScript script
   GL.writeScripts (takeDirectory js_file </> "dist") deploy_script scripts
 
   let template = CF.templateFromScript script
   writeFileJSON (templateFilePath $ S.scriptName script) template
   where 
     templateFilePath script_name = 
-      dist_dir </> T.unpack (script_name <> "-template.json")
+      dist_dir </> T.unpack (GL.templateNameFromScriptName script_name)
 
     dist_dir = takeDirectory js_file </> "dist"
+
+
 
 
 -- convertYaml :: IO ()
