@@ -10,7 +10,7 @@ async function(event) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(await #{rawJS impl_fun_name}.apply(null, args))
+      body: JSON.stringify(await #{rawJS impl_fun_name}.apply(null, args), null, 2)
     }
   } catch (e) {
     console.log(e)
