@@ -41,13 +41,16 @@ asyncFunction = do
     body :: Parser T.Text
     body = between' (symbol' "{") (symbol "}") bodyContent
 
+    innerBody :: Parser T.Text
+    innerBody = between' (symbol' "{") (symbol' "}") bodyContent
+
     bodyContent :: Parser T.Text
     bodyContent = do 
       pre_brace <- takeWhileP (Just "not curly brace") (\c -> c /= '{' && c /= '}')
       next      <- lookAhead anySingle
       case next of 
         '{' -> do 
-          inner_bdy    <- body
+          inner_bdy    <- innerBody
           rest_content <- bodyContent
           pure $ pre_brace <> inner_bdy <> rest_content
         '}' -> pure pre_brace
