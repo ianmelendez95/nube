@@ -40,7 +40,8 @@
                 "Role": {
                     "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
-                "Runtime": "nodejs16.x"
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
         },
@@ -120,7 +121,8 @@
                 "Role": {
                     "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
-                "Runtime": "nodejs16.x"
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
         },
