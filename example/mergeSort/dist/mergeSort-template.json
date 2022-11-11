@@ -1,0 +1,367 @@
+{
+    "Parameters": {
+        "MergeSortBucket": {
+            "Default": "mergesort-bucket",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "GetRandomIntArrayIntegration": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "IntegrationMethod": "POST",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                    "Fn::GetAtt": "GetRandomIntArrayLambda.Arn"
+                },
+                "PayloadFormatVersion": "2.0"
+            },
+            "Type": "AWS::ApiGatewayV2::Integration"
+        },
+        "GetRandomIntArrayLambda": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "MergeSortBucket"
+                    },
+                    "S3Key": "getRandomIntArray-code.zip"
+                },
+                "Environment": {
+                    "Variables": {
+                        "AWS_GATEWAY_HOST": {
+                            "Fn::Sub": "${MergeSortApi}.execute-api.${AWS::Region}.amazonaws.com"
+                        }
+                    }
+                },
+                "FunctionName": "getRandomIntArray",
+                "Handler": "getRandomIntArray.handler",
+                "Role": {
+                    "Fn::GetAtt": "MergeSortRole.Arn"
+                },
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "GetRandomIntArrayPermission": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": "GetRandomIntArrayLambda.Arn"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MergeSortApi}/${MergeSortApiStage}/POST/getRandomIntArray"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "GetRandomIntArrayRoute": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "RouteKey": "POST /getRandomIntArray",
+                "Target": {
+                    "Fn::Sub": "integrations/${GetRandomIntArrayIntegration}"
+                }
+            },
+            "Type": "AWS::ApiGatewayV2::Route"
+        },
+        "GetRandomIntIntegration": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "IntegrationMethod": "POST",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                    "Fn::GetAtt": "GetRandomIntLambda.Arn"
+                },
+                "PayloadFormatVersion": "2.0"
+            },
+            "Type": "AWS::ApiGatewayV2::Integration"
+        },
+        "GetRandomIntLambda": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "MergeSortBucket"
+                    },
+                    "S3Key": "getRandomInt-code.zip"
+                },
+                "Environment": {
+                    "Variables": {
+                        "AWS_GATEWAY_HOST": {
+                            "Fn::Sub": "${MergeSortApi}.execute-api.${AWS::Region}.amazonaws.com"
+                        }
+                    }
+                },
+                "FunctionName": "getRandomInt",
+                "Handler": "getRandomInt.handler",
+                "Role": {
+                    "Fn::GetAtt": "MergeSortRole.Arn"
+                },
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "GetRandomIntPermission": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": "GetRandomIntLambda.Arn"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MergeSortApi}/${MergeSortApiStage}/POST/getRandomInt"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "GetRandomIntRoute": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "RouteKey": "POST /getRandomInt",
+                "Target": {
+                    "Fn::Sub": "integrations/${GetRandomIntIntegration}"
+                }
+            },
+            "Type": "AWS::ApiGatewayV2::Route"
+        },
+        "MergeSortApi": {
+            "Properties": {
+                "Name": "mergeSort-api",
+                "ProtocolType": "HTTP"
+            },
+            "Type": "AWS::ApiGatewayV2::Api"
+        },
+        "MergeSortApiStage": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "AutoDeploy": true,
+                "StageName": "$default"
+            },
+            "Type": "AWS::ApiGatewayV2::Stage"
+        },
+        "MergeSortIntegration": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "IntegrationMethod": "POST",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                    "Fn::GetAtt": "MergeSortLambda.Arn"
+                },
+                "PayloadFormatVersion": "2.0"
+            },
+            "Type": "AWS::ApiGatewayV2::Integration"
+        },
+        "MergeSortLambda": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "MergeSortBucket"
+                    },
+                    "S3Key": "mergeSort-code.zip"
+                },
+                "Environment": {
+                    "Variables": {
+                        "AWS_GATEWAY_HOST": {
+                            "Fn::Sub": "${MergeSortApi}.execute-api.${AWS::Region}.amazonaws.com"
+                        }
+                    }
+                },
+                "FunctionName": "mergeSort",
+                "Handler": "mergeSort.handler",
+                "Role": {
+                    "Fn::GetAtt": "MergeSortRole.Arn"
+                },
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "MergeSortPairIntegration": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "IntegrationMethod": "POST",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                    "Fn::GetAtt": "MergeSortPairLambda.Arn"
+                },
+                "PayloadFormatVersion": "2.0"
+            },
+            "Type": "AWS::ApiGatewayV2::Integration"
+        },
+        "MergeSortPairLambda": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "MergeSortBucket"
+                    },
+                    "S3Key": "mergeSortPair-code.zip"
+                },
+                "Environment": {
+                    "Variables": {
+                        "AWS_GATEWAY_HOST": {
+                            "Fn::Sub": "${MergeSortApi}.execute-api.${AWS::Region}.amazonaws.com"
+                        }
+                    }
+                },
+                "FunctionName": "mergeSortPair",
+                "Handler": "mergeSortPair.handler",
+                "Role": {
+                    "Fn::GetAtt": "MergeSortRole.Arn"
+                },
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "MergeSortPairPermission": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": "MergeSortPairLambda.Arn"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MergeSortApi}/${MergeSortApiStage}/POST/mergeSortPair"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "MergeSortPairRoute": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "RouteKey": "POST /mergeSortPair",
+                "Target": {
+                    "Fn::Sub": "integrations/${MergeSortPairIntegration}"
+                }
+            },
+            "Type": "AWS::ApiGatewayV2::Route"
+        },
+        "MergeSortPermission": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": "MergeSortLambda.Arn"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MergeSortApi}/${MergeSortApiStage}/POST/mergeSort"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "MergeSortRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "MaxSessionDuration": 3600,
+                "Path": "/service-role/",
+                "RoleName": "mergeSort-role"
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "MergeSortRoute": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "RouteKey": "POST /mergeSort",
+                "Target": {
+                    "Fn::Sub": "integrations/${MergeSortIntegration}"
+                }
+            },
+            "Type": "AWS::ApiGatewayV2::Route"
+        },
+        "TestMergeSortIntegration": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "IntegrationMethod": "POST",
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                    "Fn::GetAtt": "TestMergeSortLambda.Arn"
+                },
+                "PayloadFormatVersion": "2.0"
+            },
+            "Type": "AWS::ApiGatewayV2::Integration"
+        },
+        "TestMergeSortLambda": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "MergeSortBucket"
+                    },
+                    "S3Key": "testMergeSort-code.zip"
+                },
+                "Environment": {
+                    "Variables": {
+                        "AWS_GATEWAY_HOST": {
+                            "Fn::Sub": "${MergeSortApi}.execute-api.${AWS::Region}.amazonaws.com"
+                        }
+                    }
+                },
+                "FunctionName": "testMergeSort",
+                "Handler": "testMergeSort.handler",
+                "Role": {
+                    "Fn::GetAtt": "MergeSortRole.Arn"
+                },
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "TestMergeSortPermission": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": "TestMergeSortLambda.Arn"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MergeSortApi}/${MergeSortApiStage}/POST/testMergeSort"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "TestMergeSortRoute": {
+            "Properties": {
+                "ApiId": {
+                    "Ref": "MergeSortApi"
+                },
+                "RouteKey": "POST /testMergeSort",
+                "Target": {
+                    "Fn::Sub": "integrations/${TestMergeSortIntegration}"
+                }
+            },
+            "Type": "AWS::ApiGatewayV2::Route"
+        }
+    }
+}
