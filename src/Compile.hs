@@ -27,9 +27,13 @@ compileFile js_file = do
 
   script <- P.parseJsFile js_file
   let js = S.scriptFuns script
+      proxies_script = GL.jsFunsToProxiesScript js
       scripts = GL.jsFunsToScripts js
       deploy_script = GL.jsScriptToDeployScript script
-  GL.writeScripts (takeDirectory js_file </> "dist") deploy_script scripts
+  GL.writeScripts (takeDirectory js_file </> "dist") 
+                  deploy_script 
+                  proxies_script
+                  scripts
 
   let template = CF.templateFromScript script
   writeFileJSON (templateFilePath $ S.scriptName script) template

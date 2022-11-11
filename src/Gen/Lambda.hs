@@ -10,6 +10,7 @@ import qualified JS.Syntax as S
 import qualified Gen.CF as CF
 
 import System.Directory
+import System.FilePath
 import JS.Syntax (Fun(funName))
 
 import Text.Julius hiding (renderJavascript)
@@ -19,19 +20,21 @@ data Script = Script
   , scriptContent :: T.Text
   }
 
-writeScripts :: FilePath -> T.Text -> [Script] -> IO ()
-writeScripts dist deploy_script js_scripts = do
-  createDirectoryIfMissing True dist
+writeScripts :: FilePath -> T.Text -> T.Text -> [Script] -> IO ()
+writeScripts dist deploy_script proxies_script handler_scripts = do
+  createDirectoryIfMissing True (dist </> "node_modules")
   writeDistFile "deploy.sh" deploy_script
-  mapM_ doScript js_scripts
+  writeDistFile "node_modules/proxies.js" proxies_script
+  mapM_ doScript handler_scripts
   where 
     doScript :: Script -> IO ()
-    doScript script = writeDistFile (T.unpack (scriptName script) <> ".js") 
-                                    (scriptContent script)
+    doScript script = 
+      writeDistFile (T.unpack (scriptName script) <> ".js") 
+                    (scriptContent script)
     
     writeDistFile :: FilePath -> T.Text -> IO ()
-    writeDistFile file_name =
-      TIO.writeFile (dist <> "/" <> file_name)
+    writeDistFile file_path =
+      TIO.writeFile (dist </> file_path)
 
 jsScriptToDeployScript :: S.Script -> T.Text
 jsScriptToDeployScript script = 
@@ -53,15 +56,22 @@ jsFunsToScripts = go []
 
 jsFunsToScript :: S.Fun -> [S.Fun] -> Script
 jsFunsToScript main_fun helper_funs = 
-  let content = T.unlines $
-        [ "const https = require('https')"
-        , "const { Buffer } = require('node:buffer')\n"
-        , "exports.handler = " <> jsFunToHandler main_fun 
-        , ""
+  let content = T.intercalate "\n\n"
+        [ jsFunsToProxiesImport helper_funs
+        , jsFunToHandler main_fun 
         , S.funText main_fun
-        , ""
-        ] ++ map jsFunToProxy helper_funs
+        ]
    in Script (funName main_fun) content
+
+-- Proxies
+
+jsFunsToProxiesScript :: [S.Fun] -> T.Text
+jsFunsToProxiesScript funs = T.unlines $ map jsFunToProxy funs
+
+jsFunsToProxiesImport :: [S.Fun] -> T.Text
+jsFunsToProxiesImport funs = "const {\n  " 
+  <> T.intercalate ",\n  " (map S.funName funs)
+  <> "\n} = require('proxies')"
 
 jsFunToHandler :: S.Fun -> T.Text
 jsFunToHandler fun = mkHandlerFun (S.funName fun)

@@ -1,4 +1,4 @@
-async function(event) {
+exports.handler = async function(event) {
   try {
     let args = (typeof event.body === 'undefined' || event.body.trim().length === 0) 
       ? [] 
