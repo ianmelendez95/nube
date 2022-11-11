@@ -22,9 +22,9 @@ data Script = Script
 
 writeScripts :: FilePath -> T.Text -> T.Text -> [Script] -> IO ()
 writeScripts dist deploy_script proxies_script handler_scripts = do
-  createDirectoryIfMissing True (dist </> "node_modules")
+  createDirectoryIfMissing True (dist </> "nodejs/node_modules")
   writeDistFile "deploy.sh" deploy_script
-  writeDistFile "node_modules/proxies.js" proxies_script
+  writeDistFile "nodejs/node_modules/proxies.js" proxies_script
   mapM_ doScript handler_scripts
   where 
     doScript :: Script -> IO ()
