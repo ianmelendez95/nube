@@ -1,6 +1,4 @@
 .stack-work/
 *~
 
-node_modules/
-
 /example/**/dist/*.zip
