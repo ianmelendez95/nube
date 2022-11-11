@@ -154,6 +154,7 @@ instance ToJSON RFun where
         , "Handler" .= fromText (name <> ".handler")
         , "Role" .= GetArn (refId role)
         , "Runtime" .= fromText "nodejs16.x"
+        , "Timeout" .= (60 :: Int)
         ]
     ]
 
