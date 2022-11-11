@@ -1,8 +1,16 @@
 async function(event) {
   try {
+    let args = (typeof event.body === 'undefined' || event.body.trim().length === 0) 
+      ? [] 
+      : JSON.parse(event.body) 
+
+    if (!Array.isArray(args)) {
+      args = [args]
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify(await #{rawJS impl_fun_name}.apply(null, JSON.parse(event.body)))
+      body: JSON.stringify(await #{rawJS impl_fun_name}.apply(null, args))
     }
   } catch (e) {
     console.log(e)
