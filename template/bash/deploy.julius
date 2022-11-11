@@ -9,8 +9,14 @@ FUN_NAMES="#{rawJS fun_names}"
 
 assert_bucket () {
   if ! aws s3api head-bucket --bucket "$BUCKET" 2>&1 > /dev/null; then 
-    echo "ERROR: cannot access bucket: $BUCKET"
-    exit 1
+    read -p "Bucket '$BUCKET' not available, create? [Y/n] " -n 1 -r
+    echo   
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      aws s3 mb "s3://$BUCKET"
+    else
+      echo "ERROR: cannot access bucket: $BUCKET"
+      exit 1
+    fi
   fi
 }
 
