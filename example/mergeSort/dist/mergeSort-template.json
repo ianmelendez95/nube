@@ -37,6 +37,11 @@
                 },
                 "FunctionName": "getRandomIntArray",
                 "Handler": "getRandomIntArray.handler",
+                "Layers": [
+                    {
+                        "Ref": "MergeSortLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "MergeSortRole.Arn"
                 },
@@ -101,6 +106,11 @@
                 },
                 "FunctionName": "getRandomInt",
                 "Handler": "getRandomInt.handler",
+                "Layers": [
+                    {
+                        "Ref": "MergeSortLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "MergeSortRole.Arn"
                 },
@@ -182,6 +192,11 @@
                 },
                 "FunctionName": "mergeSort",
                 "Handler": "mergeSort.handler",
+                "Layers": [
+                    {
+                        "Ref": "MergeSortLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "MergeSortRole.Arn"
                 },
@@ -189,6 +204,24 @@
                 "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
+        },
+        "MergeSortLayer": {
+            "Properties": {
+                "CompatibleArchitectures": [
+                    "x86_64"
+                ],
+                "CompatibleRuntimes": [
+                    "nodejs16.x"
+                ],
+                "Content": {
+                    "S3Bucket": {
+                        "Ref": "MergeSortBucket"
+                    },
+                    "S3Key": "mergeSort-layer.zip"
+                },
+                "LayerName": "mergeSort-layer"
+            },
+            "Type": "AWS::Lambda::LayerVersion"
         },
         "MergeSortPairIntegration": {
             "Properties": {
@@ -221,6 +254,11 @@
                 },
                 "FunctionName": "mergeSortPair",
                 "Handler": "mergeSortPair.handler",
+                "Layers": [
+                    {
+                        "Ref": "MergeSortLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "MergeSortRole.Arn"
                 },
@@ -330,6 +368,11 @@
                 },
                 "FunctionName": "testMergeSort",
                 "Handler": "testMergeSort.handler",
+                "Layers": [
+                    {
+                        "Ref": "MergeSortLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "MergeSortRole.Arn"
                 },
