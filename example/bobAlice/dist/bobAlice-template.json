@@ -23,6 +23,24 @@
             },
             "Type": "AWS::ApiGatewayV2::Stage"
         },
+        "BobAliceLayer": {
+            "Properties": {
+                "CompatibleArchitectures": [
+                    "x86_64"
+                ],
+                "CompatibleRuntimes": [
+                    "nodejs16.x"
+                ],
+                "Content": {
+                    "S3Bucket": {
+                        "Ref": "BobAliceBucket"
+                    },
+                    "S3Key": "bobAlice-layer.zip"
+                },
+                "LayerName": "bobAlice-layer"
+            },
+            "Type": "AWS::Lambda::LayerVersion"
+        },
         "BobAliceRole": {
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -74,10 +92,16 @@
                 },
                 "FunctionName": "getAlice",
                 "Handler": "getAlice.handler",
+                "Layers": [
+                    {
+                        "Ref": "BobAliceLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "BobAliceRole.Arn"
                 },
-                "Runtime": "nodejs16.x"
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
         },
@@ -137,10 +161,16 @@
                 },
                 "FunctionName": "getBob",
                 "Handler": "getBob.handler",
+                "Layers": [
+                    {
+                        "Ref": "BobAliceLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "BobAliceRole.Arn"
                 },
-                "Runtime": "nodejs16.x"
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
         },
@@ -200,10 +230,16 @@
                 },
                 "FunctionName": "makeBobAndAliceFriends",
                 "Handler": "makeBobAndAliceFriends.handler",
+                "Layers": [
+                    {
+                        "Ref": "BobAliceLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "BobAliceRole.Arn"
                 },
-                "Runtime": "nodejs16.x"
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
         },
@@ -263,10 +299,16 @@
                 },
                 "FunctionName": "makeFriends",
                 "Handler": "makeFriends.handler",
+                "Layers": [
+                    {
+                        "Ref": "BobAliceLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "BobAliceRole.Arn"
                 },
-                "Runtime": "nodejs16.x"
+                "Runtime": "nodejs16.x",
+                "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
         },
