@@ -37,6 +37,11 @@
                 },
                 "FunctionName": "capitalizeWord",
                 "Handler": "capitalizeWord.handler",
+                "Layers": [
+                    {
+                        "Ref": "CapitalizeWordsLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
@@ -118,6 +123,11 @@
                 },
                 "FunctionName": "capitalizeWords",
                 "Handler": "capitalizeWords.handler",
+                "Layers": [
+                    {
+                        "Ref": "CapitalizeWordsLayer"
+                    }
+                ],
                 "Role": {
                     "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
@@ -125,6 +135,24 @@
                 "Timeout": 60
             },
             "Type": "AWS::Lambda::Function"
+        },
+        "CapitalizeWordsLayer": {
+            "Properties": {
+                "CompatibleArchitectures": [
+                    "x86_64"
+                ],
+                "CompatibleRuntimes": [
+                    "nodejs16.x"
+                ],
+                "Content": {
+                    "S3Bucket": {
+                        "Ref": "CapitalizeWordsBucket"
+                    },
+                    "S3Key": "capitalizeWords-layer.zip"
+                },
+                "LayerName": "capitalizeWords-layer"
+            },
+            "Type": "AWS::Lambda::LayerVersion"
         },
         "CapitalizeWordsPermission": {
             "Properties": {
