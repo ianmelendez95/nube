@@ -45,6 +45,7 @@ jsScriptToDeployScript script =
    in mkDeployScript (CF.bucketNameFromScriptName name)
                      (templateNameFromScriptName name)
                      (name <> "-stack")
+                     (name <> "-layer")
                      (map S.funName funs)
 
 templateNameFromScriptName :: T.Text -> T.Text
@@ -100,9 +101,10 @@ mkProxyFun impl_fun_name impl_fun_params = renderJavascript $(juliusFile "templa
 mkDeployScript :: T.Text 
                -> T.Text 
                -> T.Text
+               -> T.Text
                -> [T.Text] 
                -> T.Text
-mkDeployScript bucket_name template_name stack_name fun_names_arr = 
+mkDeployScript bucket_name template_name stack_name layer_name fun_names_arr = 
   let fun_names = T.unlines fun_names_arr
    in renderJavascript $(juliusFile "template/bash/deploy.julius")
 

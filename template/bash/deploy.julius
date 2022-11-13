@@ -5,6 +5,7 @@ set -e
 BUCKET="#{rawJS bucket_name}"
 TEMPLATE="#{rawJS template_name}"
 STACK_NAME="#{rawJS stack_name}"
+LAYER="#{rawJS layer_name}"
 FUN_NAMES="#{rawJS fun_names}"
 
 assert_bucket () {
@@ -39,9 +40,7 @@ create_cf_stack () {
 }
 
 upload_layer () {
-  FUN_NAME="$1"
-
-  ZIP_FILE="$FUN_NAME-layer.zip"
+  ZIP_FILE="$LAYER.zip"
 
   echo "packaging: $ZIP_FILE"
   zip -r "$ZIP_FILE" "nodejs"

@@ -20,6 +20,7 @@ data Template = Template {
   tplApi    :: Named RApi,
   tplStage  :: Named RStage,
   tplRole   :: Named RRole,
+  tplLayer  :: Named RLayer,
   tplFuns   :: [LambdaRGroup]
 }
 
@@ -39,21 +40,27 @@ newtype RRole = RRole {
   roleName :: T.Text
 }
 
+data RLayer = RLayer {
+  layerName :: T.Text,
+  layerBucket :: Ref
+}
+
 -- | Lambda Resource Group
 -- | Includes all resources for enabling a given Lambda within the API
 data LambdaRGroup = LambdaRGroup {
   lamFun   :: Named RFun,   -- Function
   lamInt   :: Named RInt,   -- Integration
   lamRoute :: Named RRoute, -- Route
-  lamPerm  :: Named RPerm   --
+  lamPerm  :: Named RPerm  -- Permission
 }
 
 -- | Lambda Function Resource
 data RFun = RFun {
-  funName :: T.Text,
+  funName   :: T.Text,
   funBucket :: Ref,
-  funApi  :: Ref,
-  funRole :: Ref
+  funApi    :: Ref,
+  funRole   :: Ref,
+  funLayer  :: Ref
 }
 
 -- | API Integration
@@ -83,12 +90,13 @@ newtype Sub = Sub T.Text
 newtype GetArn = GetArn T.Text
 
 instance ToJSON Template where 
-  toJSON (Template bucket api stage role funs) = object 
+  toJSON (Template bucket api stage role layer funs) = object 
     [ "Parameters" .= object [ namedKV bucket ]
     , "Resources"  .= object (
         [ namedKV api
         , namedKV stage
         , namedKV role
+        , namedKV layer
         ] ++ concatMap lambdaRGroupKVs funs
       )
     ]
@@ -137,8 +145,22 @@ instance ToJSON RRole where
         ]
     ]
 
+instance ToJSON RLayer where 
+  toJSON (RLayer name bucket) = object 
+    [ "Type" .= fromText "AWS::Lambda::LayerVersion" 
+    , "Properties" .= object 
+        [ "CompatibleArchitectures" .= [ fromText "x86_64" ]
+        , "CompatibleRuntimes"      .= [ fromText "nodejs16.x" ]
+        , "Content" .= object 
+            [ "S3Bucket" .= bucket
+            , "S3Key"    .= fromText (name <> ".zip")
+            ]
+        , "LayerName" .= name
+        ]
+    ]
+
 instance ToJSON RFun where 
-  toJSON (RFun name bucket api role) = object 
+  toJSON (RFun name bucket api role layer) = object 
     [ "Type" .= fromText "AWS::Lambda::Function" 
     , "Properties" .= object 
         [ "Code" .= object 
@@ -152,6 +174,7 @@ instance ToJSON RFun where
             ]
         , "FunctionName" .= name
         , "Handler" .= fromText (name <> ".handler")
+        , "Layers" .= [ layer ]
         , "Role" .= GetArn (refId role)
         , "Runtime" .= fromText "nodejs16.x"
         , "Timeout" .= (60 :: Int)
@@ -207,21 +230,23 @@ templateFromScript script =
       api    = apiFromScriptName name
       stage  = stageFromApi api
       role   = roleFromScriptName name
+      layer  = layerFromScriptName (namedRef bucket) name
       funs   = map (jsFunToLambda (namedRef bucket) 
                                   (namedRef api) 
                                   (namedRef stage) 
-                                  (namedRef role)) 
+                                  (namedRef role)
+                                  (namedRef layer)) 
                    (S.scriptFuns script)
-   in Template bucket api stage role funs
+   in Template bucket api stage role layer funs
 
-jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
-jsFunToLambda bucket_ref api_ref stage_ref role_ref fun = 
+jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
+jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun = 
   let fun_name :: T.Text
       fun_name = S.funName fun
 
       fun_res :: Named RFun
       fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
-        RFun fun_name bucket_ref api_ref role_ref
+        RFun fun_name bucket_ref api_ref role_ref layer_ref
 
       int_res :: Named RInt
       int_res = Named (capitalizeFirst fun_name <> "Integration") $ 
@@ -262,6 +287,10 @@ stageFromApi api =
 
 roleFromScriptName :: T.Text -> Named RRole
 roleFromScriptName name = Named (capitalizeFirst name <> "Role") (RRole (name <> "-role"))
+
+layerFromScriptName :: Ref -> T.Text -> Named RLayer 
+layerFromScriptName bucket_ref name = 
+  Named (capitalizeFirst name <> "Layer") (RLayer (name <> "-layer") bucket_ref)
   
 -- | name here is the resource name/logical id
 hostFromApiRef :: Ref -> Sub
