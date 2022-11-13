@@ -38,4 +38,3 @@ async function #{rawJS impl_fun_name}#{rawJS impl_fun_params} {
     req.end(argsString)
   })
 }
-

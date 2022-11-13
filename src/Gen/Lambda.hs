@@ -68,7 +68,17 @@ jsFunsToScript main_fun helper_funs =
 -- Proxies
 
 jsFunsToProxiesScript :: [S.Fun] -> T.Text
-jsFunsToProxiesScript funs = T.unlines $ map jsFunToProxy funs
+jsFunsToProxiesScript funs = 
+
+  let proxy_imports = T.unlines 
+        [ "const https = require('https')"
+        , "const { Buffer } = require('node:buffer')"
+        ]
+      proxy_funs = T.unlines $ map jsFunToProxy funs
+      proxy_exports = "module.exports = {\n  "
+        <> T.intercalate ",\n  " (map S.funName funs)
+        <> "\n}"
+   in proxy_imports <> "\n" <> proxy_funs <> "\n" <> proxy_exports
 
 jsFunsToProxiesImport :: [S.Fun] -> T.Text
 jsFunsToProxiesImport funs = "const {\n  " 

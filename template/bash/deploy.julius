@@ -32,6 +32,18 @@ create_cf_stack () {
     --stack-name "$STACK_NAME" 
 }
 
+upload_layer () {
+  FUN_NAME="$1"
+
+  ZIP_FILE="$FUN_NAME-layer.zip"
+
+  echo "packaging: $ZIP_FILE"
+  zip -r "$ZIP_FILE" "nodejs"
+
+  echo "uploading: $ZIP_FILE s3://$BUCKET"
+  aws s3 cp "$ZIP_FILE" "s3://$BUCKET"
+}
+
 upload_fun_code () {
   FUN_NAME="$1"
 
@@ -46,6 +58,7 @@ upload_fun_code () {
 
 assert_bucket
 upload_template
+upload_layer
 
 for f in $FUN_NAMES; do 
   upload_fun_code "$f"
