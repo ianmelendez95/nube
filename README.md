@@ -57,7 +57,7 @@ where you see `${API_ID}` in the following `curl` examples)
     $ curl -d '["hello"]' \ 
     >   -H 'Content-Type: application/json' \
     >   https://${API_ID}.execute-api.us-east-2.amazonaws.com/capitalizeWord
-    "Hello There World!"
+    "Hello"
 
 ## FAQ
 
