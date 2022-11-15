@@ -73,8 +73,45 @@ either identify it on your AWS console or run `aws configure get region` on the 
     >   -H 'Content-Type: application/json' \
     >   https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com/capitalizeWord
     "Hello"
+    
+## Installation
+
+Ok, you've made it this far, it's time for a disclaimer:
+
+This is lowbrow parody. You should not use it for anything other 
+than entertainment. It goes without saying you deploy to your account
+at your own risk!
+
+It very much works (when it works, ${READER_DEITY} help you if you have any errors).
+However, it was built as a cheeky parody of the microservices craze, 
+illustrating the obsession taken to an extreme.
+
+Here is where I say I'm not just some luddite that doesn't appreciate the benefits of the 
+cloud. I am well aware of the days when _function calls_ were considered an abhorrent 
+disrespect of the CPU, to be avoided at all costs.
 
 ## FAQ
+
+### Why? Just, why?
+
+This is lowbrow parody. You should not use it for anything other 
+than entertainment. It goes without saying you deploy to your account
+at your own risk!
+
+It very much works (when it works, ${READER_DEITY} help you if you have any errors).
+However, it started as a cheeky parody of the microservices craze, 
+illustrating the obsession taken to an extreme. 
+As I worked on the concept I found it to be surprisingly fun to interact with AWS 
+(hats off to the Amazon teams that make it all a reality!).
+One thing led to another, and I found myself fleshing out a full blown MVP, 
+despite being fully prepared to let it stay a goofy idea pitched to a group of 
+friends on what must have been an otherwise uneventful Tuesday afternoon.
+
+Here is where I say I'm not just a luddite that doesn't appreciate the benefits of the 
+cloud. I am well aware of the days when _function calls_ were considered an abhorrent 
+disrespect of the CPU, to be avoided at all costs. Noone is suggesting 
+each source function should be a microservice (nanoservice?), though should they exist I will 
+gladly encourage them to use `nube` to see why that is a thoroughly painful idea.
 
 ### Why only Asynchronous Functions?
 
