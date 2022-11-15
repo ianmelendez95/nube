@@ -268,4 +268,4 @@ gladly encourage them to use `nube` to see why that is a thoroughly painful idea
   - [ ] request handlers check argument count
 - [ ] support for synchronous functions - one of the following:
   - [ ] included inline in each lambda function (could be in the shared layer)
-  - [ ] OR converted to asynchronous form (major undertaking compilation to [CPS](https://en.wikipedia.org/wiki/Continuation-passing_style))
+  - [ ] OR converted to asynchronous form (major undertaking)
