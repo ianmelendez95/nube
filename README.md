@@ -2,7 +2,7 @@
 
 ## Usage
 
-Start with a JavaScript file that contains only asynchronous functions. [(why?)](https://github.com/ianmelendez95/nube/edit/master/README.md#why-only-asynchronous-functions)
+Start with a JavaScript file that contains only asynchronous functions [(why async?)](https://github.com/ianmelendez95/nube/edit/master/README.md#why-only-asynchronous-functions).
 
     $ cat capitalizeWords.js
     async function capitalizeWords(string) {
@@ -46,17 +46,18 @@ Change directory into the `/dist` directory. Read the `deploy.sh` file, verify y
     creating stack: mergeSort-template.json
 
 After deployment, check your AWS CloudFormation dashboard, and wait until your new `capitalizeWords-stack` is setup and ready to go!
-You will now be able to use each of these functions as a standalone API endpoint! (Be sure to replace your generated API Gateway API ID 
-where you see `${API_ID}` in the following `curl` examples)
+You will now be able to use each of these functions as a standalone API endpoint! Be sure to replace your generated API Gateway API ID 
+where you see `${API_ID}`, and your default region where you see `${AWS_REGION}` in the following `curl` examples. To get your default region
+either identify it on your AWS console or run `aws configure get region` on the command line.
 
     $ curl -d '["hello there world!"]' \ 
     >   -H 'Content-Type: application/json' \
-    >   https://${API_ID}.execute-api.us-east-2.amazonaws.com/capitalizeWords
+    >   https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com/capitalizeWords
     "Hello There World!"
     
     $ curl -d '["hello"]' \ 
     >   -H 'Content-Type: application/json' \
-    >   https://${API_ID}.execute-api.us-east-2.amazonaws.com/capitalizeWord
+    >   https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com/capitalizeWord
     "Hello"
 
 ## FAQ
