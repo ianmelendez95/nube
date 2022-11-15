@@ -2,7 +2,7 @@
 
 ## Summary
 
-`nube` is your new favorite, absurdly cloud native, JavaScript compiler.
+`nube` is your new favorite, _absurdly_ cloud native, JavaScript compiler.
 
 - Every single function becomes a new API service.
 - Every single function call becomes an HTTP request.
@@ -91,6 +91,47 @@ cloud. I am well aware of the days when _function calls_ were considered an abho
 disrespect of the CPU, to be avoided at all costs.
 
 ## FAQ
+
+
+
+### Please Describe, in Excruciating Detail, how nube works?
+
+_Excruciating detail_? Wow, I don't know how you all have time for that but I don't, 
+so here's the quick tour.
+
+Here's a JavaScript function.
+
+    async function capitalizeWord(word) {
+      return word[0].toUpperCase() + word.slice(1)
+    }
+    
+Here's what it could look like as a NodeJS AWS Lambda 'handler', 
+as an example. This handler receives what will be the POST body
+as `event.body`. We assume the POST body is a valid JSON array of 
+arguments to our `capitalizeWord` function.
+
+    exports.handler = async function(event) {
+      // Parse the arguments from the request body as a JSON array
+      const args = JSON.parse(event.body)
+      
+      // Call the function with these arguments
+      const functionResult = await capitalizeWord.apply(null, args)
+      
+      // Stringify the result
+      const functionResultString = JSON.stringify(functionResult)
+      
+      // Return the result as a minimal HTTP response
+      return { statusCode: 200, body: functionResultString }
+    }
+    
+And there you have it. A fully working AWS Lambda handler file ready to be turned into a
+Lambda function!
+
+"But wait!" you say. "What if my function calls other functions?" I swear, you people
+are never content... Well if we must, we need a way to replace our functions with the equivalent
+HTTP call to the Lambda function. 
+
+[TODO - continue proxy description]
 
 ### Why? Just, why?
 
