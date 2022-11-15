@@ -173,7 +173,22 @@ to the API.
 Ok so now what, we have the ingredients, it's all ready to bake right? How does this actually get 
 deployed to _the cloud_?
 
-[TODO - CF]
+Well we could just use the AWS CLI to create our infrastructure piecemeal, but the benevolent
+powers that be at Amazon gave us the power of CloudFormation templates.
+
+For the sake of brevity, there will just be a listing of the resources involved in the template,
+and their relationships. For a full example of such a template see [here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/capitalizeWords-template.json).
+
+| Resource Name                  | Resource Type           | Description                                                                         |
+| ------------------------------ | ----------------------- | ----------------------------------------------------------------------------------- |
+| `CapitalizeWordsBucket`        | Parameter               | Technically not a resource, but the bucket containing our code, template, and layer |
+| `CapitalizeWord(s)Lambda`      | Lambda Function         | The Lambda function handlers for our `capitalizeWord(s)` functions |
+| `CapitalizeWordsLayer`         | Lambda LayerVersion     | The shared layer containing our `proxies` module used by our Lambda function handlers | 
+| `CapitalizeWordsApi`           | API Gateway             | The API Gateway that will forward HTTP requests to our Lambda functions |
+| `CapitalizeWordsApiStage`      | API Gateway Stage       | The API Gateway stage that is configured to auto deploy our API routes | 
+| `CapitalizeWord(s)Integration` | API Gateway Integration | The integrations that inform our API about the lambda functions |
+| `CapitalizeWord(s)Route`       | API Gateway Route       | The routes that direct POST requests to our API integrated Lambdas by path |
+| `CapitalizeWord(s)Permission`  | Lambda Permission       | The permission that authorizes our API Gateway to forward requests to the lambda functions | `CapitalizeWordsRole`          | IAM Role                | The role assigned to the Lambda functions authorizing the basic use of the service |
 
 ### Why? Just, why?
 
