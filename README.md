@@ -88,7 +88,7 @@ making my project irrelevant before it ever begun.
 
 ## How it Works
 
-**The Handler**
+### The Handler
 
 Here's a JavaScript function.
 
@@ -118,7 +118,7 @@ arguments to our `capitalizeWord` function.
 And there you have it. A fully working AWS Lambda handler file ready to be turned into a
 Lambda function! Check out the actual compiler output of such a handler [here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/capitalizeWord.js).
 
-**The Proxy**
+### The Proxy
 
 "But wait!" you say. "What if my function calls other functions?" I swear, you people
 are never content... Well if we must, we need a way to replace our functions with the equivalent
@@ -161,7 +161,7 @@ Their implementation is fairly different (uses Node's builtin `https` package, h
 but at the core they are doing the same thing, acting as the 'real' function but delegating 
 to the API.
 
-**The CloudFormation**
+### The CloudFormation
 
 Ok so now what, we have the ingredients, it's all ready to bake right? How does this actually get 
 deployed to _the cloud_?
@@ -185,9 +185,60 @@ and their relationships. For a full example of such a template see [here](https:
 
 ## FAQ
 
+### Why only Asynchronous Functions?
+
+Because they are _much_ easier to convert to a proxy function.
+A proxy function is where we replace a function in the script, such as the following
+
+    async function capitalizeWord(word) {
+      return word[0].toUpperCase() + word.slice(1)
+    }
+    
+With one that makes an HTTP request to the same function that is available via 
+API like so
+
+    async function capitalizeWord(word) {
+      const response = await fetch('https://21691ba1lf.execute-api.us-east-2.amazonaws.com/capitalizeWord', {
+        method: 'POST',
+        body: JSON.stringify([word]),
+        headers: {'Content-Type': 'application/json'}
+      })
+
+      return response.json()
+    }
+    
+Notice how the function signature `async function capitalizeWord(word)` didn't change.
+It would be far more difficult to make synchronous functions work as asynchronous HTTP proxies.
+Take for example the following script.
+
+    function capitalizeWords(string) {
+      return string.split(' ').map(capitalizeWord).join(' ')
+    }
+
+    function capitalizeWord(word) {
+      return word[0].toUpperCase() + word.slice(1)
+    }
+
+If we simply make `capitalizeWord` async, `capitalizeWords` would fail as we would be calling `.join(' ')` on an 
+array of `Promises`. We would need to parse the body as an AST and identify all function calls, and convert them to their
+async/await equivalent. Notice that our compiler would have to be smart enough to identify that 
+`arr.map(capitalizeWord)` is equivalent to `Promise.all(arr.map(capitalizeWord))` and not just `await arr.map(capitalizeWord)`.
+Further, notice that we assume all calls are to async functions, since discriminating would be an extra complication.
+
+    async function capitalizeWords(string) {
+      const res1 = await string.split(' ')
+      const res2 = await Promise.all(res1.map(capitalizeWord))
+      const res3 = await res2.join(' ')
+      return res3
+    }
+
+Ultimately, compiling synchronous functions to asynchronous functions would be a worthwhile project all on it's own, 
+and proved to be a significant undertaking that wouldn't highlight the process of compiling a simple JS file to a fully 
+'cloud native' API platform.
+
 ### Why? Just, why?
 
-This is lowbrow parody purely for my own entertainment and a learning vehicle for 
+This is basically parody purely for my own entertainment and a learning vehicle for 
 AWS.
 
 It very much works (_when_ it works, `${READER_DEITY}` help you if you have any errors).
@@ -204,9 +255,7 @@ disrespect of the CPU, to be avoided at all costs. Noone is suggesting
 each source function should be a microservice (nanoservice?), though should they exist I will 
 gladly encourage them to use `nube` to see why that is a thoroughly painful idea.
 
-### Why only Asynchronous Functions?
 
-[TODO]
 
 ## Room for Improvement
 
