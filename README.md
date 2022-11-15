@@ -4,9 +4,9 @@
 
 `nube` is your new favorite, _absurdly_ cloud native, JavaScript compiler.
 
-- Every single function becomes a new API service.
-- Every single function call becomes an HTTP request.
-- Every unit of your program becomes infinitely scalable.
+- Every single function an API service.
+- Every single function call an HTTP request.
+- Every unit of your program infinitely scalable.
 
 `nube` provides this for free! [1] Turn your JavaScript file into a complete AWS CloudFormation stage, with each function as a standalone ready-to-use API endpoint, and all of your functions talking to each other over the WWW, just as Tim Berners-Lee intended!
 
