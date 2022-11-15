@@ -8,7 +8,7 @@
 - Every single function call becomes an HTTP request.
 - Every unit of your program becomes infinitely scalable.
 
-`nube` provides this for free! [1] 
+`nube` provides this for free! [1] Turn your JavaScript file into a complete AWS CloudFormation stage, with each function as a standalone ready-to-use API endpoint, and all of your functions talking to each other over the WWW, just as Tim Berners-Lee intended!
 
 [1] Fine Print: So long as you write in soberingly limited subset of JS, can deal with poor debugging support, and 
 have a personal favor from Jeff Bezos to give your account the concurrency quota for an entire region. But if you have that,
