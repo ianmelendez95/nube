@@ -16,7 +16,7 @@ it's practically a free lunch!
 
 ## Usage
 
-Start with a JavaScript file that contains only asynchronous functions [(why async?)](https://github.com/ianmelendez95/nube/edit/master/README.md#why-only-asynchronous-functions).
+Start with a JavaScript file that contains only asynchronous functions [(why async?)](https://github.com/ianmelendez95/nube/blob/master/README.md#why-only-asynchronous-functions).
 
     $ cat capitalizeWords.js
     async function capitalizeWords(string) {
