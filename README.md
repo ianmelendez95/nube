@@ -1,5 +1,19 @@
 # nube
 
+## Summary
+
+`nube` is your new favorite, absurdly cloud native, JavaScript compiler.
+
+- Every single function becomes a new API service.
+- Every single function call becomes an HTTP request.
+- Every unit of your program becomes infinitely scalable.
+
+`nube` provides this for free! [1] 
+
+[1] Fine Print: So long as you write in soberingly limited subset of JS, can deal with poor debugging support, and 
+have a personal favor from Jeff Bezos to give your account the concurrency quota for an entire region. But if you have that,
+it's practically a free lunch!
+
 ## Usage
 
 Start with a JavaScript file that contains only asynchronous functions [(why async?)](https://github.com/ianmelendez95/nube/edit/master/README.md#why-only-asynchronous-functions).
@@ -37,13 +51,13 @@ Change directory into the `/dist` directory. Read the `deploy.sh` file, verify y
     $ cd dist
     $ chmod 700 deploy.sh
     $ ./deploy.sh 
-    upload: ./mergeSort-template.json to s3://mergesort-bucket/mergeSort-template.json
-    packaging: mergeSort-layer.zip
+    upload: ./capitalizeWords-template.json to s3://capitalizewords-bucket/capitalizeWords-template.json
+    packaging: capitalizeWords-layer.zip
       adding: nodejs/ (stored 0%)
     ...
-    uploading: mergeSortPair-code.zip s3://mergesort-bucket
-    upload: ./mergeSortPair-code.zip to s3://mergesort-bucket/mergeSortPair-code.zip
-    creating stack: mergeSort-template.json
+    uploading: capitalizeWord-code.zip s3://capitalizewords-bucket
+    upload: ./capitalizeWord-code.zip to s3://capitalizewords-bucket/capitalizeWord-code.zip
+    creating stack: capitalizeWords-template.json
 
 After deployment, check your AWS CloudFormation dashboard, and wait until your new `capitalizeWords-stack` is setup and ready to go!
 You will now be able to use each of these functions as a standalone API endpoint! Be sure to replace your generated API Gateway API ID 
