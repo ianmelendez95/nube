@@ -232,7 +232,7 @@ Further, notice that we assume all calls are to async functions, since discrimin
       return res3
     }
 
-Ultimately, compiling synchronous functions to asynchronous functions would be a worthwhile project all on it's own, 
+Ultimately, compiling synchronous functions to asynchronous functions would be a worthwhile project all on its own, 
 and proved to be a significant undertaking that wouldn't highlight the process of compiling a simple JS file to a fully 
 'cloud native' API platform.
 
