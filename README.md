@@ -82,22 +82,20 @@ This is lowbrow parody. You should not use it for anything other
 than entertainment. It goes without saying you deploy to your account
 at your own risk!
 
-It very much works (when it works, ${READER_DEITY} help you if you have any errors).
-However, it was built as a cheeky parody of the microservices craze, 
-illustrating the obsession taken to an extreme.
-
-Here is where I say I'm not just some luddite that doesn't appreciate the benefits of the 
-cloud. I am well aware of the days when _function calls_ were considered an abhorrent 
-disrespect of the CPU, to be avoided at all costs.
+The AWS CDK is only _marginally_ better than my one man side project, but it 
+is undeniably the better choice. Go use it. It's great. The devs did an excellent job 
+making my project irrelevant before it ever begun.
 
 ## FAQ
 
 
 
-### Please Describe, in Excruciating Detail, how nube works?
+### Please Describe, in Excruciating Detail, how `nube` works?
 
 _Excruciating detail_? Wow, I don't know how you all have time for that but I don't, 
 so here's the quick tour.
+
+**The Handler**
 
 Here's a JavaScript function.
 
@@ -105,7 +103,7 @@ Here's a JavaScript function.
       return word[0].toUpperCase() + word.slice(1)
     }
     
-Here's what it could look like as a NodeJS AWS Lambda 'handler', 
+Here's what it could look like with a NodeJS AWS Lambda 'handler', 
 as an example. This handler receives what will be the POST body
 as `event.body`. We assume the POST body is a valid JSON array of 
 arguments to our `capitalizeWord` function.
@@ -125,22 +123,65 @@ arguments to our `capitalizeWord` function.
     }
     
 And there you have it. A fully working AWS Lambda handler file ready to be turned into a
-Lambda function!
+Lambda function! Check out the actual compiler output of such a handler [here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/capitalizeWord.js).
+
+**The Proxy**
 
 "But wait!" you say. "What if my function calls other functions?" I swear, you people
 are never content... Well if we must, we need a way to replace our functions with the equivalent
-HTTP call to the Lambda function. 
+HTTP call to the Lambda function. We'll call this replacement the 'proxy' to the actual function
+in _the cloud_.
 
-[TODO - continue proxy description]
+Lets say you had the following function that calls your `capitalizeWord` function to 
+capitalize all the words in a sentence.
+
+    async function capitalizeWords(string) {
+      const words = await Promise.all(string.split(' ').map(capitalizeWord)) // note the call to capitalizeWord here
+      return words.join(' ')
+    }
+    
+Further, let's say you deployed your `capitalizeWord` handler script as an AWS Lambda function,
+integrated with an AWS HTTP API Gateway, available at the url `https://a1b2c3d4.execute-api.us-east-2.amazonaws.com/capitalizeWord`.
+Your `capitalizeWord` function could look like this.
+
+    async function capitalizeWord(string) {
+      // Stringify the function arguments to an arguments array
+      const argsString = JSON.stringify([string])
+
+      // Send the POST HTTP request on the endpoint, with the stringified arguments in the body
+      const response = await fetch('https://a1b2c3d4.execute-api.us-east-2.amazonaws.com/capitalizeWord', {
+        method: 'POST',
+        body: argsString,
+        headers: {'Content-Type': 'application/json'}
+      })
+
+      // Retrieve the response as JSON and return the result
+      const data = await response.json()
+      return data
+    }
+    
+Your `capitalizeWords` handler now has a proxy to `capitalizeWord` ready to use, and 
+the handler is none the wiser that the function is actually an HTTP call, since the 
+function signature was left intact. For examples of these proxies, see 
+[here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/nodejs/node_modules/proxies.js).
+Their implementation is fairly different (uses Node's builtin `https` package, has primitive retry logic, etc.) 
+but at the core they are doing the same thing, acting as the 'real' function but delegating 
+to the API.
+
+**The CloudFormation**
+
+Ok so now what, we have the ingredients, it's all ready to bake right? How does this actually get 
+deployed to _the cloud_?
+
+[TODO - CF]
 
 ### Why? Just, why?
 
-This is lowbrow parody. You should not use it for anything other 
-than entertainment. It goes without saying you deploy to your account
-at your own risk!
+This is lowbrow parody purely for my own entertainment and learning vehicle for 
+AWS.
 
 It very much works (when it works, ${READER_DEITY} help you if you have any errors).
-However, it started as a cheeky parody of the microservices craze, 
+However, it started as a cheeky dig at the microservices craze, 
 illustrating the obsession taken to an extreme. 
 As I worked on the concept I found it to be surprisingly fun to interact with AWS 
 (hats off to the Amazon teams that make it all a reality!).
