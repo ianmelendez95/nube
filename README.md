@@ -86,14 +86,7 @@ The AWS CDK is only _marginally_ better than my one man side project, but it
 is undeniably the better choice. Go use it. It's great. The devs did an excellent job 
 making my project irrelevant before it ever begun.
 
-## FAQ
-
-
-
-### Please Describe, in Excruciating Detail, how `nube` works?
-
-_Excruciating detail_? Wow, I don't know how you all have time for that but I don't, 
-so here's the quick tour.
+## How it Works
 
 **The Handler**
 
@@ -190,19 +183,20 @@ and their relationships. For a full example of such a template see [here](https:
 | `CapitalizeWord(s)Route`       | API Gateway Route       | The routes that direct POST requests to our API integrated Lambdas by path |
 | `CapitalizeWord(s)Permission`  | Lambda Permission       | The permission that authorizes our API Gateway to forward requests to the lambda functions | `CapitalizeWordsRole`          | IAM Role                | The role assigned to the Lambda functions authorizing the basic use of the service |
 
+## FAQ
+
 ### Why? Just, why?
 
-This is lowbrow parody purely for my own entertainment and learning vehicle for 
+This is lowbrow parody purely for my own entertainment and a learning vehicle for 
 AWS.
 
-It very much works (when it works, ${READER_DEITY} help you if you have any errors).
-However, it started as a cheeky dig at the microservices craze, 
-illustrating the obsession taken to an extreme. 
+It very much works (_when_ it works, `${READER_DEITY}` help you if you have any errors).
+However, it started as a cheeky dig at the microservices craze, illustrating the obsession taken to an extreme. 
 As I worked on the concept I found it to be surprisingly fun to interact with AWS 
 (hats off to the Amazon teams that make it all a reality!).
-One thing led to another, and I found myself fleshing out a full blown MVP, 
-despite being fully prepared to let it stay a goofy idea pitched to a group of 
-friends on what must have been an otherwise uneventful Tuesday afternoon.
+One thing led to another, and I found myself fleshing out a full blown MVP.
+This is despite being fully prepared to let it stay a goofy idea, pitched to a group of 
+friends on what must have been an uneventful Tuesday afternoon.
 
 Here is where I say I'm not just a luddite that doesn't appreciate the benefits of the 
 cloud. I am well aware of the days when _function calls_ were considered an abhorrent 
