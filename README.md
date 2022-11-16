@@ -86,6 +86,42 @@ The AWS CDK is only _marginally_ better than my one man side project, but it
 is undeniably the better choice. Go use it. It's great. The devs did an excellent job 
 making my project irrelevant before it ever begun.
 
+### Install Haskell Stack and Build From Source
+
+Obtain the Haskell `stack` build system. Either through 
+your preferred OS package manager (recommended), or by direct installation [here](https://docs.haskellstack.org/en/stable/#how-to-install-stack) if not available.
+
+With `stack` installed simply go into the project and run `stack build`.
+
+    $ git clone git@github.com:ianmelendez95/nube.git
+    $ cd nube
+    $ stack build
+    
+You can then run the compiler from within the project using `stack exec`
+
+    $ stack exec nube -- capitalizeWords.js
+    
+You could also install the executable into your `.local/bin` file
+so that it is available as a command.
+
+    $ stack install
+    Copying from .stack-work/install/aarch64-osx/aa684d49679b5194babb03d60b5f393f45d0337ee2e131e678431f8ccc74050b/9.0.2/bin/nube to /Users/ianmelendez/.local/bin/nube
+
+    Copied executables to ~/.local/bin:
+    - nube
+    
+    $ nube capitalizeWords.js
+
+### Install AWS CLI 
+
+In order to actually use the compiler output and spin up on the cloud, 
+you'll need a working AWS CLI available on your machine. 
+Follow instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) 
+to get that set up.
+
+It goes without saying that you'll need an AWS account to setup the CLI with.
+The good news is an AWS account is (frighteningly) easy to set up.
+
 ## How it Works
 
 ### The Handler
