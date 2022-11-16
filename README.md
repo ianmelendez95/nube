@@ -242,8 +242,8 @@ This is basically parody purely for my own entertainment and a learning vehicle 
 AWS.
 
 It very much works (_when_ it works, `${READER_DEITY}` help you if you have any errors).
-However, it started as a cheeky dig at the microservices craze, illustrating the obsession taken to an extreme. 
-As I worked on the concept I found it to be surprisingly fun to interact with AWS 
+Starting as a cheeky dig at the microservices craze, it's an illustration of the obsession taken to an extreme. 
+As I worked on the concept it turned out to be surprisingly fun to interact with AWS 
 (hats off to the Amazon teams that make it all a reality!).
 One thing led to another, and I found myself fleshing out a full blown MVP.
 This is despite being fully prepared to let it stay a goofy idea, pitched to a group of 
@@ -252,10 +252,8 @@ friends on what must have been an uneventful Tuesday afternoon.
 Here is where I say I'm not just a luddite that doesn't appreciate the benefits of the 
 cloud. I am well aware of the days when _function calls_ were considered an abhorrent 
 disrespect of the CPU, to be avoided at all costs. Noone is suggesting 
-each source function should be a microservice (nanoservice?), though should they exist I will 
-gladly encourage them to use `nube` to see why that is a thoroughly painful idea.
-
-
+each source function should be a microservice (nanoservice?), though should such people exist they are encouraged
+to use `nube` to see why that is a thoroughly painful idea.
 
 ## Room for Improvement
 
