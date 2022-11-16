@@ -74,6 +74,8 @@ either identify it on your AWS console or run `aws configure get region` on the 
     >   https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com/capitalizeWord
     "Hello"
     
+A full example of this kind of output can be found [here](https://github.com/ianmelendez95/nube/tree/master/example/capitalizeWords) among other examples.
+    
 ## Installation
 
 Ok, you've made it this far, it's time for a disclaimer:
@@ -235,7 +237,7 @@ With the S3 bucket loaded up with all of the relevant files, a painless call to
 bucket file, and less than a minute later a fully functional cloud platform 
 pops into existence, all from a simple JavaScript file!
 
-An example of such a deployment script can be seen [here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/deploy.sh)
+An example of such a deployment script can be seen [here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/deploy.sh).
 
 ## FAQ
 
