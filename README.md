@@ -183,6 +183,22 @@ and their relationships. For a full example of such a template see [here](https:
 | `CapitalizeWord(s)Route`       | API Gateway Route       | The routes that direct POST requests to our API integrated Lambdas by path |
 | `CapitalizeWord(s)Permission`  | Lambda Permission       | The permission that authorizes our API Gateway to forward requests to the lambda functions | `CapitalizeWordsRole`          | IAM Role                | The role assigned to the Lambda functions authorizing the basic use of the service |
 
+### The Deployment Script
+
+Finally you need to kick off the whole process. Essentially all we need to do 
+is setup the bucket the CloudFormation file is expecting with all of the relevant
+files. For our `capitalizeWords.js` example, the following files are uploaded to 
+the S3 `capitalizewords-bucket` bucket.
+
+* `capitalizeWord(s)-code.zip`    - The ZIP files containing the Lambda handler scripts respectively.
+* `capitalizeWords-layer.zip`     - The ZIP file containing the shared Lambda layer proxies module.
+* `capitalizeWords-template.json` - The CloudFormation template file to setup the whole thing.
+
+With the S3 bucket loaded up with all of the relevant files, a painless call to 
+`aws cloudformation create-stack` pointing to the `capitalizeWords-template.json` 
+bucket file, and less than a minute later a fully functional cloud platform 
+pops into existence, all from a simple JavaScript file!
+
 ## FAQ
 
 ### Why only Asynchronous Functions?
