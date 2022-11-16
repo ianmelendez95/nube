@@ -235,6 +235,8 @@ With the S3 bucket loaded up with all of the relevant files, a painless call to
 bucket file, and less than a minute later a fully functional cloud platform 
 pops into existence, all from a simple JavaScript file!
 
+An example of such a deployment script can be seen [here](https://github.com/ianmelendez95/nube/blob/master/example/capitalizeWords/dist/deploy.sh)
+
 ## FAQ
 
 ### Why only Asynchronous Functions?
