@@ -74,8 +74,8 @@ jsFunsToProxiesScript funs =
         [ "const https = require('https')"
         , "const { Buffer } = require('node:buffer')"
         ]
-      proxy_funs = T.unlines $ map jsFunToProxy funs
-      proxy_request_fun = renderJavascript $(juliusFile "template/js/proxy-request.julius")
+      proxy_funs = T.intercalate "\n\n" $ map jsFunToProxy funs
+      proxy_request_fun = "\n" <> renderJavascript $(juliusFile "template/js/proxy-request.julius")
       proxy_exports = "module.exports = {\n  "
         <> T.intercalate ",\n  " (map S.funName funs)
         <> "\n}"
