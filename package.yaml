@@ -48,7 +48,7 @@ library:
   - containers
 
 executables:
-  nube-exe:
+  nube:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
