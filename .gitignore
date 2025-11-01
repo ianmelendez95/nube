@@ -1,4 +1,82 @@
+# Cabal build artifacts
+dist/
+dist-newstyle/
+.ghc.environment.*
+
+# Stack build artifacts (if using Stack)
 .stack-work/
+
+# Compiled Object files
+*.o
+*.hi
+*.dyn_o
+*.dyn_hi
+
+# Profiling files
+*.prof
+*.aux
+*.hp
+*.eventlog
+
+# GHC temporary files
+*.ghc.environment.*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
 *~
+.DS_Store
+Thumbs.db
+
+# Haddock documentation
+doc/
+
+# TAGS files
+TAGS
+tags
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Operating system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Local configuration files
+cabal.project.local
+cabal.project.local~
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Output executables
+*.exe
+
+# Haskell Language Server files
+.hls/
+hie.yaml.local
+
+# Nix files (if using Nix)
+result
+result-*
+
+# Docker files
+.dockerignore
 
 /example/**/dist/*.zip
