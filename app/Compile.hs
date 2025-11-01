@@ -3,7 +3,6 @@
 module Compile where
 
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 import Data.Char
 
 import qualified Gen.Lambda as GL
@@ -11,11 +10,11 @@ import qualified JS.Parse as P
 import qualified JS.Syntax as S
 import qualified Gen.CF as CF
 
-import qualified Data.Aeson as J
-import qualified Data.ByteString.Lazy as BS
-
 import System.FilePath
-import qualified Gen.CF as CF
+
+import Control.Monad (
+    unless
+  )
 
 import Util.Aeson
 
@@ -50,6 +49,6 @@ assertValidJsFileName file_path =
       basename = takeBaseName file_path
    in if ext /= ".js"
         then error $ "Expecting .js file extension - has: " <> ext
-        else if not (all isLetter basename)
-               then error $ "Only letters allowed in file basename: " <> basename
-               else pure ()
+        else 
+          unless (all isLetter basename)
+                 (error $ "Only letters allowed in file basename: " <> basename)
