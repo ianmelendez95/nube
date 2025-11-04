@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cabal run nube -O0 -- $@
+

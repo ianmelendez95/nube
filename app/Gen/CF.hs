@@ -150,7 +150,7 @@ instance ToJSON RLayer where
     [ "Type" .= fromText "AWS::Lambda::LayerVersion" 
     , "Properties" .= object 
         [ "CompatibleArchitectures" .= [ fromText "x86_64" ]
-        , "CompatibleRuntimes"      .= [ fromText "nodejs16.x" ]
+        , "CompatibleRuntimes"      .= [ fromText "nodejs22.x" ]
         , "Content" .= object 
             [ "S3Bucket" .= bucket
             , "S3Key"    .= fromText (name <> ".zip")
@@ -176,7 +176,7 @@ instance ToJSON RFun where
         , "Handler" .= fromText (name <> ".handler")
         , "Layers" .= [ layer ]
         , "Role" .= GetArn (refId role)
-        , "Runtime" .= fromText "nodejs16.x"
+        , "Runtime" .= fromText "nodejs22.x"
         , "Timeout" .= (60 :: Int)
         ]
     ]
