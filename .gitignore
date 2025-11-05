@@ -1,6 +1,6 @@
 # Cabal build artifacts
-dist/
-dist-newstyle/
+/dist
+/dist-newstyle
 .ghc.environment.*
 
 # Stack build artifacts (if using Stack)
@@ -80,3 +80,4 @@ result-*
 .dockerignore
 
 /example/**/dist/*.zip
+/example/capitalizeWords-sqs

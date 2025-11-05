@@ -1,8 +1,8 @@
-const {
+import {
   capitalizeWords
-} = require('proxies')
+} from 'proxies'
 
-exports.handler = async function(event) {
+export const handler = async (event) => {
   try {
     let args = (typeof event.body === 'undefined' || event.body.trim().length === 0) 
       ? [] 

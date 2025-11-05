@@ -23,12 +23,12 @@ data Script = Script
 writeScripts :: FilePath -> T.Text -> T.Text -> [Script] -> IO ()
 writeScripts dist deploy_script proxies_script handler_scripts = do
   writeDistFile "deploy.sh" deploy_script
-  writeDistFile "nodejs/node_modules/proxies.js" proxies_script
+  writeDistFile "nodejs/node_modules/proxies.mjs" proxies_script
   mapM_ doScript handler_scripts
   where 
     doScript :: Script -> IO ()
     doScript script = 
-      writeDistFile (T.unpack (scriptName script) <> ".js") 
+      writeDistFile (T.unpack (scriptName script) <> ".mjs") 
                     (scriptContent script)
     
     writeDistFile :: FilePath -> T.Text -> IO ()
@@ -71,25 +71,21 @@ jsFunsToScript main_fun helper_funs =
 jsFunsToProxiesScript :: [S.Fun] -> T.Text
 jsFunsToProxiesScript funs = 
   let proxy_imports = T.unlines 
-        [ "const https = require('https')"
-        , "const { Buffer } = require('node:buffer')"
+        [ "import https from 'node:https'"
+        , "import { Buffer } from 'node:buffer'"
         ]
       proxy_funs = T.intercalate "\n\n" $ map jsFunToProxy funs
       proxy_request_fun = "\n" <> renderJavascript $(juliusFile "template/js/proxy-request.julius")
-      proxy_exports = "module.exports = {\n  "
-        <> T.intercalate ",\n  " (map S.funName funs)
-        <> "\n}"
    in T.unlines 
         [ proxy_imports
         , proxy_funs
         , proxy_request_fun
-        , proxy_exports
         ]
 
 jsFunsToProxiesImport :: [S.Fun] -> T.Text
-jsFunsToProxiesImport funs = "const {\n  " 
+jsFunsToProxiesImport funs = "import {\n  " 
   <> T.intercalate ",\n  " (map S.funName funs)
-  <> "\n} = require('proxies')"
+  <> "\n} from 'proxies'"
 
 jsFunToHandler :: S.Fun -> T.Text
 jsFunToHandler fun = mkHandlerFun (S.funName fun)

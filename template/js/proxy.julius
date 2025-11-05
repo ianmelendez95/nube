@@ -1,4 +1,4 @@
-async function #{rawJS impl_fun_name}#{rawJS impl_fun_params} {
+export async function #{rawJS impl_fun_name}#{rawJS impl_fun_params} {
   const argsString = JSON.stringify(
     Array.from(arguments).slice(0, #{rawJS impl_fun_name}.length))
 
