@@ -23,7 +23,8 @@ data Script = Script
 writeScripts :: FilePath -> T.Text -> T.Text -> [Script] -> IO ()
 writeScripts dist deploy_script proxies_script handler_scripts = do
   writeDistFile "deploy.sh" deploy_script
-  writeDistFile "nodejs/node_modules/proxies.mjs" proxies_script
+  writeDistFile "nodejs/node_modules/proxies/index.mjs" proxies_script
+  writeDistFile "nodejs/node_modules/proxies/package.json" "{\n  \"name\": \"proxies\",\n  \"type\": \"module\",\n  \"main\": \"index.mjs\"\n}"
   mapM_ doScript handler_scripts
   where 
     doScript :: Script -> IO ()
