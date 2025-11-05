@@ -57,7 +57,7 @@ upload_fun_code () {
   ZIP_FILE="$FUN_NAME-code.zip"
 
   echo "packaging: $ZIP_FILE"
-  zip "$ZIP_FILE" "$FUN_NAME.mjs"
+  zip -j "$ZIP_FILE" "$FUN_NAME/index.mjs"
 
   echo "uploading: $ZIP_FILE s3://$BUCKET"
   aws s3 cp "$ZIP_FILE" "s3://$BUCKET"

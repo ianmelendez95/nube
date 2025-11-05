@@ -175,7 +175,7 @@ instance ToJSON RFun where
                 ]
             ]
         , "FunctionName" .= name
-        , "Handler" .= fromText (name <> ".handler")
+        , "Handler" .= fromText "index.handler"
         , "Layers" .= [ layer ]
         , "Role" .= GetArn (refId role)
         , "Runtime" .= fromText "nodejs22.x"

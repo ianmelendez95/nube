@@ -29,7 +29,7 @@ writeScripts dist deploy_script proxies_script handler_scripts = do
   where 
     doScript :: Script -> IO ()
     doScript script = 
-      writeDistFile (T.unpack (scriptName script) <> ".mjs") 
+      writeDistFile (T.unpack (scriptName script) <> "/index.mjs") 
                     (scriptContent script)
     
     writeDistFile :: FilePath -> T.Text -> IO ()
