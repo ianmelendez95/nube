@@ -142,6 +142,8 @@ instance ToJSON RRole where
         , "MaxSessionDuration" .= (3600 :: Int)
         , "Path" .= fromText "/service-role/"
         , "RoleName" .= fromText name
+        , "ManagedPolicyArns" .= 
+            [ fromText "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" ]
         ]
     ]
 
