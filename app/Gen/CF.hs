@@ -187,7 +187,9 @@ instance ToJSON RFun where
             ]
         , "Environment" .= object 
             [ "Variables" .= object 
-                [ "SQS_BASE_URL" .= fromText "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}" ]
+                [ "SQS_BASE_URL" .= object
+                  [ "Fn::Sub" .= fromText "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}" ]
+                ]
             ]
         , "FunctionName" .= name
         , "Handler" .= fromText "index.handler"

@@ -30,7 +30,9 @@
                 },
                 "Environment": {
                     "Variables": {
-                        "SQS_BASE_URL": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}"
+                        "SQS_BASE_URL": {
+                            "Fn::Sub": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}"
+                        }
                     }
                 },
                 "FunctionName": "capitalizeWord",
@@ -145,7 +147,9 @@
                 },
                 "Environment": {
                     "Variables": {
-                        "SQS_BASE_URL": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}"
+                        "SQS_BASE_URL": {
+                            "Fn::Sub": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}"
+                        }
                     }
                 },
                 "FunctionName": "capitalizeWords",
