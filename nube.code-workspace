@@ -14,10 +14,10 @@
 			{
 				"type": "aws-sam",
 				"request": "direct-invoke",
-				"name": "capitalizeWord:index.handler (nodejs22.x)",
+				"name": "capitalizeWords:index.handler (nodejs22.x)",
 				"invokeTarget": {
 					"target": "code",
-					"projectRoot": "/Users/ianmelendez/js-projects/nube-lambda/capitalizeWord",
+					"projectRoot": "/Users/ianmelendez/js-projects/nube-lambda/capitalizeWords",
 					"lambdaHandler": "index.handler"
 				},
 				"lambda": {

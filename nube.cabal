@@ -59,6 +59,8 @@ executable nube
     -- Import common warning flags.
     import:           warnings
 
+    ghc-options:      -O0
+
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
 

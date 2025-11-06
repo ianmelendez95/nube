@@ -30,9 +30,7 @@
                 },
                 "Environment": {
                     "Variables": {
-                        "AWS_GATEWAY_HOST": {
-                            "Fn::Sub": "${CapitalizeWordsApi}.execute-api.${AWS::Region}.amazonaws.com"
-                        }
+                        "SQS_BASE_URL": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}"
                     }
                 },
                 "FunctionName": "capitalizeWord",
@@ -62,6 +60,22 @@
                 }
             },
             "Type": "AWS::Lambda::Permission"
+        },
+        "CapitalizeWordRequestQueue": {
+            "Properties": {
+                "MessageRetentionPeriod": 20,
+                "QueueName": "capitalizeWord-request-queue",
+                "VisibilityTimeout": 1
+            },
+            "Type": "AWS::SQS::Queue"
+        },
+        "CapitalizeWordResponseQueue": {
+            "Properties": {
+                "MessageRetentionPeriod": 20,
+                "QueueName": "capitalizeWord-response-queue",
+                "VisibilityTimeout": 1
+            },
+            "Type": "AWS::SQS::Queue"
         },
         "CapitalizeWordRoute": {
             "Properties": {
@@ -116,9 +130,7 @@
                 },
                 "Environment": {
                     "Variables": {
-                        "AWS_GATEWAY_HOST": {
-                            "Fn::Sub": "${CapitalizeWordsApi}.execute-api.${AWS::Region}.amazonaws.com"
-                        }
+                        "SQS_BASE_URL": "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}"
                     }
                 },
                 "FunctionName": "capitalizeWords",
@@ -132,7 +144,7 @@
                     "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
                 "Runtime": "nodejs22.x",
-                "Timeout": 60
+                "Timeout": 20
             },
             "Type": "AWS::Lambda::Function"
         },
@@ -167,6 +179,22 @@
             },
             "Type": "AWS::Lambda::Permission"
         },
+        "CapitalizeWordsRequestQueue": {
+            "Properties": {
+                "MessageRetentionPeriod": 20,
+                "QueueName": "capitalizeWords-request-queue",
+                "VisibilityTimeout": 1
+            },
+            "Type": "AWS::SQS::Queue"
+        },
+        "CapitalizeWordsResponseQueue": {
+            "Properties": {
+                "MessageRetentionPeriod": 20,
+                "QueueName": "capitalizeWords-response-queue",
+                "VisibilityTimeout": 1
+            },
+            "Type": "AWS::SQS::Queue"
+        },
         "CapitalizeWordsRole": {
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -182,7 +210,8 @@
                     "Version": "2012-10-17"
                 },
                 "ManagedPolicyArns": [
-                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
                 ],
                 "MaxSessionDuration": 3600,
                 "Path": "/service-role/",

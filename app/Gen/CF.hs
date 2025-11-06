@@ -48,17 +48,18 @@ data RLayer = RLayer {
 -- | Lambda Resource Group
 -- | Includes all resources for enabling a given Lambda within the API
 data LambdaRGroup = LambdaRGroup {
-  lamFun   :: Named RFun,   -- Function
-  lamInt   :: Named RInt,   -- Integration
-  lamRoute :: Named RRoute, -- Route
-  lamPerm  :: Named RPerm  -- Permission
+  lamFun      :: Named RFun,        -- Function
+  lamInt      :: Named RInt,        -- Integration
+  lamRoute    :: Named RRoute,      -- Route
+  lamPerm     :: Named RPerm,       -- Permission
+  lamReqQueue :: Named RSQSQueue,   -- SQS Request Queue
+  lamResQueue :: Named RSQSQueue    -- SQS Response Queue
 }
 
 -- | Lambda Function Resource
 data RFun = RFun {
   funName   :: T.Text,
   funBucket :: Ref,
-  funApi    :: Ref,
   funRole   :: Ref,
   funLayer  :: Ref
 }
@@ -83,12 +84,15 @@ data RPerm = RPerm {
   permFun   :: Ref
 }
 
+newtype RSQSQueue = RSQSQueue {
+  sqsQueueName :: T.Text
+}
+
 newtype Ref = Ref { refId :: T.Text }
 
 newtype Sub = Sub T.Text
 
 newtype GetArn = GetArn T.Text
-
 instance ToJSON Template where 
   toJSON (Template bucket api stage role layer funs) = object 
     [ "Parameters" .= object [ namedKV bucket ]
@@ -164,7 +168,7 @@ instance ToJSON RLayer where
     ]
 
 instance ToJSON RFun where 
-  toJSON (RFun name bucket api role layer) = object 
+  toJSON (RFun name bucket role layer) = object 
     [ "Type" .= fromText "AWS::Lambda::Function" 
     , "Properties" .= object 
         [ "Code" .= object 
@@ -173,8 +177,7 @@ instance ToJSON RFun where
             ]
         , "Environment" .= object 
             [ "Variables" .= object 
-                [ "AWS_GATEWAY_HOST" .= hostFromApiRef api
-                ]
+                [ "SQS_BASE_URL" .= fromText "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}" ]
             ]
         , "FunctionName" .= name
         , "Handler" .= fromText "index.handler"
@@ -218,6 +221,16 @@ instance ToJSON RPerm where
         ]
     ]
 
+instance ToJSON RSQSQueue where 
+  toJSON (RSQSQueue name) = object 
+    [ "Type" .= fromText "AWS::SQS::Queue"
+    , "Properties" .= object 
+        [ "QueueName" .= name
+        , "VisibilityTimeout" .= (1 :: Int)
+        , "MessageRetentionPeriod" .= (20 :: Int)
+        ]
+    ]
+
 instance ToJSON Ref where 
   toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
 
@@ -245,31 +258,40 @@ templateFromScript script =
 
 jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
 jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun = 
-  let fun_name :: T.Text
-      fun_name = S.funName fun
+  LambdaRGroup fun_res int_res route_res perm_res req_queue_res res_queue_res
+  where 
+    fun_name :: T.Text
+    fun_name = S.funName fun
 
-      fun_res :: Named RFun
-      fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
-        RFun fun_name bucket_ref api_ref role_ref layer_ref
+    fun_res :: Named RFun
+    fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
+      RFun fun_name bucket_ref role_ref layer_ref
 
-      int_res :: Named RInt
-      int_res = Named (capitalizeFirst fun_name <> "Integration") $ 
-        RInt (namedRef fun_res) api_ref
+    int_res :: Named RInt
+    int_res = Named (capitalizeFirst fun_name <> "Integration") $ 
+      RInt (namedRef fun_res) api_ref
 
-      route_res :: Named RRoute
-      route_res = Named (capitalizeFirst fun_name <> "Route") $ 
-        RRoute fun_name api_ref (namedRef int_res)
+    route_res :: Named RRoute
+    route_res = Named (capitalizeFirst fun_name <> "Route") $ 
+      RRoute fun_name api_ref (namedRef int_res)
 
-      perm_res :: Named RPerm
-      perm_res = Named (capitalizeFirst fun_name <> "Permission") $
-        RPerm fun_name api_ref stage_ref (namedRef fun_res)
-   in LambdaRGroup fun_res int_res route_res perm_res
+    perm_res :: Named RPerm
+    perm_res = Named (capitalizeFirst fun_name <> "Permission") $
+      RPerm fun_name api_ref stage_ref (namedRef fun_res)
+
+    req_queue_res :: Named RSQSQueue
+    req_queue_res = Named (capitalizeFirst fun_name <> "RequestQueue") $
+      RSQSQueue (fun_name <> "-request-queue")
+
+    res_queue_res :: Named RSQSQueue
+    res_queue_res = Named (capitalizeFirst fun_name <> "ResponseQueue") $
+      RSQSQueue (fun_name <> "-response-queue")
 
 -- Lambda Group
 
 lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
-lambdaRGroupKVs (LambdaRGroup fun int route perm) = 
-  [namedKV fun, namedKV int, namedKV route, namedKV perm]
+lambdaRGroupKVs (LambdaRGroup fun int route perm req_queue res_queue) = 
+  [namedKV fun, namedKV int, namedKV route, namedKV perm, namedKV req_queue, namedKV res_queue]
 
 -- Resources
 

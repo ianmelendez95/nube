@@ -2,19 +2,51 @@ import {
   capitalizeWords
 } from 'proxies'
 
+const capitalizeWordResponseQueue = `${process.env.SQS_BASE_URL}/capitalizeWord-response-queue`;
+
 export const handler = async (event) => {
   try {
-    let args = (typeof event.body === 'undefined' || event.body.trim().length === 0) 
-      ? [] 
-      : JSON.parse(event.body) 
+    if (event.Records) {
+      console.info(`Processing ${event.Records.length} messages.`);
 
-    if (!Array.isArray(args)) {
-      args = [args]
-    }
+      for (const message of event.Records) {
+        let args = (typeof message.body === 'undefined' || message.body.trim().length === 0) 
+          ? [] 
+          : JSON.parse(message.body) 
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(await capitalizeWord.apply(null, args), null, 2)
+        if (!Array.isArray(args)) {
+          args = [args]
+        }
+
+        const result = JSON.stringify(await capitalizeWord.apply(null, args), null, 2)
+        const requestId = message.messageAttributes?.OriginRequestId?.stringValue;
+
+        await client.send(new SendMessageCommand({
+          QueueUrl: capitalizeWordResponseQueue,
+          MessageBody: result,
+          MessageAttributes: {
+            OriginRequestId: {
+              DataType: 'String',
+              StringValue: requestId
+            }
+          }
+        }));
+      }
+    } else {
+      console.info('Processing request event');
+
+      let args = (typeof event.body === 'undefined' || event.body.trim().length === 0) 
+        ? [] 
+        : JSON.parse(event.body) 
+
+      if (!Array.isArray(args)) {
+        args = [args]
+      }
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(await capitalizeWord.apply(null, args), null, 2)
+      }
     }
   } catch (e) {
     console.log(e)
