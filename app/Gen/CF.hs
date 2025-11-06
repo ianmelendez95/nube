@@ -236,7 +236,7 @@ instance ToJSON RSQSQueue where
     [ "Type" .= fromText "AWS::SQS::Queue"
     , "Properties" .= object 
         [ "QueueName" .= name
-        , "VisibilityTimeout" .= (5 :: Int)
+        , "VisibilityTimeout" .= (20 :: Int) -- must match the lambda timeout (20 is the default)
         , "MessageRetentionPeriod" .= (60 :: Int)
         , "ReceiveMessageWaitTimeSeconds" .= (5 :: Int)
         ]

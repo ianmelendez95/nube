@@ -3,7 +3,7 @@ async function request(requestQueueUrl, responseQueueUrl, argsString) {
 
   console.log(`Sending request with ID ${requestId}`);
 
-  await client.send(new SendMessageCommand({
+  await sqsClient.send(new SendMessageCommand({
     QueueUrl: requestQueueUrl,
     MessageAttributes: {
       OriginRequestId: {
@@ -16,7 +16,7 @@ async function request(requestQueueUrl, responseQueueUrl, argsString) {
 
   for (let attempt = 0; attempt < 5; attempt++) {
     console.log(`Waiting for response, attempt ${attempt + 1}...`);
-    const receiveResponse = await client.send(new ReceiveMessageCommand({
+    const receiveResponse = await sqsClient.send(new ReceiveMessageCommand({
       QueueUrl: responseQueueUrl,
       MessageAttributeNames: ['OriginRequestId'],
       WaitTimeSeconds: 3,
@@ -32,7 +32,7 @@ async function request(requestQueueUrl, responseQueueUrl, argsString) {
         if (message.MessageAttributes.OriginRequestId.StringValue === requestId) {
           const result = message.Body;
 
-          await client.send(new DeleteMessageCommand({
+          await sqsClient.send(new DeleteMessageCommand({
             QueueUrl: responseQueueUrl,
             ReceiptHandle: message.ReceiptHandle
           }));

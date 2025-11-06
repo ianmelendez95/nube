@@ -1,6 +1,8 @@
 import {
+  sqsClient,
   capitalizeWord
 } from 'proxies'
+import {SendMessageCommand} from '@aws-sdk/client-sqs';
 
 const capitalizeWordsResponseQueue = `${process.env.SQS_BASE_URL}/capitalizeWords-response-queue`;
 
@@ -21,7 +23,7 @@ export const handler = async (event) => {
         const result = JSON.stringify(await capitalizeWords.apply(null, args), null, 2)
         const requestId = message.messageAttributes?.OriginRequestId?.stringValue;
 
-        await client.send(new SendMessageCommand({
+        await sqsClient.send(new SendMessageCommand({
           QueueUrl: capitalizeWordsResponseQueue,
           MessageBody: result,
           MessageAttributes: {

@@ -17,7 +17,7 @@ export const handler = async (event) => {
         const result = JSON.stringify(await #{rawJS impl_fun_name}.apply(null, args), null, 2)
         const requestId = message.messageAttributes?.OriginRequestId?.stringValue;
 
-        await client.send(new SendMessageCommand({
+        await sqsClient.send(new SendMessageCommand({
           QueueUrl: #{rawJS impl_fun_name}ResponseQueue,
           MessageBody: result,
           MessageAttributes: {
