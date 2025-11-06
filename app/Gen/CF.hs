@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Gen.CF where 
+module Gen.CF (
+  jsFunToLambda,
+  templateFromScript,
+  bucketNameFromScriptName
+) where 
 
 import qualified Data.Text as T
 
@@ -12,80 +16,86 @@ import qualified JS.Syntax as S
 
 data Named a = Named {
   namedName :: T.Text,
-  namedItem :: a
+  _namedItem :: a
 }
 
 data Template = Template {
-  tplBucket :: Named PBucket,
-  tplApi    :: Named RApi,
-  tplStage  :: Named RStage,
-  tplRole   :: Named RRole,
-  tplLayer  :: Named RLayer,
-  tplFuns   :: [LambdaRGroup]
+  _tplBucket :: Named PBucket,
+  _tplApi    :: Named RApi,
+  _tplStage  :: Named RStage,
+  _tplRole   :: Named RRole,
+  _tplLayer  :: Named RLayer,
+  _tplFuns   :: [LambdaRGroup]
 }
 
 newtype PBucket = PBucket {
-  bucketName :: T.Text
+  _bucketName :: T.Text
 }
 
 newtype RApi = RApi {
-  apiName :: T.Text
+  _apiName :: T.Text
 }
 
 newtype RStage = RStage {
-  stageApi:: Ref
+  _stageApi:: Ref
 }
 
 newtype RRole = RRole { 
-  roleName :: T.Text
+  _roleName :: T.Text
 }
 
 data RLayer = RLayer {
-  layerName :: T.Text,
-  layerBucket :: Ref
+  _layerName :: T.Text,
+  _layerBucket :: Ref
 }
 
 -- | Lambda Resource Group
 -- | Includes all resources for enabling a given Lambda within the API
 data LambdaRGroup = LambdaRGroup {
-  lamFun      :: Named RFun,        -- Function
-  lamInt      :: Named RInt,        -- Integration
-  lamRoute    :: Named RRoute,      -- Route
-  lamPerm     :: Named RPerm,       -- Permission
-  lamReqQueue :: Named RSQSQueue,   -- SQS Request Queue
-  lamResQueue :: Named RSQSQueue    -- SQS Response Queue
+  _lamFun      :: Named RFun,        -- Function
+  _lamInt      :: Named RInt,        -- Integration
+  _lamRoute    :: Named RRoute,      -- Route
+  _lamPerm     :: Named RPerm,       -- Permission
+  _lamReqQueue :: Named RSQSQueue,   -- SQS Request Queue
+  _lamResQueue :: Named RSQSQueue,   -- SQS Response Queue
+  _lamSQSMap   :: Named RSQSMap      -- SQS Event Source Mapping
 }
 
 -- | Lambda Function Resource
 data RFun = RFun {
-  funName   :: T.Text,
-  funBucket :: Ref,
-  funRole   :: Ref,
-  funLayer  :: Ref
+  _funName   :: T.Text,
+  _funBucket :: Ref,
+  _funRole   :: Ref,
+  _funLayer  :: Ref
 }
 
 -- | API Integration
 data RInt = RInt {
-  intFun :: Ref,  -- Lambda Function Logical ID
-  intApi :: Ref   -- API Gateway Logical ID
+  _intFun :: Ref,  -- Lambda Function Logical ID
+  _intApi :: Ref   -- API Gateway Logical ID
 }
 
 data RRoute = RRoute {
-  routeFunName :: T.Text,  -- Function Name
-  routeApi :: Ref,    -- API Gateway Logical ID
-  routeInt :: Ref     -- API Integration Logical ID
+  _routeFunName :: T.Text,  -- Function Name
+  _routeApi :: Ref,    -- API Gateway Logical ID
+  _routeInt :: Ref     -- API Integration Logical ID
 }
 
 -- | Lambda Permission
 data RPerm = RPerm {
-  permFunName :: T.Text,
-  permApi   :: Ref,
-  permStage :: Ref,
-  permFun   :: Ref
+  _permFunName :: T.Text,
+  _permApi   :: Ref,
+  _permStage :: Ref,
+  _permFun   :: Ref
 }
 
 newtype RSQSQueue = RSQSQueue {
-  sqsQueueName :: T.Text
+  _sqsQueueName :: T.Text
+}
+
+data RSQSMap = RSQSMap {
+  _sqsMapQueue :: Ref,
+  _sqsMapFun   :: Ref
 }
 
 newtype Ref = Ref { refId :: T.Text }
@@ -231,6 +241,19 @@ instance ToJSON RSQSQueue where
         ]
     ]
 
+instance ToJSON RSQSMap where 
+  toJSON (RSQSMap queue fun) = object 
+    [ "Type" .= fromText "AWS::SQS::Queue"
+    , "Properties" .= object 
+        [ "EventSourceArn" .= object
+          [ "Ref" .= refId queue ]
+        , "FunctionName" .= object 
+          [ "Ref" .= refId fun ]
+        , "BatchSize" .= (10 :: Int)
+        , "MaximumBatchingWindowInSeconds" .= (5 :: Int)
+        ]
+    ]
+
 instance ToJSON Ref where 
   toJSON (Ref ref_id) = object [ "Ref" .= fromText ref_id ]
 
@@ -258,7 +281,13 @@ templateFromScript script =
 
 jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> Ref -> S.Fun -> LambdaRGroup
 jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun = 
-  LambdaRGroup fun_res int_res route_res perm_res req_queue_res res_queue_res
+  LambdaRGroup fun_res 
+               int_res 
+               route_res 
+               perm_res 
+               req_queue_res 
+               res_queue_res
+               sqs_map_res
   where 
     fun_name :: T.Text
     fun_name = S.funName fun
@@ -287,11 +316,15 @@ jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun =
     res_queue_res = Named (capitalizeFirst fun_name <> "ResponseQueue") $
       RSQSQueue (fun_name <> "-response-queue")
 
+    sqs_map_res :: Named RSQSMap
+    sqs_map_res = Named (capitalizeFirst fun_name <> "SQSMapping") $
+      RSQSMap (namedRef req_queue_res) (namedRef fun_res)
+
 -- Lambda Group
 
 lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
-lambdaRGroupKVs (LambdaRGroup fun int route perm req_queue res_queue) = 
-  [namedKV fun, namedKV int, namedKV route, namedKV perm, namedKV req_queue, namedKV res_queue]
+lambdaRGroupKVs (LambdaRGroup fun int route perm req_queue res_queue sqs_map) = 
+  [namedKV fun, namedKV int, namedKV route, namedKV perm, namedKV req_queue, namedKV res_queue, namedKV sqs_map]
 
 -- Resources
 
@@ -318,11 +351,6 @@ layerFromScriptName :: Ref -> T.Text -> Named RLayer
 layerFromScriptName bucket_ref name = 
   Named (capitalizeFirst name <> "Layer") (RLayer (name <> "-layer") bucket_ref)
   
--- | name here is the resource name/logical id
-hostFromApiRef :: Ref -> Sub
-hostFromApiRef ref = 
-  Sub $ "${" <> refId ref <> "}.execute-api.${AWS::Region}.amazonaws.com"
-
 targetFromIntRef :: Ref -> Sub
 targetFromIntRef ref = 
   Sub $ "integrations/${" <> refId ref <> "}"

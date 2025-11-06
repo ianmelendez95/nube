@@ -89,6 +89,19 @@
             },
             "Type": "AWS::ApiGatewayV2::Route"
         },
+        "CapitalizeWordSQSMapping": {
+            "Properties": {
+                "BatchSize": 10,
+                "EventSourceArn": {
+                    "Ref": "CapitalizeWordRequestQueue"
+                },
+                "FunctionName": {
+                    "Ref": "CapitalizeWordLambda"
+                },
+                "MaximumBatchingWindowInSeconds": 5
+            },
+            "Type": "AWS::SQS::Queue"
+        },
         "CapitalizeWordsApi": {
             "Properties": {
                 "Name": "capitalizeWords-api",
@@ -230,6 +243,19 @@
                 }
             },
             "Type": "AWS::ApiGatewayV2::Route"
+        },
+        "CapitalizeWordsSQSMapping": {
+            "Properties": {
+                "BatchSize": 10,
+                "EventSourceArn": {
+                    "Ref": "CapitalizeWordsRequestQueue"
+                },
+                "FunctionName": {
+                    "Ref": "CapitalizeWordsLambda"
+                },
+                "MaximumBatchingWindowInSeconds": 5
+            },
+            "Type": "AWS::SQS::Queue"
         }
     }
 }
