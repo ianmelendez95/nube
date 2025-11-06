@@ -237,7 +237,7 @@ instance ToJSON RSQSQueue where
     , "Properties" .= object 
         [ "QueueName" .= name
         , "VisibilityTimeout" .= (1 :: Int)
-        , "MessageRetentionPeriod" .= (20 :: Int)
+        , "MessageRetentionPeriod" .= (60 :: Int)
         ]
     ]
 
