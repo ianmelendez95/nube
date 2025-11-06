@@ -46,7 +46,7 @@
                     "Fn::GetAtt": "CapitalizeWordsRole.Arn"
                 },
                 "Runtime": "nodejs22.x",
-                "Timeout": 60
+                "Timeout": 20
             },
             "Type": "AWS::Lambda::Function"
         },

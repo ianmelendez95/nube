@@ -143,7 +143,9 @@ instance ToJSON RRole where
         , "Path" .= fromText "/service-role/"
         , "RoleName" .= fromText name
         , "ManagedPolicyArns" .= 
-            [ fromText "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" ]
+            [ fromText "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" 
+            , fromText "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+            ]
         ]
     ]
 
@@ -179,7 +181,7 @@ instance ToJSON RFun where
         , "Layers" .= [ layer ]
         , "Role" .= GetArn (refId role)
         , "Runtime" .= fromText "nodejs22.x"
-        , "Timeout" .= (60 :: Int)
+        , "Timeout" .= (20 :: Int)
         ]
     ]
 
