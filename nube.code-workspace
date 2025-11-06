@@ -1,0 +1,76 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "nube-lambda",
+			"path": "../../js-projects/nube-lambda"
+		}
+	],
+	"settings": {},
+	"launch": {
+		"configurations": [
+			{
+				"type": "aws-sam",
+				"request": "direct-invoke",
+				"name": "capitalizeWord:index.handler (nodejs22.x)",
+				"invokeTarget": {
+					"target": "code",
+					"projectRoot": "/Users/ianmelendez/js-projects/nube-lambda/capitalizeWord",
+					"lambdaHandler": "index.handler"
+				},
+				"lambda": {
+					"runtime": "nodejs22.x",
+					"payload": {},
+					"environmentVariables": {}
+				}
+			},
+			{
+				"type": "aws-sam",
+				"request": "direct-invoke",
+				"name": "capitalizeWord:capitalizeWord.handler (nodejs22.x)",
+				"invokeTarget": {
+					"target": "code",
+					"projectRoot": "${workspaceFolder}/capitalizeWord",
+					"lambdaHandler": "capitalizeWord.handler"
+				},
+				"lambda": {
+					"runtime": "nodejs22.x",
+					"payload": {},
+					"environmentVariables": {}
+				}
+			},
+			{
+				"type": "aws-sam",
+				"request": "direct-invoke",
+				"name": "capitalizeWords:capitalizeWords.handler (nodejs22.x)",
+				"invokeTarget": {
+					"target": "code",
+					"projectRoot": "${workspaceFolder}/capitalizeWords",
+					"lambdaHandler": "capitalizeWords.handler"
+				},
+				"lambda": {
+					"runtime": "nodejs22.x",
+					"payload": {},
+					"environmentVariables": {}
+				}
+			},
+			{
+				"type": "aws-sam",
+				"request": "direct-invoke",
+				"name": "capitalizeWords:capitalizeWords.handler (nodejs22.x)",
+				"invokeTarget": {
+					"target": "code",
+					"projectRoot": "${workspaceFolder}/capitalizeWords",
+					"lambdaHandler": "capitalizeWords.handler"
+				},
+				"lambda": {
+					"runtime": "nodejs22.x",
+					"payload": {},
+					"environmentVariables": {}
+				}
+			}
+		]
+	}
+}
