@@ -63,17 +63,19 @@
         },
         "CapitalizeWordRequestQueue": {
             "Properties": {
-                "MessageRetentionPeriod": 20,
+                "MessageRetentionPeriod": 60,
                 "QueueName": "capitalizeWord-request-queue",
-                "VisibilityTimeout": 1
+                "ReceiveMessageWaitTimeSeconds": 5,
+                "VisibilityTimeout": 5
             },
             "Type": "AWS::SQS::Queue"
         },
         "CapitalizeWordResponseQueue": {
             "Properties": {
-                "MessageRetentionPeriod": 20,
+                "MessageRetentionPeriod": 60,
                 "QueueName": "capitalizeWord-response-queue",
-                "VisibilityTimeout": 1
+                "ReceiveMessageWaitTimeSeconds": 5,
+                "VisibilityTimeout": 5
             },
             "Type": "AWS::SQS::Queue"
         },
@@ -93,14 +95,14 @@
             "Properties": {
                 "BatchSize": 10,
                 "EventSourceArn": {
-                    "Ref": "CapitalizeWordRequestQueue"
+                    "Fn::GetAtt": "CapitalizeWordRequestQueue.Arn"
                 },
                 "FunctionName": {
                     "Ref": "CapitalizeWordLambda"
                 },
                 "MaximumBatchingWindowInSeconds": 5
             },
-            "Type": "AWS::SQS::Queue"
+            "Type": "AWS::Lambda::EventSourceMapping"
         },
         "CapitalizeWordsApi": {
             "Properties": {
@@ -194,17 +196,19 @@
         },
         "CapitalizeWordsRequestQueue": {
             "Properties": {
-                "MessageRetentionPeriod": 20,
+                "MessageRetentionPeriod": 60,
                 "QueueName": "capitalizeWords-request-queue",
-                "VisibilityTimeout": 1
+                "ReceiveMessageWaitTimeSeconds": 5,
+                "VisibilityTimeout": 5
             },
             "Type": "AWS::SQS::Queue"
         },
         "CapitalizeWordsResponseQueue": {
             "Properties": {
-                "MessageRetentionPeriod": 20,
+                "MessageRetentionPeriod": 60,
                 "QueueName": "capitalizeWords-response-queue",
-                "VisibilityTimeout": 1
+                "ReceiveMessageWaitTimeSeconds": 5,
+                "VisibilityTimeout": 5
             },
             "Type": "AWS::SQS::Queue"
         },
@@ -248,14 +252,14 @@
             "Properties": {
                 "BatchSize": 10,
                 "EventSourceArn": {
-                    "Ref": "CapitalizeWordsRequestQueue"
+                    "Fn::GetAtt": "CapitalizeWordsRequestQueue.Arn"
                 },
                 "FunctionName": {
                     "Ref": "CapitalizeWordsLambda"
                 },
                 "MaximumBatchingWindowInSeconds": 5
             },
-            "Type": "AWS::SQS::Queue"
+            "Type": "AWS::Lambda::EventSourceMapping"
         }
     }
 }

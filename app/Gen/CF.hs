@@ -236,17 +236,18 @@ instance ToJSON RSQSQueue where
     [ "Type" .= fromText "AWS::SQS::Queue"
     , "Properties" .= object 
         [ "QueueName" .= name
-        , "VisibilityTimeout" .= (1 :: Int)
+        , "VisibilityTimeout" .= (5 :: Int)
         , "MessageRetentionPeriod" .= (60 :: Int)
+        , "ReceiveMessageWaitTimeSeconds" .= (5 :: Int)
         ]
     ]
 
 instance ToJSON RSQSMap where 
   toJSON (RSQSMap queue fun) = object 
-    [ "Type" .= fromText "AWS::SQS::Queue"
+    [ "Type" .= fromText "AWS::Lambda::EventSourceMapping"
     , "Properties" .= object 
         [ "EventSourceArn" .= object
-          [ "Ref" .= refId queue ]
+          [ "Fn::GetAtt" .= fromText (refId queue <> ".Arn") ]
         , "FunctionName" .= object 
           [ "Ref" .= refId fun ]
         , "BatchSize" .= (10 :: Int)
