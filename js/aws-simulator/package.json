@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./index.mjs",
-    "link-fakes": "ln -s ../src/capitalizeWords/nodejs/node_modules/proxies ./node_modules/proxies && ln -s ../src/fake-sdk ./node_modules/@aws-sdk"
+    "link": "ln -s ../src/capitalizeWords/nodejs/node_modules/proxies ./node_modules/proxies && ln -s ../src/@aws-sdk ./node_modules/@aws-sdk"
   },
   "author": "",
   "license": "ISC",
