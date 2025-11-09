@@ -160,6 +160,23 @@ instance ToJSON RRole where
             [ fromText "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" 
             , fromText "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
             ]
+        , "Policies" .=
+            [ object 
+                [ "PolicyName" .= fromText "SQSSendMessagePolicy"
+                , "PolicyDocument" .= object 
+                    [ "Version" .= fromText "2012-10-17"
+                    , "Statement" .= 
+                        [ object 
+                            [ "Effect" .= fromText "Allow"
+                            , "Action" .= 
+                                [ fromText "sqs:SendMessage" ]
+                            , "Resource" .= object
+                                [ "Fn::Sub" .= fromText "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*-queue" ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ]
     ]
 
