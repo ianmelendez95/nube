@@ -10,7 +10,6 @@
 	],
 	"settings": {
 		"deno.enable": true,
-		"deno.enablePaths": ["./js/aws-simulator"]
 	},
 	"launch": {
 		"configurations": []
