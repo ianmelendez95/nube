@@ -12,6 +12,7 @@ capitalizeWord
 
 # Parse command line arguments
 UPDATE_STACK=false
+CHECK_DIFF=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -19,10 +20,15 @@ while [[ $# -gt 0 ]]; do
       UPDATE_STACK=true
       shift
       ;;
+    --diff)
+      CHECK_DIFF=true
+      shift
+      ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--update]"
+      echo "Usage: $0 [--update|--diff]"
       echo "  --update    Update existing stack instead of creating new one"
+      echo "  --diff      Show differences between local template and deployed stack"
       exit 1
       ;;
   esac
@@ -68,6 +74,46 @@ update_cf_stack () {
     --stack-name "$STACK_NAME" 
 }
 
+check_diff () {
+  echo "checking template differences for stack: $STACK_NAME"
+  
+  # Check if stack exists
+  if ! aws cloudformation describe-stacks --stack-name "$STACK_NAME" &>/dev/null; then
+    echo "❌ Stack '$STACK_NAME' does not exist - nothing to compare"
+    exit 1
+  fi
+  
+  # Create temporary files for comparison
+  LOCAL_TEMPLATE=$(mktemp)
+  DEPLOYED_TEMPLATE=$(mktemp)
+  
+  # Clean up temp files on exit
+  trap "rm -f $LOCAL_TEMPLATE $DEPLOYED_TEMPLATE" EXIT
+  
+  # Get local template (pretty-printed)
+  cat "$TEMPLATE" | jq '.' > "$LOCAL_TEMPLATE"
+  
+  # Get deployed template (pretty-printed)
+  echo "fetching deployed template..."
+  aws cloudformation get-template \
+    --stack-name "$STACK_NAME" \
+    --query 'TemplateBody' \
+    --output json | jq '.' > "$DEPLOYED_TEMPLATE"
+  
+  # Compare templates
+  echo ""
+  echo "=== Template Diff (Local vs Deployed) ==="
+  echo "Legend: - (deployed/old)  + (local/new)"
+  echo ""
+  
+  if diff -u "$DEPLOYED_TEMPLATE" "$LOCAL_TEMPLATE"; then
+    echo "✅ No differences found - templates are identical"
+  else
+    echo ""
+    echo "💡 Use './deploy.sh --update' to apply these changes"
+  fi
+}
+
 upload_layer () {
   ZIP_FILE="$LAYER.zip"
 
@@ -90,17 +136,23 @@ upload_fun_code () {
   aws s3 cp "$ZIP_FILE" "s3://$BUCKET"
 }
 
-assert_bucket
-upload_template
-upload_layer
-
-for f in $FUN_NAMES; do 
-  upload_fun_code "$f"
-done
-
-if [ "$UPDATE_STACK" = true ]; then
-  update_cf_stack
+if [ "$CHECK_DIFF" = true ]; then
+  # For diff checking, we don't need to upload anything
+  check_diff
 else
-  create_cf_stack
+  # Normal deployment flow
+  assert_bucket
+  upload_template
+  upload_layer
+
+  for f in $FUN_NAMES; do 
+    upload_fun_code "$f"
+  done
+
+  if [ "$UPDATE_STACK" = true ]; then
+    update_cf_stack
+  else
+    create_cf_stack
+  fi
 fi
 
