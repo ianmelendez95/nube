@@ -4,12 +4,10 @@ export class SQSClient {
     }
 }
 
-type SQSCommandInput = {[key: string]: any};
-
 class SQSCommand {
-    _command: SQSCommandInput;
+    _command;
 
-    constructor(command: SQSCommandInput) {
+    constructor(command) {
         this._command = command;
     }
 

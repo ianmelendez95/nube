@@ -1,9 +1,9 @@
-import { v5 } from '@std/uuid';
 
-Deno.test("capitalizeWord invoke directly", async () => {
-    Deno.env.set("SQS_BASE_URL", "sqs:");
+async function main() {
+    console.log("TRACE: ", process.env.NODE_PATH);
+    process.env["SQS_BASE_URL"] = 'sqs:';
 
-    const {handler} = await import('./capitalizeWord/index.mjs')
+    const {handler} = await import('./src/capitalizeWords/capitalizeWord/index.mjs')
     handler({
         Records: [
             {
@@ -19,4 +19,6 @@ Deno.test("capitalizeWord invoke directly", async () => {
             },
         ]
     });
-});
+}
+
+main()

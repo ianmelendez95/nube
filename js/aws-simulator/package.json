@@ -1,0 +1,12 @@
+{
+  "name": "aws-simulator",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node ./index.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
