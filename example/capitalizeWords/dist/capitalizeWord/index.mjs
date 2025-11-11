@@ -26,7 +26,7 @@ export const handler = async (event) => {
         await dynamoClient.send(new PutItemCommand({
           TableName: responseTableName,
           Item: {
-            requestId: { S: requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` },
+            'request-id': { S: requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` },
             result: { S: JSON.stringify(result) },
             timestamp: { N: Date.now().toString() },
             functionName: { S: 'capitalizeWord' }
