@@ -265,7 +265,7 @@
                             ],
                             "Version": "2012-10-17"
                         },
-                        "PolicyName": "SQSAndDynamoDBPolicy"
+                        "PolicyName": "SQSAndDynamoPolicy"
                     }
                 ],
                 "RoleName": "capitalizeWords-role"
@@ -312,12 +312,8 @@
                         "KeyType": "HASH"
                     }
                 ],
-                "TableName": "response-table",
                 "TableClass": "STANDARD",
-                "TimeToLiveSpecification": {
-                    "AttributeName": "ttl",
-                    "Enabled": true
-                }
+                "TableName": "response-table"
             },
             "Type": "AWS::DynamoDB::Table"
         }

@@ -103,6 +103,7 @@ newtype Ref = Ref { refId :: T.Text }
 newtype Sub = Sub T.Text
 
 newtype GetArn = GetArn T.Text
+
 instance ToJSON Template where 
   toJSON (Template bucket api stage role layer funs) = object 
     [ "Parameters" .= object [ namedKV bucket ]
@@ -111,6 +112,7 @@ instance ToJSON Template where
         , namedKV stage
         , namedKV role
         , namedKV layer
+        , ("ResponseTable", responseTable)
         ] ++ concatMap lambdaRGroupKVs funs
       )
     ]
@@ -162,7 +164,7 @@ instance ToJSON RRole where
             ]
         , "Policies" .=
             [ object 
-                [ "PolicyName" .= fromText "SQSSendMessagePolicy"
+                [ "PolicyName" .= fromText "SQSAndDynamoPolicy"
                 , "PolicyDocument" .= object 
                     [ "Version" .= fromText "2012-10-17"
                     , "Statement" .= 
@@ -173,12 +175,40 @@ instance ToJSON RRole where
                             , "Resource" .= object
                                 [ "Fn::Sub" .= fromText "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*-queue" ]
                             ]
+                        , object
+                            [ "Effect" .= fromText "Allow"
+                            , "Action" .= 
+                                [ fromText "dynamodb:PutItem"
+                                , fromText "dynamodb:GetItem"
+                                , fromText "dynamodb:UpdateItem"
+                                , fromText "dynamodb:DeleteItem"
+                                , fromText "dynamodb:Query"
+                                ]
+                            , "Resource" .= object
+                                [ "Fn::GetAtt" .= fromText "ResponseTable.Arn" ]
+                            ]
                         ]
                     ]
                 ]
             ]
         ]
     ]
+
+{--
+{
+    "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query"
+    ],
+    "Effect": "Allow",
+    "Resource": {
+        "Fn::GetAtt": "ResponseTable.Arn"
+    }
+
+--}
 
 instance ToJSON RLayer where 
   toJSON (RLayer name bucket) = object 
@@ -213,7 +243,7 @@ instance ToJSON RFun where
         , "Layers" .= [ layer ]
         , "Role" .= GetArn (refId role)
         , "Runtime" .= fromText "nodejs22.x"
-        , "Timeout" .= (20 :: Int)
+        , "Timeout" .= (60 :: Int)
         ]
     ]
 
@@ -347,6 +377,28 @@ lambdaRGroupKVs (LambdaRGroup fun int route perm req_queue res_queue sqs_map) =
   [namedKV fun, namedKV int, namedKV route, namedKV perm, namedKV req_queue, namedKV res_queue, namedKV sqs_map]
 
 -- Resources
+
+responseTable :: Value
+responseTable = object 
+    [ "Type" .= fromText "AWS::DynamoDB::Table"
+    , "Properties" .= object 
+        [ "TableName" .= fromText "response-table"
+        , "TableClass" .= fromText "STANDARD"
+        , "AttributeDefinitions" .= 
+            [ object 
+                [ "AttributeName" .= fromText "request-id"
+                , "AttributeType" .= fromText "S"
+                ]
+            ]
+        , "KeySchema" .= 
+            [ object 
+                [ "AttributeName" .= fromText "request-id"
+                , "KeyType" .= fromText "HASH"
+                ]
+            ]
+        , "BillingMode" .= fromText "PAY_PER_REQUEST"
+        ]
+    ]
 
 bucketFromScriptName :: T.Text -> Named PBucket
 bucketFromScriptName name = 
