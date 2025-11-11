@@ -97,7 +97,7 @@ update_lambdas () {
   fi
 
   for f in $FUN_NAMES; do
-    update_lambda "$f" $
+    update_lambda "$f" &
   done
 
   wait

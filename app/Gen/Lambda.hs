@@ -73,9 +73,11 @@ jsFunsToProxiesScript :: [S.Fun] -> T.Text
 jsFunsToProxiesScript funs = 
   let proxy_imports = T.unlines 
         [ "import {SQSClient} from '@aws-sdk/client-sqs';"
-        , "import {DeleteMessageCommand, SendMessageCommand, ReceiveMessageCommand} from '@aws-sdk/client-sqs';"
+        , "import {SendMessageCommand} from '@aws-sdk/client-sqs';"
+        , "import {DynamoDBClient, GetItemCommand} from '@aws-sdk/client-dynamodb';"
         , ""
         , "export const sqsClient = new SQSClient();"
+        , "export const dynamoClient = new DynamoDBClient();"
         ]
       proxy_funs = T.intercalate "\n\n" $ map jsFunToProxy funs
       proxy_request_fun = "\n" <> renderJavascript $(juliusFile "template/js/proxy-request.julius")
@@ -87,9 +89,9 @@ jsFunsToProxiesScript funs =
 
 jsFunsToProxiesImport :: [S.Fun] -> T.Text
 jsFunsToProxiesImport funs = "import {\n  " 
-  <> T.intercalate ",\n  " ("sqsClient" : map S.funName funs)
+  <> T.intercalate ",\n  " ("sqsClient" : "dynamoClient" : map S.funName funs)
   <> "\n} from 'proxies'"
-  <> "\nimport {SendMessageCommand} from '@aws-sdk/client-sqs';"
+  <> "\nimport {PutItemCommand} from '@aws-sdk/client-dynamodb';"
 
 jsFunToHandler :: S.Fun -> T.Text
 jsFunToHandler fun = mkHandlerFun (S.funName fun)

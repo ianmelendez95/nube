@@ -1,4 +1,4 @@
-async function request(requestQueueUrl, responseQueueUrl, argsString) {
+async function request(requestQueueUrl, argsString) {
   const requestId = crypto.randomUUID();
 
   console.log(`Sending request with ID ${requestId}`);
@@ -14,35 +14,28 @@ async function request(requestQueueUrl, responseQueueUrl, argsString) {
     MessageBody: argsString
   }));
 
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 30; attempt++) {
     console.log(`Waiting for response, attempt ${attempt + 1}...`);
-    const receiveResponse = await sqsClient.send(new ReceiveMessageCommand({
-      QueueUrl: responseQueueUrl,
-      MessageAttributeNames: ['OriginRequestId'],
-      WaitTimeSeconds: 3,
-      MaxNumberOfMessages: 10,
-      VisibilityTimeout: 1
-    }));
 
-    if (receiveResponse.Messages) {
-      console.log("Received messages: ", receiveResponse.Messages);
-      for (const message of receiveResponse.Messages) {
-        console.log("Message: ", message);
-
-        if (message.MessageAttributes.OriginRequestId.StringValue === requestId) {
-          const result = message.Body;
-
-          await sqsClient.send(new DeleteMessageCommand({
-            QueueUrl: responseQueueUrl,
-            ReceiptHandle: message.ReceiptHandle
-          }));
-
-          console.log("Received relevant message, deleting: ", message.ReceiptHandle);
-
-          return JSON.parse(result);
+    try {
+      const response = await dynamoClient.send(new GetItemCommand({
+        TableName: 'response-table',
+        Key: {
+          'request-id': { S: requestId }
         }
+      }));
+
+      if (response.Item) {
+        console.log("Found response in DynamoDB:", response.Item);
+        const result = response.Item.result.S;
+        return JSON.parse(result);
       }
+    } catch (error) {
+      console.log("Error checking DynamoDB:", error);
     }
+
+    // Wait before next attempt
+    await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
   throw new Error("Did not receive a response for requestId: " + requestId);

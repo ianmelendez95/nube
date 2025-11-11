@@ -1,14 +1,9 @@
 const #{rawJS impl_fun_name}RequestQueue = `${process.env.SQS_BASE_URL}/#{rawJS impl_fun_name}-request-queue`;
-const #{rawJS impl_fun_name}ResponseQueue = `${process.env.SQS_BASE_URL}/#{rawJS impl_fun_name}-response-queue`;
 
 export async function #{rawJS impl_fun_name}#{rawJS impl_fun_params} {
   const argsString = JSON.stringify(
     Array.from(arguments).slice(0, #{rawJS impl_fun_name}.length)
   );
 
-  return request(
-    #{rawJS impl_fun_name}RequestQueue, 
-    #{rawJS impl_fun_name}ResponseQueue, 
-    argsString
-  );
+  return request(#{rawJS impl_fun_name}RequestQueue, argsString);
 }

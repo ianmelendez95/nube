@@ -1,10 +1,9 @@
 import {
+  sqsClient,
   dynamoClient,
   capitalizeWords
 } from 'proxies'
 import {PutItemCommand} from '@aws-sdk/client-dynamodb';
-
-const responseTableName = 'response-table';
 
 export const handler = async (event) => {
   try {
@@ -20,16 +19,14 @@ export const handler = async (event) => {
           args = [args]
         }
 
-        const result = await capitalizeWord.apply(null, args);
-        const requestId = message.messageAttributes?.OriginRequestId?.stringValue;
+        const requestId = message.messageAttributes.OriginRequestId.stringValue;
+        const result = JSON.stringify(await capitalizeWord.apply(null, args), null, 2)
 
         await dynamoClient.send(new PutItemCommand({
-          TableName: responseTableName,
+          TableName: 'response-table',
           Item: {
-            'request-id': { S: requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` },
-            result: { S: JSON.stringify(result) },
-            timestamp: { N: Date.now().toString() },
-            functionName: { S: 'capitalizeWord' }
+            'request-id': { S: requestId },
+            result: { S: result },
           }
         }));
       }
