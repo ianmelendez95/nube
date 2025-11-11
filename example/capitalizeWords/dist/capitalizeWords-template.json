@@ -313,6 +313,7 @@
                     }
                 ],
                 "TableName": "response-table",
+                "TableClass": "STANDARD",
                 "TimeToLiveSpecification": {
                     "AttributeName": "ttl",
                     "Enabled": true
