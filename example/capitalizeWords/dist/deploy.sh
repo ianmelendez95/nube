@@ -12,10 +12,15 @@ capitalizeWord
 
 # Parse command line arguments
 UPDATE_MODE=false
+UPDATE_LAMBDAS=false
 for arg in "$@"; do
   case $arg in
-    --update)
+    --update-cf)
       UPDATE_MODE=true
+      shift
+      ;;
+    --update-lambdas)
+      UPDATE_LAMBDAS=true
       shift
       ;;
     *)
@@ -74,11 +79,11 @@ update_lambda () {
     --function-name "$f" \
     --s3-bucket "$BUCKET" \
     --s3-key "$f-code.zip" > /dev/null
+
+  aws lambda wait function-updated --function-name "$f"
 }
 
-update_cf_stack () {
-  echo "updating stack: $STACK_NAME"
-
+update_lambdas () {
   echo "updating layer: $LAYER"
   layer_response=$(aws lambda publish-layer-version \
     --no-cli-pager \
@@ -96,6 +101,10 @@ update_cf_stack () {
   done
 
   wait
+}
+
+update_cf_stack () {
+  echo "updating stack: $STACK_NAME"
 
   aws cloudformation update-stack \
     --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
@@ -132,6 +141,10 @@ upload_layer
 for f in $FUN_NAMES; do 
   upload_fun_code "$f"
 done
+
+if [ "$UPDATE_LAMBDAS" = true ]; then
+  update_lambdas
+fi
 
 if [ "$UPDATE_MODE" = true ]; then
   update_cf_stack
