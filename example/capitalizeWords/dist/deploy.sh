@@ -10,6 +10,22 @@ FUN_NAMES="capitalizeWords
 capitalizeWord
 "
 
+# Parse command line arguments
+UPDATE_MODE=false
+for arg in "$@"; do
+  case $arg in
+    --update)
+      UPDATE_MODE=true
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $arg"
+      echo "Usage: $0 [--update]"
+      exit 1
+      ;;
+  esac
+done
+
 assert_bucket () {
   if ! aws s3api head-bucket --bucket "$BUCKET" 2>&1 > /dev/null; then 
     read -p "Bucket '$BUCKET' not available, create? [Y/n] " -n 1 -r
@@ -34,8 +50,16 @@ upload_template () {
 }
 
 create_cf_stack () {
-  echo "creating stack: $TEMPLATE"
+  echo "creating stack: $STACK_NAME"
   aws cloudformation create-stack \
+    --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
+    --capabilities CAPABILITY_NAMED_IAM \
+    --stack-name "$STACK_NAME" 
+}
+
+update_cf_stack () {
+  echo "updating stack: $STACK_NAME"
+  aws cloudformation update-stack \
     --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
     --capabilities CAPABILITY_NAMED_IAM \
     --stack-name "$STACK_NAME" 
@@ -71,5 +95,9 @@ for f in $FUN_NAMES; do
   upload_fun_code "$f"
 done
 
-create_cf_stack
+if [ "$UPDATE_MODE" = true ]; then
+  update_cf_stack
+else
+  create_cf_stack
+fi
 
