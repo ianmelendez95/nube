@@ -1,10 +1,10 @@
 import {
-  sqsClient,
+  dynamoClient,
   capitalizeWords
 } from 'proxies'
-import {SendMessageCommand} from '@aws-sdk/client-sqs';
+import {PutItemCommand} from '@aws-sdk/client-dynamodb';
 
-const capitalizeWordResponseQueue = `${process.env.SQS_BASE_URL}/capitalizeWord-response-queue`;
+const responseTableName = 'response-table';
 
 export const handler = async (event) => {
   try {
@@ -20,17 +20,16 @@ export const handler = async (event) => {
           args = [args]
         }
 
-        const result = JSON.stringify(await capitalizeWord.apply(null, args), null, 2)
+        const result = await capitalizeWord.apply(null, args);
         const requestId = message.messageAttributes?.OriginRequestId?.stringValue;
 
-        await sqsClient.send(new SendMessageCommand({
-          QueueUrl: capitalizeWordResponseQueue,
-          MessageBody: result,
-          MessageAttributes: {
-            OriginRequestId: {
-              DataType: 'String',
-              StringValue: requestId
-            }
+        await dynamoClient.send(new PutItemCommand({
+          TableName: responseTableName,
+          Item: {
+            requestId: { S: requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` },
+            result: { S: JSON.stringify(result) },
+            timestamp: { N: Date.now().toString() },
+            functionName: { S: 'capitalizeWord' }
           }
         }));
       }
