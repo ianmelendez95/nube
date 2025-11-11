@@ -55,23 +55,45 @@ create_cf_stack () {
     --stack-name "$STACK_NAME" 
 }
 
+update_lambda () {
+  f="$1"
+
+  echo "updating function layer: $f"
+  aws lambda update-function-configuration \
+    --no-cli-pager \
+    --function-name "$f" \
+    --layers "$layer_arn" > /dev/null
+
+  aws lambda wait function-updated --function-name "$f"
+
+  echo "updating function code: $f"
+  aws lambda update-function-code \
+    --no-cli-pager \
+    --function-name "$f" \
+    --s3-bucket "$BUCKET" \
+    --s3-key "$f-code.zip" > /dev/null
+}
+
 update_cf_stack () {
   echo "updating stack: $STACK_NAME"
 
   echo "updating layer: $LAYER"
-  aws lambda publish-layer-version \
+  layer_response=$(aws lambda publish-layer-version \
     --no-cli-pager \
     --layer-name "$LAYER" \
-    --content S3Bucket="$BUCKET",S3Key="$LAYER.zip"
+    --content S3Bucket="$BUCKET",S3Key="$LAYER.zip")
+
+  layer_arn=$(echo "$layer_response" | jq -r '.LayerVersionArn')
+  if [ -z "$layer_arn" ] || [ "$layer_arn" = "null" ]; then
+    echo "ERROR: failed to publish layer version"
+    exit 1
+  fi
 
   for f in $FUN_NAMES; do
-    echo "updating function: $f"
-    aws lambda update-function-code \
-      --no-cli-pager \
-      --function-name "$f" \
-      --s3-bucket "$BUCKET" \
-      --s3-key "$f-code.zip"
+    update_lambda "$f" $
   done
+
+  wait
 
   aws cloudformation update-stack \
     --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
@@ -114,3 +136,4 @@ if [ "$UPDATE_MODE" = true ]; then
 else
   create_cf_stack
 fi
+
