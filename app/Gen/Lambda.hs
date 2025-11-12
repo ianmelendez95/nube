@@ -11,7 +11,7 @@ import qualified Gen.CF as CF
 
 import System.Directory
 import System.FilePath
-import JS.Syntax (Fun(funName))
+import JS.Syntax (Fn(funName))
 
 import Text.Julius hiding (renderJavascript)
 
@@ -52,13 +52,13 @@ jsScriptToDeployScript script =
 templateNameFromScriptName :: T.Text -> T.Text
 templateNameFromScriptName name = name <> "-template.json"
 
-jsFunsToScripts :: [S.Fun] -> [Script]
+jsFunsToScripts :: [S.Fn] -> [Script]
 jsFunsToScripts = go []
   where 
     go _ [] = []
     go xs (y:ys) = jsFunsToScript y (xs ++ ys) : go (y:xs) ys
 
-jsFunsToScript :: S.Fun -> [S.Fun] -> Script
+jsFunsToScript :: S.Fn -> [S.Fn] -> Script
 jsFunsToScript main_fun helper_funs = 
   let content = T.intercalate "\n\n"
         [ jsFunsToProxiesImport helper_funs
@@ -69,7 +69,7 @@ jsFunsToScript main_fun helper_funs =
 
 -- Proxies
 
-jsFunsToProxiesScript :: [S.Fun] -> T.Text
+jsFunsToProxiesScript :: [S.Fn] -> T.Text
 jsFunsToProxiesScript funs = 
   let proxy_imports = T.unlines 
         [ "import {SQSClient} from '@aws-sdk/client-sqs';"
@@ -87,16 +87,16 @@ jsFunsToProxiesScript funs =
         , proxy_request_fun
         ]
 
-jsFunsToProxiesImport :: [S.Fun] -> T.Text
+jsFunsToProxiesImport :: [S.Fn] -> T.Text
 jsFunsToProxiesImport funs = "import {\n  " 
   <> T.intercalate ",\n  " ("sqsClient" : "dynamoClient" : map S.funName funs)
   <> "\n} from 'proxies'"
   <> "\nimport {PutItemCommand} from '@aws-sdk/client-dynamodb';"
 
-jsFunToHandler :: S.Fun -> T.Text
+jsFunToHandler :: S.Fn -> T.Text
 jsFunToHandler fun = mkHandlerFun (S.funName fun)
 
-jsFunToProxy :: S.Fun -> T.Text
+jsFunToProxy :: S.Fn -> T.Text
 jsFunToProxy fun = mkProxyFun (S.funName fun) (S.funParams fun)
 
 mkHandlerFun :: T.Text -> T.Text 

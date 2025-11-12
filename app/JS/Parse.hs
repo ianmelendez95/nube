@@ -22,13 +22,13 @@ parseJsFile path = do
   let result = either (error . errorBundlePretty) id $ runParser jsFunctions path content
   pure $ S.Script (T.pack $ takeBaseName path) result
 
-jsFunctions :: Parser [S.Fun]
+jsFunctions :: Parser [S.Fn]
 jsFunctions = many asyncFunction
 
-asyncFunction :: Parser S.Fun
+asyncFunction :: Parser S.Fn
 asyncFunction = do 
   _ <- symbol "async" >> symbol "function"
-  S.Fun <$> lexeme identifier
+  S.Fn <$> lexeme identifier
         <*> lexeme parameters
         <*> body
   where 
@@ -55,8 +55,6 @@ asyncFunction = do
           pure $ pre_brace <> inner_bdy <> rest_content
         '}' -> pure pre_brace
         _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
-
-asyncFunctionBody :: Parser 
 
 identifier :: Parser T.Text
 identifier = do 
