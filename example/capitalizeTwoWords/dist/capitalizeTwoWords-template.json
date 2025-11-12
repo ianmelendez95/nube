@@ -63,7 +63,7 @@
                     "Fn::GetAtt": "CapitalizeTwoWordsRole.Arn"
                 },
                 "Runtime": "nodejs22.x",
-                "Timeout": 60
+                "Timeout": 20
             },
             "Type": "AWS::Lambda::Function"
         },
@@ -197,7 +197,7 @@
             },
             "Type": "AWS::Lambda::EventSourceMapping"
         },
-        "CapitalizeTwoWords_1Integration": {
+        "CapitalizeTwoWords1Integration": {
             "Properties": {
                 "ApiId": {
                     "Ref": "CapitalizeTwoWordsApi"
@@ -205,19 +205,19 @@
                 "IntegrationMethod": "POST",
                 "IntegrationType": "AWS_PROXY",
                 "IntegrationUri": {
-                    "Fn::GetAtt": "CapitalizeTwoWords_1Lambda.Arn"
+                    "Fn::GetAtt": "CapitalizeTwoWords1Lambda.Arn"
                 },
                 "PayloadFormatVersion": "2.0"
             },
             "Type": "AWS::ApiGatewayV2::Integration"
         },
-        "CapitalizeTwoWords_1Lambda": {
+        "CapitalizeTwoWords1Lambda": {
             "Properties": {
                 "Code": {
                     "S3Bucket": {
                         "Ref": "CapitalizeTwoWordsBucket"
                     },
-                    "S3Key": "capitalizeTwoWords_1-code.zip"
+                    "S3Key": "capitalizeTwoWords1-code.zip"
                 },
                 "Environment": {
                     "Variables": {
@@ -226,7 +226,7 @@
                         }
                     }
                 },
-                "FunctionName": "capitalizeTwoWords_1",
+                "FunctionName": "capitalizeTwoWords1",
                 "Handler": "index.handler",
                 "Layers": [
                     {
@@ -237,67 +237,67 @@
                     "Fn::GetAtt": "CapitalizeTwoWordsRole.Arn"
                 },
                 "Runtime": "nodejs22.x",
-                "Timeout": 60
+                "Timeout": 20
             },
             "Type": "AWS::Lambda::Function"
         },
-        "CapitalizeTwoWords_1Permission": {
+        "CapitalizeTwoWords1Permission": {
             "Properties": {
                 "Action": "lambda:InvokeFunction",
                 "FunctionName": {
-                    "Fn::GetAtt": "CapitalizeTwoWords_1Lambda.Arn"
+                    "Fn::GetAtt": "CapitalizeTwoWords1Lambda.Arn"
                 },
                 "Principal": "apigateway.amazonaws.com",
                 "SourceArn": {
-                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CapitalizeTwoWordsApi}/${CapitalizeTwoWordsApiStage}/POST/capitalizeTwoWords_1"
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CapitalizeTwoWordsApi}/${CapitalizeTwoWordsApiStage}/POST/capitalizeTwoWords1"
                 }
             },
             "Type": "AWS::Lambda::Permission"
         },
-        "CapitalizeTwoWords_1RequestQueue": {
+        "CapitalizeTwoWords1RequestQueue": {
             "Properties": {
                 "MessageRetentionPeriod": 60,
-                "QueueName": "capitalizeTwoWords_1-request-queue",
+                "QueueName": "capitalizeTwoWords1-request-queue",
                 "ReceiveMessageWaitTimeSeconds": 5,
                 "VisibilityTimeout": 20
             },
             "Type": "AWS::SQS::Queue"
         },
-        "CapitalizeTwoWords_1ResponseQueue": {
+        "CapitalizeTwoWords1ResponseQueue": {
             "Properties": {
                 "MessageRetentionPeriod": 60,
-                "QueueName": "capitalizeTwoWords_1-response-queue",
+                "QueueName": "capitalizeTwoWords1-response-queue",
                 "ReceiveMessageWaitTimeSeconds": 5,
                 "VisibilityTimeout": 20
             },
             "Type": "AWS::SQS::Queue"
         },
-        "CapitalizeTwoWords_1Route": {
+        "CapitalizeTwoWords1Route": {
             "Properties": {
                 "ApiId": {
                     "Ref": "CapitalizeTwoWordsApi"
                 },
-                "RouteKey": "POST /capitalizeTwoWords_1",
+                "RouteKey": "POST /capitalizeTwoWords1",
                 "Target": {
-                    "Fn::Sub": "integrations/${CapitalizeTwoWords_1Integration}"
+                    "Fn::Sub": "integrations/${CapitalizeTwoWords1Integration}"
                 }
             },
             "Type": "AWS::ApiGatewayV2::Route"
         },
-        "CapitalizeTwoWords_1SQSMapping": {
+        "CapitalizeTwoWords1SQSMapping": {
             "Properties": {
                 "BatchSize": 10,
                 "EventSourceArn": {
-                    "Fn::GetAtt": "CapitalizeTwoWords_1RequestQueue.Arn"
+                    "Fn::GetAtt": "CapitalizeTwoWords1RequestQueue.Arn"
                 },
                 "FunctionName": {
-                    "Ref": "CapitalizeTwoWords_1Lambda"
+                    "Ref": "CapitalizeTwoWords1Lambda"
                 },
                 "MaximumBatchingWindowInSeconds": 5
             },
             "Type": "AWS::Lambda::EventSourceMapping"
         },
-        "CapitalizeTwoWords_2Integration": {
+        "CapitalizeTwoWords2Integration": {
             "Properties": {
                 "ApiId": {
                     "Ref": "CapitalizeTwoWordsApi"
@@ -305,19 +305,19 @@
                 "IntegrationMethod": "POST",
                 "IntegrationType": "AWS_PROXY",
                 "IntegrationUri": {
-                    "Fn::GetAtt": "CapitalizeTwoWords_2Lambda.Arn"
+                    "Fn::GetAtt": "CapitalizeTwoWords2Lambda.Arn"
                 },
                 "PayloadFormatVersion": "2.0"
             },
             "Type": "AWS::ApiGatewayV2::Integration"
         },
-        "CapitalizeTwoWords_2Lambda": {
+        "CapitalizeTwoWords2Lambda": {
             "Properties": {
                 "Code": {
                     "S3Bucket": {
                         "Ref": "CapitalizeTwoWordsBucket"
                     },
-                    "S3Key": "capitalizeTwoWords_2-code.zip"
+                    "S3Key": "capitalizeTwoWords2-code.zip"
                 },
                 "Environment": {
                     "Variables": {
@@ -326,7 +326,7 @@
                         }
                     }
                 },
-                "FunctionName": "capitalizeTwoWords_2",
+                "FunctionName": "capitalizeTwoWords2",
                 "Handler": "index.handler",
                 "Layers": [
                     {
@@ -337,61 +337,61 @@
                     "Fn::GetAtt": "CapitalizeTwoWordsRole.Arn"
                 },
                 "Runtime": "nodejs22.x",
-                "Timeout": 60
+                "Timeout": 20
             },
             "Type": "AWS::Lambda::Function"
         },
-        "CapitalizeTwoWords_2Permission": {
+        "CapitalizeTwoWords2Permission": {
             "Properties": {
                 "Action": "lambda:InvokeFunction",
                 "FunctionName": {
-                    "Fn::GetAtt": "CapitalizeTwoWords_2Lambda.Arn"
+                    "Fn::GetAtt": "CapitalizeTwoWords2Lambda.Arn"
                 },
                 "Principal": "apigateway.amazonaws.com",
                 "SourceArn": {
-                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CapitalizeTwoWordsApi}/${CapitalizeTwoWordsApiStage}/POST/capitalizeTwoWords_2"
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CapitalizeTwoWordsApi}/${CapitalizeTwoWordsApiStage}/POST/capitalizeTwoWords2"
                 }
             },
             "Type": "AWS::Lambda::Permission"
         },
-        "CapitalizeTwoWords_2RequestQueue": {
+        "CapitalizeTwoWords2RequestQueue": {
             "Properties": {
                 "MessageRetentionPeriod": 60,
-                "QueueName": "capitalizeTwoWords_2-request-queue",
+                "QueueName": "capitalizeTwoWords2-request-queue",
                 "ReceiveMessageWaitTimeSeconds": 5,
                 "VisibilityTimeout": 20
             },
             "Type": "AWS::SQS::Queue"
         },
-        "CapitalizeTwoWords_2ResponseQueue": {
+        "CapitalizeTwoWords2ResponseQueue": {
             "Properties": {
                 "MessageRetentionPeriod": 60,
-                "QueueName": "capitalizeTwoWords_2-response-queue",
+                "QueueName": "capitalizeTwoWords2-response-queue",
                 "ReceiveMessageWaitTimeSeconds": 5,
                 "VisibilityTimeout": 20
             },
             "Type": "AWS::SQS::Queue"
         },
-        "CapitalizeTwoWords_2Route": {
+        "CapitalizeTwoWords2Route": {
             "Properties": {
                 "ApiId": {
                     "Ref": "CapitalizeTwoWordsApi"
                 },
-                "RouteKey": "POST /capitalizeTwoWords_2",
+                "RouteKey": "POST /capitalizeTwoWords2",
                 "Target": {
-                    "Fn::Sub": "integrations/${CapitalizeTwoWords_2Integration}"
+                    "Fn::Sub": "integrations/${CapitalizeTwoWords2Integration}"
                 }
             },
             "Type": "AWS::ApiGatewayV2::Route"
         },
-        "CapitalizeTwoWords_2SQSMapping": {
+        "CapitalizeTwoWords2SQSMapping": {
             "Properties": {
                 "BatchSize": 10,
                 "EventSourceArn": {
-                    "Fn::GetAtt": "CapitalizeTwoWords_2RequestQueue.Arn"
+                    "Fn::GetAtt": "CapitalizeTwoWords2RequestQueue.Arn"
                 },
                 "FunctionName": {
-                    "Ref": "CapitalizeTwoWords_2Lambda"
+                    "Ref": "CapitalizeTwoWords2Lambda"
                 },
                 "MaximumBatchingWindowInSeconds": 5
             },
@@ -437,7 +437,7 @@
                     "Fn::GetAtt": "CapitalizeTwoWordsRole.Arn"
                 },
                 "Runtime": "nodejs22.x",
-                "Timeout": 60
+                "Timeout": 20
             },
             "Type": "AWS::Lambda::Function"
         },
