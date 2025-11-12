@@ -1,7 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-module JS.Syntax where 
+module JS.Syntax (
+  Script(..),
+  Fun(..),
+  FunBody(..),
+  scriptText,
+  funText
+) where 
 
 import qualified Data.Text as T
 
@@ -14,6 +20,10 @@ data Fun = Fun {
   funName   :: T.Text,
   funParams :: T.Text,
   funBody   :: T.Text
+}
+
+data FunBody = FunBody {
+  funStmts :: T.Text
 }
 
 instance Show Script where 

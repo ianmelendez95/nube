@@ -56,6 +56,8 @@ asyncFunction = do
         '}' -> pure pre_brace
         _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
 
+asyncFunctionBody :: Parser 
+
 identifier :: Parser T.Text
 identifier = do 
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
