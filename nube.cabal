@@ -118,5 +118,7 @@ test-suite test
         , nube
         , hspec
         , hspec-contrib
+    
+    hs-source-dirs:     test
 
     default-language:   GHC2021
