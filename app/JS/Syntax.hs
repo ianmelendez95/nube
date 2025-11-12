@@ -35,10 +35,12 @@ data Expr
   | ECall Expr [Expr] 
   | EMember MemberExpr
   | EAwait Expr
+  deriving (Show, Eq)
 
 data MemberExpr 
   = DotMember T.Text T.Text
   | BracketMember T.Text Expr
+  deriving (Show, Eq)
 
 instance Show Script where 
   show = T.unpack . scriptText

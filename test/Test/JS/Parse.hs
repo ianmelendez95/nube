@@ -9,10 +9,14 @@ import Data.Text
   ( Text,
     pack
   )
+
+import JS.Syntax
+  (Expr (..))
 import JS.Parse
   ( Parser (..),
     identifier,
-    dotMember
+    dotMember,
+    stringLitExpr
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -25,11 +29,11 @@ import Text.Megaparsec
     runParser,
   )
 
-jsParseSpec :: SpecWith ()
 jsParseSpec = do 
   testIdentifier
+  testDotMember
+  testStringLitExpr
 
-testIdentifier :: SpecWith ()
 testIdentifier =
   describe "identifier" $ do
     it "returns the identifier" $ do
@@ -41,6 +45,12 @@ testDotMember =
     it "returns the property name" $ do
       prop <- testParser dotMember ".someProp"
       prop `shouldBe` "someProp"
+
+testStringLitExpr =
+  describe "stringLitExpr" $ do
+    it "returns the string" $ do
+      slit <- testParser stringLitExpr "\"hello world!\""
+      slit `shouldBe` EStringLit "hello world!"
 
 testParser :: Parser a -> Text -> IO a
 testParser parser content = do
