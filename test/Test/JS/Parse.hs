@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Test.JS.Parse
   ( jsParseSpec,
   )
@@ -10,6 +12,7 @@ import Data.Text
 import JS.Parse
   ( Parser (..),
     identifier,
+    dotMember
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -23,14 +26,21 @@ import Text.Megaparsec
   )
 
 jsParseSpec :: SpecWith ()
-jsParseSpec = testIdentifier
+jsParseSpec = do 
+  testIdentifier
 
 testIdentifier :: SpecWith ()
 testIdentifier =
   describe "identifier" $ do
     it "returns the identifier" $ do
-      id <- testParser identifier (pack "hello")
-      id `shouldBe` (pack "hello")
+      id <- testParser identifier "hello"
+      id `shouldBe` "hello"
+
+testDotMember =
+  describe "dotMember" $ do
+    it "returns the property name" $ do
+      prop <- testParser dotMember ".someProp"
+      prop `shouldBe` "someProp"
 
 testParser :: Parser a -> Text -> IO a
 testParser parser content = do

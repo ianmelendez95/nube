@@ -72,6 +72,11 @@ expr = undefined
 member :: Parser S.MemberExpr
 member = undefined
 
+dotMember :: Parser T.Text
+dotMember = do
+  _ <- symbol "."
+  identifier
+
 identifier :: Parser T.Text
 identifier = do
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
