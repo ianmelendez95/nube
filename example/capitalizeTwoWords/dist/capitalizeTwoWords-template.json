@@ -501,19 +501,19 @@
             "Properties": {
                 "AttributeDefinitions": [
                     {
-                        "AttributeName": "request-id",
+                        "AttributeName": "frameId",
                         "AttributeType": "S"
                     }
                 ],
                 "BillingMode": "PAY_PER_REQUEST",
                 "KeySchema": [
                     {
-                        "AttributeName": "request-id",
+                        "AttributeName": "frameId",
                         "KeyType": "HASH"
                     }
                 ],
                 "TableClass": "STANDARD",
-                "TableName": "response-table"
+                "TableName": "frame-table"
             },
             "Type": "AWS::DynamoDB::Table"
         }

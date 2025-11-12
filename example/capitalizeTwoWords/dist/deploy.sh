@@ -15,6 +15,7 @@ capitalizeWord
 # Parse command line arguments
 UPDATE_MODE=false
 UPDATE_LAMBDAS=false
+UPDATE_LAYER=false
 for arg in "$@"; do
   case $arg in
     --update-cf)
@@ -23,6 +24,10 @@ for arg in "$@"; do
       ;;
     --update-lambdas)
       UPDATE_LAMBDAS=true
+      shift
+      ;;
+    --update-layer)
+      UPDATE_LAYER=true
       shift
       ;;
     *)
@@ -65,7 +70,7 @@ create_cf_stack () {
     --disable-rollback
 }
 
-update_lambda () {
+update_lambda_layer () {
   f="$1"
 
   echo "updating function layer: $f"
@@ -75,18 +80,12 @@ update_lambda () {
     --layers "$layer_arn" > /dev/null
 
   aws lambda wait function-updated --function-name "$f"
-
-  echo "updating function code: $f"
-  aws lambda update-function-code \
-    --no-cli-pager \
-    --function-name "$f" \
-    --s3-bucket "$BUCKET" \
-    --s3-key "$f-code.zip" > /dev/null
-
-  aws lambda wait function-updated --function-name "$f"
+  echo "done updating function layer: $f"
 }
 
-update_lambdas () {
+update_layer () {
+  upload_layer
+
   echo "updating layer: $LAYER"
   layer_response=$(aws lambda publish-layer-version \
     --no-cli-pager \
@@ -100,10 +99,25 @@ update_lambdas () {
   fi
 
   for f in $FUN_NAMES; do
-    update_lambda "$f" &
+    update_lambda_layer "$f" &
   done
 
   wait
+}
+
+update_lambda_code () {
+  f="$1"
+
+  upload_fun_code "$f"
+
+  echo "updating function code: $f"
+  aws lambda update-function-code \
+    --no-cli-pager \
+    --function-name "$f" \
+    --s3-bucket "$BUCKET" \
+    --s3-key "$f-code.zip" > /dev/null
+
+  aws lambda wait function-updated --function-name "$f"
 }
 
 update_cf_stack () {
@@ -138,20 +152,26 @@ upload_fun_code () {
 }
 
 assert_bucket
-upload_template
-upload_layer
-
-for f in $FUN_NAMES; do 
-  upload_fun_code "$f"
-done
 
 if [ "$UPDATE_LAMBDAS" = true ]; then
-  update_lambdas
-fi
+  for f in $FUN_NAMES; do
+    update_lambda_code "$f" &
+  done
 
-if [ "$UPDATE_MODE" = true ]; then
-  update_cf_stack
-else
-  create_cf_stack
+  wait
+else if [ "$UPDATE_LAYER" = true ]; then
+  update_layer
+else 
+  upload_template
+  upload_layer
+
+  for f in $FUN_NAMES; do 
+    upload_fun_code "$f"
+  done
+
+  if [ "$UPDATE_MODE" = true ]; then
+    update_cf_stack
+  else
+    create_cf_stack
 fi
 
