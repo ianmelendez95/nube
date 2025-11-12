@@ -27,7 +27,7 @@ for arg in "$@"; do
       ;;
     *)
       echo "Unknown argument: $arg"
-      echo "Usage: $0 [--update]"
+      echo "Usage: $0 [--update-cf|--update-lambdas]"
       exit 1
       ;;
   esac
