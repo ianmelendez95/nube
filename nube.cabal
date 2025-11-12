@@ -64,22 +64,31 @@ executable nube
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
 
-    -- Modules included in this executable, other than Main.
-    other-modules:
-        Gen.CF
-        JS.Parse
-        JS.Syntax
+    -- Other library packages from which modules are imported.
+    build-depends:    
+        base ^>=4.21.0.0
+        , nube
+
+    -- Directories containing source files.
+    hs-source-dirs:   src
+
+    -- Base language which the package is written in.
+    default-language: GHC2021
+
+library
+    -- Import common warning flags.
+    import:           warnings
+
+    ghc-options:      -O0
+
+    exposed-modules: 
         Compile
         Gen.CF
         Gen.Lambda
+        Util.Aeson
         JS.Parse
         JS.Syntax
-        Util.Aeson
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-
-    -- Other library packages from which modules are imported.
+    
     build-depends:    
         base ^>=4.21.0.0
         , aeson
@@ -89,6 +98,7 @@ executable nube
         , directory
         , filepath
         , megaparsec
+        , parser-combinators
         , mtl
         , shakespeare
         , text
@@ -98,3 +108,12 @@ executable nube
 
     -- Base language which the package is written in.
     default-language: GHC2021
+
+test-suite test
+    type:               exitcode-stdio-1.0
+    main-is:            Test.hs
+
+    build-depends:  
+        nube:nube
+
+    default-language:   GHC2021
