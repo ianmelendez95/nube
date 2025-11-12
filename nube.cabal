@@ -118,6 +118,8 @@ test-suite test
         , nube
         , hspec
         , hspec-contrib
+        , megaparsec
+        , text
     
     hs-source-dirs:     test
 
