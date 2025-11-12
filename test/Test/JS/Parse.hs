@@ -1,6 +1,11 @@
-module Test.JS.Parse (
-    jsParseSpec
-) where
+module Test.JS.Parse
+  ( jsParseSpec,
+  )
+where
 
-jsParseSpec :: IO ()
+import Test.Hspec
+  ( SpecWith (..),
+  )
+
+jsParseSpec :: SpecWith ()
 jsParseSpec = undefined

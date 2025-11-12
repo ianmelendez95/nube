@@ -11,5 +11,5 @@ main = do
     [js_file] -> do 
       putStrLn $ "compiling: " <> js_file
       compileFile js_file
-      putStrLn $ "done"
+      putStrLn "done"
     _ -> putStrLn "usage: nube <js-file>"

@@ -38,20 +38,20 @@ asyncFunction = do
                           (symbol' ")")
                           (takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')'))
 
-    body :: Parser T.Text
-    body = between' (symbol' "{") (symbol "}") bodyContent
+    _body :: Parser T.Text
+    _body = between' (symbol' "{") (symbol "}") _bodyContent
 
-    innerBody :: Parser T.Text
-    innerBody = between' (symbol' "{") (symbol' "}") bodyContent
+    _innerBody :: Parser T.Text
+    _innerBody = between' (symbol' "{") (symbol' "}") _bodyContent
 
-    bodyContent :: Parser T.Text
-    bodyContent = do
+    _bodyContent :: Parser T.Text
+    _bodyContent = do
       pre_brace <- takeWhileP (Just "not curly brace") (\c -> c /= '{' && c /= '}')
       next      <- lookAhead anySingle
       case next of
         '{' -> do
-          inner_bdy    <- innerBody
-          rest_content <- bodyContent
+          inner_bdy    <- _innerBody
+          rest_content <- _bodyContent
           pure $ pre_brace <> inner_bdy <> rest_content
         '}' -> pure pre_brace
         _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
