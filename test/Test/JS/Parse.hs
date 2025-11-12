@@ -21,6 +21,7 @@ import JS.Parse
 import Test.Hspec
   ( SpecWith (..),
     describe,
+    xdescribe,
     it,
     shouldBe,
   )
@@ -30,23 +31,16 @@ import Text.Megaparsec
   )
 
 jsParseSpec = do 
-  testIdentifier
-  testDotMember
-  testStringLitExpr
-
-testIdentifier =
   describe "identifier" $ do
     it "returns the identifier" $ do
       id <- testParser identifier "hello"
       id `shouldBe` "hello"
 
-testDotMember =
   describe "dotMember" $ do
     it "returns the property name" $ do
       prop <- testParser dotMember ".someProp"
       prop `shouldBe` "someProp"
 
-testStringLitExpr =
   describe "stringLitExpr" $ do
     it "returns the string" $ do
       slit <- testParser stringLitExpr "\"hello world!\""

@@ -27,7 +27,7 @@ import Text.Megaparsec
     runParser,
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
-import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol)
+import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment)
 
 type Parser = Parsec Void T.Text
 
@@ -124,7 +124,7 @@ lexeme' :: Parser T.Text -> Parser T.Text
 lexeme' p = (<>) <$> p <*> space'
 
 spaceConsumer :: Parser ()
-spaceConsumer = L.space space1 mempty mempty
+spaceConsumer = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
 
 space' :: Parser T.Text
 space' = takeWhileP (Just "whitespace") isSpace
