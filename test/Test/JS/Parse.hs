@@ -38,6 +38,10 @@ jsParseSpec = do
       res <- testParser member "someObj.someProp"
       res `shouldBe` EDotMember "someObj" "someProp"
 
+    it "parses bracket member" $ do 
+      res <- testParser member "someObj[\"someProp\"]"
+      res `shouldBe` EBracketMember "someObj" (EStringLit "someProp")
+
   describe "identifier" $ do
     it "returns the identifier" $ do
       id <- testParser identifier "hello"
