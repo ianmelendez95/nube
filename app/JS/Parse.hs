@@ -6,10 +6,11 @@ module JS.Parse
     parseJsFile,
     identifier,
     dotMember,
+    member
   )
 where
 
-import Control.Monad.Combinators (between)
+import Control.Monad.Combinators (between, (<|>))
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -17,7 +18,7 @@ import Data.Void (Void)
 import JS.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
-  ( MonadParsec (lookAhead, takeWhile1P, takeWhileP),
+  ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
     Parsec,
     anySingle,
     between,
@@ -90,8 +91,10 @@ expr = stringLitExpr
 stringLitExpr :: Parser S.Expr
 stringLitExpr = S.EStringLit <$> stringLiteral
 
-member :: Parser S.MemberExpr
-member = undefined
+member :: Parser S.Expr
+member = do
+  obj <- identifier
+  (S.EDotMember obj <$> dotMember) <|> (S.EBracketMember obj <$> bracketMember)
 
 dotMember :: Parser T.Text
 dotMember = do

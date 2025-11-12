@@ -11,12 +11,14 @@ import Data.Text
   )
 
 import JS.Syntax
-  (Expr (..))
+  (Expr (..)
+  )
 import JS.Parse
   ( Parser (..),
     identifier,
     dotMember,
-    stringLitExpr
+    stringLitExpr,
+    member
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -31,6 +33,11 @@ import Text.Megaparsec
   )
 
 jsParseSpec = do 
+  describe "member" $ do 
+    it "parses dot member" $ do 
+      res <- testParser member "someObj.someProp"
+      res `shouldBe` EDotMember "someObj" "someProp"
+
   describe "identifier" $ do
     it "returns the identifier" $ do
       id <- testParser identifier "hello"
