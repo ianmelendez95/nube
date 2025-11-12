@@ -69,6 +69,9 @@ const_assign = do
 expr :: Parser S.Expr
 expr = undefined
 
+member :: Parser S.MemberExpr
+member = undefined
+
 identifier :: Parser T.Text
 identifier = do
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')

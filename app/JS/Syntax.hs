@@ -6,6 +6,7 @@ module JS.Syntax (
   Fn(..),
   Stmt(..),
   Expr(..),
+  MemberExpr(..),
   scriptText,
   funText
 ) where 
