@@ -53,8 +53,12 @@ jsParseSpec = do
       prop `shouldBe` "someProp"
 
   describe "stringLitExpr" $ do
-    it "returns the string" $ do
+    it "parses double quoted" $ do
       slit <- testParser stringLitExpr "\"hello world!\""
+      slit `shouldBe` EStringLit "hello world!"
+
+    it "parses single quoted" $ do
+      slit <- testParser stringLitExpr "'hello world!'"
       slit `shouldBe` EStringLit "hello world!"
 
 testParser :: Parser a -> Text -> IO a

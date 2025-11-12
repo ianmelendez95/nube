@@ -109,7 +109,10 @@ identifier = do
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
 
 stringLiteral :: Parser T.Text
-stringLiteral = T.pack <$> (symbol "\"" >> manyTill L.charLiteral (symbol "\""))
+stringLiteral = stringLiteral' (symbol "\"") <|> stringLiteral' (symbol "'")
+
+stringLiteral' :: Parser a -> Parser T.Text
+stringLiteral' quotes = T.pack <$> (quotes >> manyTill L.charLiteral quotes)
 
 between' :: Parser T.Text -> Parser T.Text -> Parser T.Text -> Parser T.Text
 between' bra cket p = T.concat <$> sequence [bra, p, cket]
