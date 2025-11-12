@@ -516,6 +516,26 @@
                 "TableName": "frame-table"
             },
             "Type": "AWS::DynamoDB::Table"
+        },
+        "ResultTable": {
+            "Properties": {
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "frameId",
+                        "AttributeType": "S"
+                    }
+                ],
+                "BillingMode": "PAY_PER_REQUEST",
+                "KeySchema": [
+                    {
+                        "AttributeName": "frameId",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "TableClass": "STANDARD",
+                "TableName": "result-table"
+            },
+            "Type": "AWS::DynamoDB::Table"
         }
     }
 }
