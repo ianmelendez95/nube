@@ -64,9 +64,9 @@ data LambdaRGroup = LambdaRGroup {
 -- | Lambda Function Resource
 data RFun = RFun {
   _fnName   :: T.Text,
-  _funBucket :: Ref,
-  _funRole   :: Ref,
-  _funLayer  :: Ref
+  _fnucket :: Ref,
+  _fnole   :: Ref,
+  _fnayer  :: Ref
 }
 
 -- | API Integration
@@ -248,13 +248,13 @@ instance ToJSON RFun where
     ]
 
 instance ToJSON RInt where 
-  toJSON (RInt fun api) = object 
+  toJSON (RInt fn api) = object 
     [ "Type" .= fromText "AWS::ApiGatewayV2::Integration"
     , "Properties" .= object 
         [ "ApiId" .= api
         , "IntegrationMethod" .= fromText "POST"
         , "IntegrationType" .= fromText "AWS_PROXY"
-        , "IntegrationUri" .= GetArn (refId fun)
+        , "IntegrationUri" .= GetArn (refId fn)
         , "PayloadFormatVersion" .= fromText "2.0"
         ]
     ]
@@ -270,11 +270,11 @@ instance ToJSON RRoute where
     ]
 
 instance ToJSON RPerm where 
-  toJSON (RPerm fname api stage fun) = object 
+  toJSON (RPerm fname api stage fn) = object 
     [ "Type" .= fromText "AWS::Lambda::Permission"
     , "Properties" .= object 
         [ "Action" .= fromText "lambda:InvokeFunction"
-        , "FunctionName" .= GetArn (refId fun)
+        , "FunctionName" .= GetArn (refId fn)
         , "Principal" .= fromText "apigateway.amazonaws.com"
         , "SourceArn" .= endpointSubFromRefs api stage fname
         ]
@@ -292,13 +292,13 @@ instance ToJSON RSQSQueue where
     ]
 
 instance ToJSON RSQSMap where 
-  toJSON (RSQSMap queue fun) = object 
+  toJSON (RSQSMap queue fn) = object 
     [ "Type" .= fromText "AWS::Lambda::EventSourceMapping"
     , "Properties" .= object 
         [ "EventSourceArn" .= object
           [ "Fn::GetAtt" .= fromText (refId queue <> ".Arn") ]
         , "FunctionName" .= object 
-          [ "Ref" .= refId fun ]
+          [ "Ref" .= refId fn ]
         , "BatchSize" .= (10 :: Int)
         , "MaximumBatchingWindowInSeconds" .= (5 :: Int)
         ]
@@ -330,7 +330,7 @@ templateFromScript script =
    in Template bucket api stage role layer funs
 
 jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> Ref -> S.Fn -> LambdaRGroup
-jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun = 
+jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fn = 
   LambdaRGroup fun_res 
                int_res 
                route_res 
@@ -340,7 +340,7 @@ jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun =
                sqs_map_res
   where 
     fun_name :: T.Text
-    fun_name = S.fnName fun
+    fun_name = S.fnName fn
 
     fun_res :: Named RFun
     fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 
@@ -373,8 +373,8 @@ jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun =
 -- Lambda Group
 
 lambdaRGroupKVs :: LambdaRGroup -> [(Key, Value)]
-lambdaRGroupKVs (LambdaRGroup fun int route perm req_queue res_queue sqs_map) = 
-  [namedKV fun, namedKV int, namedKV route, namedKV perm, namedKV req_queue, namedKV res_queue, namedKV sqs_map]
+lambdaRGroupKVs (LambdaRGroup fn int route perm req_queue res_queue sqs_map) = 
+  [namedKV fn, namedKV int, namedKV route, namedKV perm, namedKV req_queue, namedKV res_queue, namedKV sqs_map]
 
 -- Resources
 

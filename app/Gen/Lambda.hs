@@ -94,10 +94,10 @@ jsFunsToProxiesImport funs = "import {\n  "
   <> "\nimport {PutItemCommand} from '@aws-sdk/client-dynamodb';"
 
 jsFunToHandler :: S.Fn -> T.Text
-jsFunToHandler fun = mkHandlerFun (S.fnName fun)
+jsFunToHandler fn = mkHandlerFun (S.fnName fn)
 
 jsFunToProxy :: S.Fn -> T.Text
-jsFunToProxy fun = mkProxyFun (S.fnName fun) (S.fnParams fun)
+jsFunToProxy fn = mkProxyFun (S.fnName fn) (S.fnParams fn)
 
 mkHandlerFun :: T.Text -> T.Text 
 mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/js/handler.julius")
