@@ -114,6 +114,7 @@ test-suite test
     main-is:            Test.hs
 
     build-depends:  
-        nube:nube
+        base ^>=4.21.0.0
+        , nube
 
     default-language:   GHC2021
