@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   eventHandler
 } from 'proxies'
@@ -5,5 +6,6 @@ import {
 export const handler = eventHandler(capitalizeTwoWords_2);
 
 async function capitalizeTwoWords_2(_ctx)  {
-    _ctx.return(_ctx.frame.word1 + ' ' + _ctx.frame.word2);
+  _ctx.frame.capWord2 = _ctx.args[0];
+  _ctx.return(_ctx.frame.capWord1 + ' ' + _ctx.frame.capWord2);
 }

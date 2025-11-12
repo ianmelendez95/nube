@@ -5,5 +5,6 @@ import {
 export const handler = eventHandler(capitalizeTwoWords_1);
 
 async function capitalizeTwoWords_1(_ctx)  {
-    _ctx.call('capitalizeWord', [_ctx.frame.word2], 'capitalizeTwoWords_2');
+  _ctx.frame.capWord1 = _ctx.args[0];
+  _ctx.callCC('capitalizeWord', [_ctx.frame.word2], 'capitalizeTwoWords_2');
 }
