@@ -159,7 +159,7 @@ if [ "$UPDATE_LAMBDAS" = true ]; then
   done
 
   wait
-else if [ "$UPDATE_LAYER" = true ]; then
+elif [ "$UPDATE_LAYER" = true ]; then
   update_layer
 else 
   upload_template
@@ -173,5 +173,6 @@ else
     update_cf_stack
   else
     create_cf_stack
+  fi
 fi
 
