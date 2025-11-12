@@ -63,7 +63,7 @@ data LambdaRGroup = LambdaRGroup {
 
 -- | Lambda Function Resource
 data RFun = RFun {
-  _funName   :: T.Text,
+  _fnName   :: T.Text,
   _funBucket :: Ref,
   _funRole   :: Ref,
   _funLayer  :: Ref
@@ -340,7 +340,7 @@ jsFunToLambda bucket_ref api_ref stage_ref role_ref layer_ref fun =
                sqs_map_res
   where 
     fun_name :: T.Text
-    fun_name = S.funName fun
+    fun_name = S.fnName fun
 
     fun_res :: Named RFun
     fun_res = Named (capitalizeFirst fun_name <> "Lambda") $ 

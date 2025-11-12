@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module JS.Parse where 
+module JS.Parse where
 
 import Data.Void
 import Text.Megaparsec
@@ -17,7 +17,7 @@ import qualified JS.Syntax as S
 type Parser = Parsec Void T.Text
 
 parseJsFile :: FilePath -> IO S.Script
-parseJsFile path = do 
+parseJsFile path = do
   content <- TIO.readFile path
   let result = either (error . errorBundlePretty) id $ runParser jsFunctions path content
   pure $ S.Script (T.pack $ takeBaseName path) result
@@ -26,15 +26,15 @@ jsFunctions :: Parser [S.Fn]
 jsFunctions = many asyncFunction
 
 asyncFunction :: Parser S.Fn
-asyncFunction = do 
+asyncFunction = do
   _ <- symbol "async" >> symbol "function"
   S.Fn <$> lexeme identifier
         <*> lexeme parameters
-        <*> body
-  where 
+        <*> undefined
+  where
     -- Parameters of the function
     parameters :: Parser T.Text
-    parameters = between' (symbol' "(") 
+    parameters = between' (symbol' "(")
                           (symbol' ")")
                           (takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')'))
 
@@ -45,19 +45,32 @@ asyncFunction = do
     innerBody = between' (symbol' "{") (symbol' "}") bodyContent
 
     bodyContent :: Parser T.Text
-    bodyContent = do 
+    bodyContent = do
       pre_brace <- takeWhileP (Just "not curly brace") (\c -> c /= '{' && c /= '}')
       next      <- lookAhead anySingle
-      case next of 
-        '{' -> do 
+      case next of
+        '{' -> do
           inner_bdy    <- innerBody
           rest_content <- bodyContent
           pure $ pre_brace <> inner_bdy <> rest_content
         '}' -> pure pre_brace
         _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
 
+statement :: Parser S.Stmt
+statement = undefined
+
+const_assign :: Parser S.Stmt
+const_assign = do
+  _ <- symbol "const"
+  var_name <- identifier
+  _ <- symbol "="
+  S.SAssign var_name <$> expr
+
+expr :: Parser S.Expr
+expr = undefined
+
 identifier :: Parser T.Text
-identifier = do 
+identifier = do
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
 
 between' :: Parser T.Text -> Parser T.Text -> Parser T.Text -> Parser T.Text
@@ -82,4 +95,4 @@ space' :: Parser T.Text
 space' = takeWhileP (Just "whitespace") isSpace
 
 space1' :: Parser T.Text
-space1' = takeWhile1P (Just "whitespace") isSpace 
+space1' = takeWhile1P (Just "whitespace") isSpace

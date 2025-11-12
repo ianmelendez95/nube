@@ -11,7 +11,7 @@ import qualified Gen.CF as CF
 
 import System.Directory
 import System.FilePath
-import JS.Syntax (Fn(funName))
+import JS.Syntax (Fn(fnName))
 
 import Text.Julius hiding (renderJavascript)
 
@@ -47,7 +47,7 @@ jsScriptToDeployScript script =
                      (templateNameFromScriptName name)
                      (name <> "-stack")
                      (name <> "-layer")
-                     (map S.funName funs)
+                     (map S.fnName funs)
 
 templateNameFromScriptName :: T.Text -> T.Text
 templateNameFromScriptName name = name <> "-template.json"
@@ -65,7 +65,7 @@ jsFunsToScript main_fun helper_funs =
         , jsFunToHandler main_fun 
         , S.funText main_fun
         ]
-   in Script (funName main_fun) content
+   in Script (fnName main_fun) content
 
 -- Proxies
 
@@ -89,15 +89,15 @@ jsFunsToProxiesScript funs =
 
 jsFunsToProxiesImport :: [S.Fn] -> T.Text
 jsFunsToProxiesImport funs = "import {\n  " 
-  <> T.intercalate ",\n  " ("sqsClient" : "dynamoClient" : map S.funName funs)
+  <> T.intercalate ",\n  " ("sqsClient" : "dynamoClient" : map S.fnName funs)
   <> "\n} from 'proxies'"
   <> "\nimport {PutItemCommand} from '@aws-sdk/client-dynamodb';"
 
 jsFunToHandler :: S.Fn -> T.Text
-jsFunToHandler fun = mkHandlerFun (S.funName fun)
+jsFunToHandler fun = mkHandlerFun (S.fnName fun)
 
 jsFunToProxy :: S.Fn -> T.Text
-jsFunToProxy fun = mkProxyFun (S.funName fun) (S.funParams fun)
+jsFunToProxy fun = mkProxyFun (S.fnName fun) (S.fnParams fun)
 
 mkHandlerFun :: T.Text -> T.Text 
 mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/js/handler.julius")

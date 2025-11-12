@@ -4,7 +4,8 @@
 module JS.Syntax (
   Script(..),
   Fn(..),
-  FunBody(..),
+  Stmt(..),
+  Expr(..),
   scriptText,
   funText
 ) where 
@@ -17,14 +18,26 @@ data Script = Script {
 }
 
 data Fn = Fn { 
-  funName   :: T.Text,
-  funParams :: T.Text,
-  funBody   :: T.Text
+  fnName   :: T.Text,
+  fnParams :: T.Text,
+  fnStmts  :: [Stmt]
 }
 
-data FunBody = FunBody {
-  funStmts :: T.Text
-}
+data Stmt 
+  = SAssign T.Text Expr
+  | SReturn Expr
+
+data Expr 
+  = EVar T.Text
+  | EStringLit T.Text
+  | ENumberLit Double
+  | ECall Expr [Expr] 
+  | EMember MemberExpr
+  | EAwait Expr
+
+data MemberExpr 
+  = DotMember T.Text T.Text
+  | BracketMember T.Text Expr
 
 instance Show Script where 
   show = T.unpack . scriptText
@@ -36,4 +49,7 @@ scriptText :: Script -> T.Text
 scriptText (Script name funcs) = T.unlines $ name : map funText funcs
 
 funText :: Fn -> T.Text
-funText (Fn name params body) = "async function " <> name <> params <> " " <> body
+funText (Fn name params body) = "async function " <> name <> params <> " " <> stmtText body
+
+stmtText :: [Stmt] -> T.Text
+stmtText = undefined
