@@ -146,9 +146,6 @@ exprTerm =
       S.ENumberLit <$> L.decimal
     ]
 
-callExpr :: Parser S.Expr
-callExpr = S.ECall <$> expr <*> callParens
-
 callParens :: Parser [S.Expr]
 callParens = between (symbol "(") (symbol ")") (sepBy arg (symbol ","))
   where

@@ -7,74 +7,77 @@ where
 
 import Data.Text
   ( Text,
-    pack
-  )
-
-import JS.Syntax
-  (Expr (..)
-  , EAccess (..)
-  , Stmt (..)
-  , Fn (..)
+    pack,
   )
 import JS.Parse
   ( Parser (..),
-    identifier,
-    dotMember,
     bracketMember,
-    stringLitExpr,
+    dotMember,
     expr,
+    function,
+    identifier,
     statement,
-    function
+    stringLitExpr,
+  )
+import JS.Syntax
+  ( EAccess (..),
+    Expr (..),
+    Fn (..),
+    Stmt (..),
   )
 import Test.Hspec
   ( SpecWith (..),
     describe,
-    xdescribe,
     it,
     shouldBe,
+    xdescribe,
   )
 import Text.Megaparsec
   ( errorBundlePretty,
     runParser,
   )
 
-jsParseSpec = do 
-  describe "function" $ do 
-    it "parses simple function" $ do 
+jsParseSpec = do
+  describe "function" $ do
+    it "parses simple function" $ do
       res <- testParser function "function foo(x) { return x; }"
       res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
 
-  describe "statement" $ do 
+  describe "statement" $ do
     it "parses assign statement" $ do
       res <- testParser statement "const word = 'hello';"
       res `shouldBe` SAssign "word" (EStringLit "hello")
-    
-    it "parses return statement" $ do 
+
+    it "parses return statement" $ do
       res <- testParser statement "return x;"
       res `shouldBe` SReturn (EVar "x")
 
-  describe "expr" $ do 
-    it "parses string literal" $ do 
+  describe "expr" $ do
+    it "parses string literal" $ do
       res <- testParser expr "\"hello world!\""
       res `shouldBe` EStringLit "hello world!"
-    
+
     let string_split = EMember (EVar "string") (EDotAccess "split")
-    
-    it "parses dot member access" $ do 
+
+    it "parses dot member access" $ do
       res <- testParser expr "string.split"
       res `shouldBe` string_split
-    
+
     it "parses bracket member access" $ do
       res <- testParser expr "string['split']"
-      res `shouldBe` EMember (EVar "string") (EBracketAccess (EStringLit "split")) 
+      res `shouldBe` EMember (EVar "string") (EBracketAccess (EStringLit "split"))
 
-    it "parses dot member call" $ do 
+    it "parses dot member call" $ do
       res <- testParser expr "string.split()"
       res `shouldBe` ECall string_split []
 
-    it "parses three level dot member call" $ do 
+    it "parses three level dot member call" $ do
       res <- testParser expr "string.split().length"
       res `shouldBe` EMember (ECall string_split []) (EDotAccess "length")
+
+    it "parses simple var arg call" $ do
+      res <- testParser expr "hello(myVar)"
+      res `shouldBe` ECall (EVar "hello") [EVar "myVar"]
 
   describe "identifier" $ do
     it "returns the identifier" $ do
@@ -85,13 +88,13 @@ jsParseSpec = do
     it "returns the property name" $ do
       prop <- testParser dotMember ".someProp"
       prop `shouldBe` EDotAccess "someProp"
-  
-  describe "bracketMember" $ do 
-    it "parses simple bracket" $ do 
+
+  describe "bracketMember" $ do
+    it "parses simple bracket" $ do
       prop <- testParser bracketMember "['someProp']"
       prop `shouldBe` EBracketAccess (EStringLit "someProp")
 
-    it "parses number lit bracket" $ do 
+    it "parses number lit bracket" $ do
       prop <- testParser bracketMember "[5]"
       prop `shouldBe` EBracketAccess (ENumberLit 5)
 
