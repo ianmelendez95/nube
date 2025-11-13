@@ -59,6 +59,8 @@ import Text.Megaparsec.Char.Lexer qualified as L
     symbol,
   )
 
+-- import Text.Megaparsec.Debug (dbg)
+
 type Parser = Parsec Void T.Text
 
 parseJsFile :: FilePath -> IO S.Script
@@ -166,9 +168,7 @@ exprTable =
     binary name f = InfixL (f <$ symbol name)
 
 callParens :: Parser [S.Expr]
-callParens = between (symbol "(") (symbol ")") (sepBy arg (symbol ","))
-  where
-    arg = S.EVar <$> identifier
+callParens = between (symbol "(") (symbol ")") (sepBy expr (symbol ","))
 
 varExpr :: Parser S.Expr
 varExpr = S.EVar <$> identifier

@@ -23,8 +23,8 @@ import JS.Syntax
   ( EAccess (..),
     Expr (..),
     Fn (..),
+    IOp (..),
     Stmt (..),
-    IOp (..)
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -83,6 +83,16 @@ jsParseSpec = do
     it "parses simple add" $ do
       res <- testParser expr "4 + 2"
       res `shouldBe` EInfix IPlus (ENumberLit 4) (ENumberLit 2)
+
+    it "parses bracket member, dot member, then call with number" $ do
+      res <- testParser expr "words[0].slice(1)"
+      res
+        `shouldBe` ECall
+          ( EMember
+              (EMember (EVar "words") (EBracketAccess (ENumberLit 0)))
+              (EDotAccess "slice")
+          )
+          [ENumberLit 1]
 
   describe "identifier" $ do
     it "returns the identifier" $ do
