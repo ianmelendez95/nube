@@ -6,6 +6,7 @@ module JS.Syntax (
   Fn(..),
   Stmt(..),
   Expr(..),
+  EAccess(..),
   scriptText,
   funText
 ) where 
@@ -32,9 +33,13 @@ data Expr
   | EStringLit T.Text
   | ENumberLit Double
   | ECall Expr [Expr] 
-  | EDotMember T.Text T.Text
-  | EBracketMember T.Text Expr
+  | EMember Expr EAccess
   | EAwait Expr
+  deriving (Show, Eq)
+
+data EAccess 
+  = EDotAccess T.Text
+  | EBracketAccess Expr
   deriving (Show, Eq)
 
 instance Show Script where 

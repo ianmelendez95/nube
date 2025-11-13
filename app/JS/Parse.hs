@@ -1,16 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module JS.Parse
-  ( Parser(..),
+  ( Parser,
     stringLitExpr,
     parseJsFile,
     identifier,
     dotMember,
-    member
+    bracketMember,
+    expr
   )
 where
 
-import Control.Monad.Combinators (between, (<|>))
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -20,12 +20,16 @@ import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
     Parsec,
+    optional,
     anySingle,
     between,
+    (<|>),
     errorBundlePretty,
     many,
     manyTill,
     runParser,
+    parseMaybe,
+    sepBy
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
 import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment)
@@ -86,23 +90,46 @@ const_assign = do
   S.SAssign var_name <$> expr
 
 expr :: Parser S.Expr
-expr = stringLitExpr
+expr = do
+  term <- exprTerm
+  -- TODO use choice
+  mCall <- optional callParens
+  case mCall of 
+    Just args -> pure $ S.ECall term args
+    Nothing -> do 
+      mAccess <- optional memberAccess
+      case mAccess of 
+        Just access -> pure $ S.EMember term access
+        Nothing -> pure term
+
+
+exprTerm :: Parser S.Expr
+exprTerm = try varExpr <|> stringLitExpr
+
+callExpr :: Parser S.Expr
+callExpr = S.ECall <$> expr <*> callParens 
+
+callParens :: Parser [S.Expr]
+callParens = between (symbol "(") (symbol ")") (sepBy arg (symbol ","))
+  where 
+    arg = S.EVar <$> identifier
+
+varExpr :: Parser S.Expr
+varExpr = S.EVar <$> identifier
 
 stringLitExpr :: Parser S.Expr
 stringLitExpr = S.EStringLit <$> stringLiteral
 
-member :: Parser S.Expr
-member = do
-  obj <- identifier
-  (S.EDotMember obj <$> dotMember) <|> (S.EBracketMember obj <$> bracketMember)
+memberAccess :: Parser S.EAccess
+memberAccess = try dotMember <|> bracketMember
 
-dotMember :: Parser T.Text
+dotMember :: Parser S.EAccess
 dotMember = do
   _ <- symbol "."
-  identifier
+  S.EDotAccess <$> identifier
 
-bracketMember :: Parser S.Expr
-bracketMember = between (symbol "[") (symbol "]") expr
+bracketMember :: Parser S.EAccess
+bracketMember = S.EBracketAccess <$> between (symbol "[") (symbol "]") expr
 
 identifier :: Parser T.Text
 identifier = do

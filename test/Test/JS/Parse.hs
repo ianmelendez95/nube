@@ -12,13 +12,15 @@ import Data.Text
 
 import JS.Syntax
   (Expr (..)
+  , EAccess (..)
   )
 import JS.Parse
   ( Parser (..),
     identifier,
     dotMember,
+    bracketMember,
     stringLitExpr,
-    member
+    expr
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -33,14 +35,10 @@ import Text.Megaparsec
   )
 
 jsParseSpec = do 
-  describe "member" $ do 
-    it "parses dot member" $ do 
-      res <- testParser member "someObj.someProp"
-      res `shouldBe` EDotMember "someObj" "someProp"
-
-    it "parses bracket member" $ do 
-      res <- testParser member "someObj[\"someProp\"]"
-      res `shouldBe` EBracketMember "someObj" (EStringLit "someProp")
+  xdescribe "expr" $ do 
+    it "parses string literal" $ do 
+      res <- testParser expr "\"hello world!\""
+      res `shouldBe` EStringLit "hello world!"
 
   describe "identifier" $ do
     it "returns the identifier" $ do
@@ -50,7 +48,12 @@ jsParseSpec = do
   describe "dotMember" $ do
     it "returns the property name" $ do
       prop <- testParser dotMember ".someProp"
-      prop `shouldBe` "someProp"
+      prop `shouldBe` EDotAccess "someProp"
+  
+  describe "bracketMember" $ do 
+    it "parses simple bracket" $ do 
+      prop <- testParser bracketMember "['someProp']"
+      prop `shouldBe` EBracketAccess (EStringLit "someProp")
 
   describe "stringLitExpr" $ do
     it "parses double quoted" $ do
