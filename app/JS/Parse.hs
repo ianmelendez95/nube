@@ -94,19 +94,15 @@ const_assign = do
 expr :: Parser S.Expr
 expr = do
   term <- exprTerm
-  mmem_or_call <- optional $ choice
-    [ S.EMember term <$> memberAccess
-    , S.ECall term <$> callParens 
-    ]
-  case mmem_or_call of 
-    Nothing -> pure term
-    Just mem_or_call -> do 
-      mmem_or_call' <- optional $ choice
-        [ S.EMember mem_or_call <$> memberAccess
-        , S.ECall mem_or_call <$> callParens ]
-      case mmem_or_call' of 
-        Nothing -> pure mem_or_call
-        Just mem_or_call' -> pure mem_or_call' 
+  go term
+  where 
+    go expr = do
+      mmem_or_call <- optional $ choice
+        [ S.EMember expr <$> memberAccess
+        , S.ECall expr <$> callParens ]
+      case mmem_or_call of 
+        Nothing -> pure expr
+        Just mem_or_call -> go mem_or_call
 
 
 exprTerm :: Parser S.Expr

@@ -54,6 +54,10 @@ jsParseSpec = do
       res <- testParser expr "string.split()"
       res `shouldBe` ECall string_split []
 
+    it "parses three level dot member call" $ do 
+      res <- testParser expr "string.split().length"
+      res `shouldBe` EMember (ECall string_split []) (EDotAccess "length")
+
   describe "identifier" $ do
     it "returns the identifier" $ do
       id <- testParser identifier "hello"
