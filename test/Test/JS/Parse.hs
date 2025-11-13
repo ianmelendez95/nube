@@ -40,13 +40,19 @@ jsParseSpec = do
       res <- testParser expr "\"hello world!\""
       res `shouldBe` EStringLit "hello world!"
     
+    let string_split = EMember (EVar "string") (EDotAccess "split")
+    
     it "parses dot member access" $ do 
       res <- testParser expr "string.split"
-      res `shouldBe` EMember (EVar "string") (EDotAccess "split")
+      res `shouldBe` string_split
     
     it "parses bracket member access" $ do
       res <- testParser expr "string['split']"
       res `shouldBe` EMember (EVar "string") (EBracketAccess (EStringLit "split")) 
+
+    it "parses dot member call" $ do 
+      res <- testParser expr "string.split()"
+      res `shouldBe` ECall string_split []
 
   describe "identifier" $ do
     it "returns the identifier" $ do

@@ -22,6 +22,7 @@ import Text.Megaparsec
     Parsec,
     choice,
     optional,
+    option,
     anySingle,
     between,
     (<|>),
@@ -93,11 +94,20 @@ const_assign = do
 expr :: Parser S.Expr
 expr = do
   term <- exprTerm
-  choice 
-    [ S.ECall term <$> callParens
-    , S.EMember term <$> memberAccess
-    , pure term
+  mmem_or_call <- optional $ choice
+    [ S.EMember term <$> memberAccess
+    , S.ECall term <$> callParens 
     ]
+  case mmem_or_call of 
+    Nothing -> pure term
+    Just mem_or_call -> do 
+      mmem_or_call' <- optional $ choice
+        [ S.EMember mem_or_call <$> memberAccess
+        , S.ECall mem_or_call <$> callParens ]
+      case mmem_or_call' of 
+        Nothing -> pure mem_or_call
+        Just mem_or_call' -> pure mem_or_call' 
+
 
 exprTerm :: Parser S.Expr
 exprTerm = try varExpr <|> stringLitExpr
