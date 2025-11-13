@@ -58,7 +58,6 @@ import Text.Megaparsec.Char.Lexer qualified as L
     space,
     symbol,
   )
-import Text.Megaparsec.Debug (dbg)
 
 type Parser = Parsec Void T.Text
 
