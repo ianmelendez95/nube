@@ -13,22 +13,12 @@ module JS.Parse
   )
 where
 
-import Control.Monad (join)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Data.Void (Void)
 import JS.Syntax qualified as S
-  ( EAccess (..),
-    Expr (..),
-    Fn (..),
-    IOp (..),
-    Script (..),
-    Stmt (..),
-    funText,
-    scriptText,
-  )
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
@@ -36,16 +26,12 @@ import Text.Megaparsec
     anySingle,
     between,
     choice,
-    endBy,
     errorBundlePretty,
     many,
     manyTill,
-    option,
     optional,
-    parseMaybe,
     runParser,
     sepBy,
-    some,
     (<|>),
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
