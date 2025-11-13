@@ -9,10 +9,11 @@ module JS.Parse
     bracketMember,
     expr,
     statement,
-    function
+    function,
   )
 where
 
+import Control.Monad (join)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -22,24 +23,31 @@ import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
     Parsec,
-    choice,
-    optional,
-    option,
     anySingle,
     between,
-    (<|>),
+    choice,
+    endBy,
     errorBundlePretty,
     many,
-    some,
     manyTill,
-    runParser,
+    option,
+    optional,
     parseMaybe,
+    runParser,
     sepBy,
-    endBy
+    some,
+    (<|>),
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
-import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment, decimal)
-import Control.Monad (join)
+import Text.Megaparsec.Char.Lexer qualified as L
+  ( charLiteral,
+    decimal,
+    lexeme,
+    skipBlockComment,
+    skipLineComment,
+    space,
+    symbol,
+  )
 
 type Parser = Parsec Void T.Text
 
@@ -87,10 +95,10 @@ asyncFunction = do
         _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
 
 function :: Parser S.Fn
-function = do 
+function = do
   _ <- symbol "function"
   S.Fn <$> identifier <*> fn_parameters <*> fn_body
-  where 
+  where
     fn_parameters :: Parser [T.Text]
     fn_parameters = between (symbol "(") (symbol ")") $ sepBy identifier (symbol ",")
 
@@ -108,7 +116,7 @@ statement = (try const_assign <|> return_stmt) <* symbol ";"
       S.SAssign var_name <$> expr
 
     return_stmt :: Parser S.Stmt
-    return_stmt = do 
+    return_stmt = do
       _ <- symbol "return"
       S.SReturn <$> expr
 
@@ -116,30 +124,34 @@ expr :: Parser S.Expr
 expr = do
   term <- exprTerm
   chain_access term
-  where 
+  where
     -- TODO solve this conundrum, eliminate the recursion!
     chain_access :: S.Expr -> Parser S.Expr
     chain_access last_term =
       maybe_mem_or_call last_term >>= maybe (pure last_term) chain_access
-    
+
     maybe_mem_or_call :: S.Expr -> Parser (Maybe S.Expr)
-    maybe_mem_or_call last_term = optional $ choice
-      [ S.EMember last_term <$> memberAccess
-      , S.ECall last_term <$> callParens ]
+    maybe_mem_or_call last_term =
+      optional $
+        choice
+          [ S.EMember last_term <$> memberAccess,
+            S.ECall last_term <$> callParens
+          ]
 
 exprTerm :: Parser S.Expr
-exprTerm = choice 
-  [ try varExpr 
-  , stringLitExpr
-  , S.ENumberLit <$> L.decimal
-  ]
+exprTerm =
+  choice
+    [ try varExpr,
+      stringLitExpr,
+      S.ENumberLit <$> L.decimal
+    ]
 
 callExpr :: Parser S.Expr
-callExpr = S.ECall <$> expr <*> callParens 
+callExpr = S.ECall <$> expr <*> callParens
 
 callParens :: Parser [S.Expr]
 callParens = between (symbol "(") (symbol ")") (sepBy arg (symbol ","))
-  where 
+  where
     arg = S.EVar <$> identifier
 
 varExpr :: Parser S.Expr
