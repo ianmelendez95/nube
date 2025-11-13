@@ -97,7 +97,7 @@ jsFunToHandler :: S.Fn -> T.Text
 jsFunToHandler fn = mkHandlerFun (S.fnName fn)
 
 jsFunToProxy :: S.Fn -> T.Text
-jsFunToProxy fn = mkProxyFun (S.fnName fn) (S.fnParams fn)
+jsFunToProxy fn = mkProxyFun (S.fnName fn) undefined
 
 mkHandlerFun :: T.Text -> T.Text 
 mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/js/handler.julius")

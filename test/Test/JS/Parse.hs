@@ -13,6 +13,7 @@ import Data.Text
 import JS.Syntax
   (Expr (..)
   , EAccess (..)
+  , Stmt (..)
   )
 import JS.Parse
   ( Parser (..),
@@ -20,7 +21,8 @@ import JS.Parse
     dotMember,
     bracketMember,
     stringLitExpr,
-    expr
+    expr,
+    statement
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -35,6 +37,11 @@ import Text.Megaparsec
   )
 
 jsParseSpec = do 
+  describe "statement" $ do 
+    it "parses assign statement" $ do
+      res <- testParser statement "const word = 'hello';"
+      res `shouldBe` SAssign "word" (EStringLit "hello")
+
   describe "expr" $ do 
     it "parses string literal" $ do 
       res <- testParser expr "\"hello world!\""

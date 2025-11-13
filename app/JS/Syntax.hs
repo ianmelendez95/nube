@@ -20,13 +20,14 @@ data Script = Script {
 
 data Fn = Fn { 
   fnName   :: T.Text,
-  fnParams :: T.Text,
+  fnParams :: [T.Text],
   fnStmts  :: [Stmt]
 }
 
 data Stmt 
   = SAssign T.Text Expr
   | SReturn Expr
+  deriving (Show, Eq)
 
 data Expr 
   = EVar T.Text
@@ -52,7 +53,7 @@ scriptText :: Script -> T.Text
 scriptText (Script name funcs) = T.unlines $ name : map funText funcs
 
 funText :: Fn -> T.Text
-funText (Fn name params body) = "async function " <> name <> params <> " " <> stmtText body
+funText (Fn name params body) = "async function " <> name <> undefined <> " " <> stmtText body
 
 stmtText :: [Stmt] -> T.Text
 stmtText = undefined

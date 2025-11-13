@@ -7,7 +7,8 @@ module JS.Parse
     identifier,
     dotMember,
     bracketMember,
-    expr
+    expr,
+    statement
   )
 where
 
@@ -28,10 +29,12 @@ import Text.Megaparsec
     (<|>),
     errorBundlePretty,
     many,
+    some,
     manyTill,
     runParser,
     parseMaybe,
-    sepBy
+    sepBy,
+    endBy
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
 import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment)
@@ -53,7 +56,7 @@ asyncFunction = do
   _ <- symbol "async" >> symbol "function"
   S.Fn
     <$> lexeme identifier
-    <*> lexeme parameters
+    <*> undefined
     <*> undefined
   where
     -- Parameters of the function
@@ -82,13 +85,25 @@ asyncFunction = do
         '}' -> pure pre_brace
         _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
 
+function :: Parser S.Fn
+function = do 
+  _ <- symbol "function"
+  undefined
+  -- S.Fn <$> identifier <$> fn_parameters <$> undefined
+  where 
+    fn_parameters :: Parser [T.Text]
+    fn_parameters = between (symbol "(") (symbol ")") $ sepBy identifier (symbol ",")
+
+    fn_body :: Parser [S.Stmt]
+    fn_body = between (symbol "{") (symbol "}") $ many statement
+
 statement :: Parser S.Stmt
-statement = undefined
+statement = const_assign <* symbol ";"
 
 const_assign :: Parser S.Stmt
 const_assign = do
   _ <- symbol "const"
-  var_name <- identifier
+  var_name <- lexeme identifier
   _ <- symbol "="
   S.SAssign var_name <$> expr
 
@@ -97,6 +112,7 @@ expr = do
   term <- exprTerm
   chain_access term
   where 
+    -- TODO solve this conundrum, eliminate the recursion!
     chain_access :: S.Expr -> Parser S.Expr
     chain_access last_term =
       maybe_mem_or_call last_term >>= maybe (pure last_term) chain_access
