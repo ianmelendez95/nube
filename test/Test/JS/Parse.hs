@@ -35,7 +35,7 @@ import Text.Megaparsec
   )
 
 jsParseSpec = do 
-  xdescribe "expr" $ do 
+  describe "expr" $ do 
     it "parses string literal" $ do 
       res <- testParser expr "\"hello world!\""
       res `shouldBe` EStringLit "hello world!"
