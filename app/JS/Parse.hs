@@ -20,6 +20,7 @@ import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
     Parsec,
+    choice,
     optional,
     anySingle,
     between,
@@ -92,16 +93,11 @@ const_assign = do
 expr :: Parser S.Expr
 expr = do
   term <- exprTerm
-  -- TODO use choice
-  mCall <- optional callParens
-  case mCall of 
-    Just args -> pure $ S.ECall term args
-    Nothing -> do 
-      mAccess <- optional memberAccess
-      case mAccess of 
-        Just access -> pure $ S.EMember term access
-        Nothing -> pure term
-
+  choice 
+    [ S.ECall term <$> callParens
+    , S.EMember term <$> memberAccess
+    , pure term
+    ]
 
 exprTerm :: Parser S.Expr
 exprTerm = try varExpr <|> stringLitExpr
