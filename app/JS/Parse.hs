@@ -8,7 +8,8 @@ module JS.Parse
     dotMember,
     bracketMember,
     expr,
-    statement
+    statement,
+    function
   )
 where
 
@@ -88,8 +89,7 @@ asyncFunction = do
 function :: Parser S.Fn
 function = do 
   _ <- symbol "function"
-  undefined
-  -- S.Fn <$> identifier <$> fn_parameters <$> undefined
+  S.Fn <$> identifier <*> fn_parameters <*> fn_body
   where 
     fn_parameters :: Parser [T.Text]
     fn_parameters = between (symbol "(") (symbol ")") $ sepBy identifier (symbol ",")

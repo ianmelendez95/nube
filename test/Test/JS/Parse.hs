@@ -14,6 +14,7 @@ import JS.Syntax
   (Expr (..)
   , EAccess (..)
   , Stmt (..)
+  , Fn (..)
   )
 import JS.Parse
   ( Parser (..),
@@ -22,7 +23,8 @@ import JS.Parse
     bracketMember,
     stringLitExpr,
     expr,
-    statement
+    statement,
+    function
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -37,6 +39,11 @@ import Text.Megaparsec
   )
 
 jsParseSpec = do 
+  describe "function" $ do 
+    it "parses simple function" $ do 
+      res <- testParser function "function foo(x) { return x; }"
+      res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
+
   describe "statement" $ do 
     it "parses assign statement" $ do
       res <- testParser statement "const word = 'hello';"
