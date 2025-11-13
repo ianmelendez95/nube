@@ -98,10 +98,13 @@ expr = do
   where 
     chain_access :: S.Expr -> Parser S.Expr
     chain_access last_term = do
-      mmem_or_call <- optional $ choice
-        [ S.EMember last_term <$> memberAccess
-        , S.ECall last_term <$> callParens ]
+      mmem_or_call <- maybe_mem_or_call last_term
       maybe (pure last_term) chain_access mmem_or_call
+    
+    maybe_mem_or_call :: S.Expr -> Parser (Maybe S.Expr)
+    maybe_mem_or_call last_term = optional $ choice
+      [ S.EMember last_term <$> memberAccess
+      , S.ECall last_term <$> callParens ]
 
 exprTerm :: Parser S.Expr
 exprTerm = try varExpr <|> stringLitExpr
