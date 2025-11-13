@@ -58,6 +58,7 @@ import Text.Megaparsec.Char.Lexer qualified as L
     space,
     symbol,
   )
+import Text.Megaparsec.Debug (dbg)
 
 type Parser = Parsec Void T.Text
 
@@ -131,7 +132,7 @@ statement = (try const_assign <|> return_stmt) <* symbol ";"
       S.SReturn <$> expr
 
 expr :: Parser S.Expr
-expr = makeExprParser term exprTable
+expr = makeExprParser (lexeme term) exprTable
   where
     term = do
       t <- termTerm
@@ -146,8 +147,8 @@ expr = makeExprParser term exprTable
     maybe_mem_or_call last_term =
       optional $
         choice
-          [ S.EMember last_term <$> memberAccess,
-            S.ECall last_term <$> callParens
+          [ S.EMember last_term <$> try memberAccess,
+            S.ECall last_term <$> try callParens
           ]
 
     termTerm =
