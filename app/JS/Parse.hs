@@ -94,14 +94,14 @@ const_assign = do
 expr :: Parser S.Expr
 expr = do
   term <- exprTerm
-  go term
+  chain_access term
   where 
-    go expr = do
+    chain_access :: S.Expr -> Parser S.Expr
+    chain_access last_term = do
       mmem_or_call <- optional $ choice
-        [ S.EMember expr <$> memberAccess
-        , S.ECall expr <$> callParens ]
-      maybe (pure expr) go mmem_or_call
-
+        [ S.EMember last_term <$> memberAccess
+        , S.ECall last_term <$> callParens ]
+      maybe (pure last_term) chain_access mmem_or_call
 
 exprTerm :: Parser S.Expr
 exprTerm = try varExpr <|> stringLitExpr
