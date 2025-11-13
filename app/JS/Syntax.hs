@@ -29,6 +29,7 @@ data Fn = Fn
 data Stmt
   = SAssign T.Text Expr
   | SReturn Expr
+  | SExpr Expr
   deriving (Eq)
 
 data Expr

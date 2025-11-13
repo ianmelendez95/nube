@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Test.JS.Parse
+module JS.TestParse
   ( jsParseSpec,
   )
 where

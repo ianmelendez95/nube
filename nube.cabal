@@ -88,6 +88,7 @@ library
         Util.Aeson
         JS.Parse
         JS.Syntax
+        JS.Transpile
     
     build-depends:    
         base ^>=4.21.0.0
@@ -114,7 +115,8 @@ test-suite test
     main-is:            Test.hs
 
     other-modules: 
-        Test.JS.Parse
+        JS.TestParse
+        JS.TestTranspile
 
     build-depends:  
         base ^>=4.21.0.0
