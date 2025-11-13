@@ -98,14 +98,19 @@ function = do
     fn_body = between (symbol "{") (symbol "}") $ many statement
 
 statement :: Parser S.Stmt
-statement = const_assign <* symbol ";"
+statement = (try const_assign <|> return_stmt) <* symbol ";"
+  where
+    const_assign :: Parser S.Stmt
+    const_assign = do
+      _ <- symbol "const"
+      var_name <- lexeme identifier
+      _ <- symbol "="
+      S.SAssign var_name <$> expr
 
-const_assign :: Parser S.Stmt
-const_assign = do
-  _ <- symbol "const"
-  var_name <- lexeme identifier
-  _ <- symbol "="
-  S.SAssign var_name <$> expr
+    return_stmt :: Parser S.Stmt
+    return_stmt = do 
+      _ <- symbol "return"
+      S.SReturn <$> expr
 
 expr :: Parser S.Expr
 expr = do

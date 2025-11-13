@@ -41,6 +41,10 @@ jsParseSpec = do
     it "parses assign statement" $ do
       res <- testParser statement "const word = 'hello';"
       res `shouldBe` SAssign "word" (EStringLit "hello")
+    
+    it "parses return statement" $ do 
+      res <- testParser statement "return x;"
+      res `shouldBe` SReturn (EVar "x")
 
   describe "expr" $ do 
     it "parses string literal" $ do 
