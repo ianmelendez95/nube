@@ -100,9 +100,7 @@ expr = do
       mmem_or_call <- optional $ choice
         [ S.EMember expr <$> memberAccess
         , S.ECall expr <$> callParens ]
-      case mmem_or_call of 
-        Nothing -> pure expr
-        Just mem_or_call -> go mem_or_call
+      maybe (pure expr) go mmem_or_call
 
 
 exprTerm :: Parser S.Expr
