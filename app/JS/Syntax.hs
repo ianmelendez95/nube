@@ -1,51 +1,57 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module JS.Syntax
+  ( Script (..),
+    Fn (..),
+    Stmt (..),
+    Expr (..),
+    EAccess (..),
+    scriptText,
+    funText,
+    IOp (..),
+  )
+where
 
-module JS.Syntax (
-  Script(..),
-  Fn(..),
-  Stmt(..),
-  Expr(..),
-  EAccess(..),
-  scriptText,
-  funText
-) where 
+import Data.Text qualified as T
 
-import qualified Data.Text as T
+data Script = Script
+  { scriptName :: T.Text, -- file basename
+    scriptFuns :: [Fn]
+  }
 
-data Script = Script {
-  scriptName :: T.Text,  -- file basename
-  scriptFuns :: [Fn]
-}
+data Fn = Fn
+  { fnName :: T.Text,
+    fnParams :: [T.Text],
+    fnStmts :: [Stmt]
+  }
+  deriving (Eq)
 
-data Fn = Fn { 
-  fnName   :: T.Text,
-  fnParams :: [T.Text],
-  fnStmts  :: [Stmt]
-} deriving (Eq)
-
-data Stmt 
+data Stmt
   = SAssign T.Text Expr
   | SReturn Expr
   deriving (Eq)
 
-data Expr 
+data Expr
   = EVar T.Text
   | EStringLit T.Text
   | ENumberLit Int
-  | ECall Expr [Expr] 
+  | ECall Expr [Expr]
   | EMember Expr EAccess
+  | EInfix IOp Expr Expr
   deriving (Eq)
 
-data EAccess 
+data IOp = IPlus
+  deriving (Show, Eq)
+
+data EAccess
   = EDotAccess T.Text
   | EBracketAccess Expr
   deriving (Show, Eq)
 
-instance Show Script where 
+instance Show Script where
   show = T.unpack . scriptText
 
-instance Show Fn where 
+instance Show Fn where
   show = T.unpack . funText
 
 instance Show Stmt where
@@ -59,9 +65,9 @@ scriptText (Script name funcs) = T.unlines $ name : map funText funcs
 
 funText :: Fn -> T.Text
 funText (Fn name params body) = "function " <> name <> params_text <> " {\n" <> body_text <> "\n}"
-  where 
+  where
     params_text = "(" <> T.intercalate ", " params <> ")"
-    body_text = T.intercalate ";\n  " (map stmtText body) 
+    body_text = T.intercalate ";\n  " (map stmtText body)
 
 stmtText :: Stmt -> T.Text
 stmtText (SAssign var rhs) = "const " <> var <> " = " <> exprText rhs <> ";"
@@ -73,7 +79,11 @@ exprText (EStringLit s) = "\"" <> s <> "\""
 exprText (ENumberLit n) = T.show n
 exprText (ECall lhs args) = exprText lhs <> "(" <> T.intercalate ", " (map exprText args) <> ")"
 exprText (EMember lhs rhs) = exprText lhs <> accessText rhs
+exprText (EInfix op lhs rhs) = exprText lhs <> opText op <> exprText rhs
 
 accessText :: EAccess -> T.Text
 accessText (EDotAccess v) = "." <> v
 accessText (EBracketAccess rhs) = "[" <> exprText rhs <> "]"
+
+opText :: IOp -> T.Text
+opText IPlus = "+"

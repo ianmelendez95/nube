@@ -24,6 +24,7 @@ import JS.Syntax
     Expr (..),
     Fn (..),
     Stmt (..),
+    IOp (..)
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -78,6 +79,10 @@ jsParseSpec = do
     it "parses simple var arg call" $ do
       res <- testParser expr "hello(myVar)"
       res `shouldBe` ECall (EVar "hello") [EVar "myVar"]
+
+    it "parses simple add" $ do
+      res <- testParser expr "4 + 2"
+      res `shouldBe` EInfix IPlus (ENumberLit 4) (ENumberLit 2)
 
   describe "identifier" $ do
     it "returns the identifier" $ do

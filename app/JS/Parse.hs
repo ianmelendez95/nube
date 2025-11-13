@@ -14,11 +14,21 @@ module JS.Parse
 where
 
 import Control.Monad (join)
+import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Data.Void (Void)
 import JS.Syntax qualified as S
+  ( EAccess (..),
+    Expr (..),
+    Fn (..),
+    IOp (..),
+    Script (..),
+    Stmt (..),
+    funText,
+    scriptText,
+  )
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
@@ -121,10 +131,12 @@ statement = (try const_assign <|> return_stmt) <* symbol ";"
       S.SReturn <$> expr
 
 expr :: Parser S.Expr
-expr = do
-  term <- exprTerm
-  chain_access term
+expr = makeExprParser term exprTable
   where
+    term = do
+      t <- termTerm
+      chain_access t
+
     -- TODO solve this conundrum, eliminate the recursion!
     chain_access :: S.Expr -> Parser S.Expr
     chain_access last_term =
@@ -138,13 +150,20 @@ expr = do
             S.ECall last_term <$> callParens
           ]
 
-exprTerm :: Parser S.Expr
-exprTerm =
-  choice
-    [ try varExpr,
-      stringLitExpr,
-      S.ENumberLit <$> L.decimal
-    ]
+    termTerm =
+      choice
+        [ try varExpr,
+          stringLitExpr,
+          S.ENumberLit <$> L.decimal
+        ]
+
+exprTable :: [[Operator Parser S.Expr]]
+exprTable =
+  [ [binary "+" (S.EInfix S.IPlus)]
+  ]
+  where
+    binary :: T.Text -> (S.Expr -> S.Expr -> S.Expr) -> Operator Parser S.Expr
+    binary name f = InfixL (f <$ symbol name)
 
 callParens :: Parser [S.Expr]
 callParens = between (symbol "(") (symbol ")") (sepBy arg (symbol ","))
