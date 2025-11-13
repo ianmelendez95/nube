@@ -91,6 +91,10 @@ jsParseSpec = do
       prop <- testParser bracketMember "['someProp']"
       prop `shouldBe` EBracketAccess (EStringLit "someProp")
 
+    it "parses number lit bracket" $ do 
+      prop <- testParser bracketMember "[5]"
+      prop `shouldBe` EBracketAccess (ENumberLit 5)
+
   describe "stringLitExpr" $ do
     it "parses double quoted" $ do
       slit <- testParser stringLitExpr "\"hello world!\""

@@ -32,7 +32,7 @@ data Stmt
 data Expr 
   = EVar T.Text
   | EStringLit T.Text
-  | ENumberLit Double
+  | ENumberLit Int
   | ECall Expr [Expr] 
   | EMember Expr EAccess
   deriving (Eq)

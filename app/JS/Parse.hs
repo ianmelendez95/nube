@@ -38,7 +38,7 @@ import Text.Megaparsec
     endBy
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
-import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment)
+import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment, decimal)
 import Control.Monad (join)
 
 type Parser = Parsec Void T.Text
@@ -128,7 +128,11 @@ expr = do
       , S.ECall last_term <$> callParens ]
 
 exprTerm :: Parser S.Expr
-exprTerm = try varExpr <|> stringLitExpr
+exprTerm = choice 
+  [ try varExpr 
+  , stringLitExpr
+  , S.ENumberLit <$> L.decimal
+  ]
 
 callExpr :: Parser S.Expr
 callExpr = S.ECall <$> expr <*> callParens 
