@@ -35,6 +35,7 @@ import Text.Megaparsec
   )
 import Text.Megaparsec.Char (letterChar, space1, string)
 import Text.Megaparsec.Char.Lexer qualified as L (charLiteral, lexeme, space, symbol, skipLineComment, skipBlockComment)
+import Control.Monad (join)
 
 type Parser = Parsec Void T.Text
 
@@ -97,9 +98,8 @@ expr = do
   chain_access term
   where 
     chain_access :: S.Expr -> Parser S.Expr
-    chain_access last_term = do
-      mmem_or_call <- maybe_mem_or_call last_term
-      maybe (pure last_term) chain_access mmem_or_call
+    chain_access last_term =
+      maybe_mem_or_call last_term >>= maybe (pure last_term) chain_access
     
     maybe_mem_or_call :: S.Expr -> Parser (Maybe S.Expr)
     maybe_mem_or_call last_term = optional $ choice
