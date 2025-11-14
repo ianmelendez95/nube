@@ -89,7 +89,7 @@ accessText (MDotAccess v) = "." <> v
 accessText (MBracketAccess rhs) = "[" <> exprText rhs <> "]"
 
 dotMembers :: Expr -> [T.Text] -> Expr
-dotMembers = foldr (flip dotMemberExpr)
+dotMembers = foldl dotMemberExpr
 
 dotMemberExpr :: Expr -> T.Text -> Expr
 dotMemberExpr lhs var = EMember lhs (MDotAccess var)

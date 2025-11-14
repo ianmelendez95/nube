@@ -28,4 +28,16 @@ jsTranspileSpec =
               [S.dotMembers (S.EVar "_ctx") ["frame", "x"]]
           )
 
+    it "transpiles var dot member" $ do
+      let res = transpileStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar"))
+      res
+        `shouldBeRight` S.SExpr
+          ( S.ECall
+              ( S.EMember
+                  ctx_var_name
+                  (S.MDotAccess "return")
+              )
+              [S.dotMembers (S.EVar "_ctx") ["frame", "foo", "bar"]]
+          )
+
 shouldBeRight lhs = (lhs `shouldBe`) . Right
