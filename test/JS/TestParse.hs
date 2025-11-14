@@ -18,10 +18,10 @@ import JS.Parse
     stringLitExpr,
   )
 import JS.Syntax
-  ( EAccess (..),
-    Expr (..),
+  ( Expr (..),
     Fn (..),
     IOp (..),
+    MAccess (..),
     Stmt (..),
   )
 import Test.Hspec
@@ -56,7 +56,7 @@ jsParseSpec = do
       res <- testParser expr "\"hello world!\""
       res `shouldBe` EStringLit "hello world!"
 
-    let string_split = EMember (EVar "string") (EDotAccess "split")
+    let string_split = EMember (EVar "string") (MDotAccess "split")
 
     it "parses dot member access" $ do
       res <- testParser expr "string.split"
@@ -64,7 +64,7 @@ jsParseSpec = do
 
     it "parses bracket member access" $ do
       res <- testParser expr "string['split']"
-      res `shouldBe` EMember (EVar "string") (EBracketAccess (EStringLit "split"))
+      res `shouldBe` EMember (EVar "string") (MBracketAccess (EStringLit "split"))
 
     it "parses dot member call" $ do
       res <- testParser expr "string.split()"
@@ -72,7 +72,7 @@ jsParseSpec = do
 
     it "parses three level dot member call" $ do
       res <- testParser expr "string.split().length"
-      res `shouldBe` EMember (ECall string_split []) (EDotAccess "length")
+      res `shouldBe` EMember (ECall string_split []) (MDotAccess "length")
 
     it "parses simple var arg call" $ do
       res <- testParser expr "hello(myVar)"
@@ -87,8 +87,8 @@ jsParseSpec = do
       res
         `shouldBe` ECall
           ( EMember
-              (EMember (EVar "words") (EBracketAccess (ENumberLit 0)))
-              (EDotAccess "slice")
+              (EMember (EVar "words") (MBracketAccess (ENumberLit 0)))
+              (MDotAccess "slice")
           )
           [ENumberLit 1]
 
@@ -100,16 +100,16 @@ jsParseSpec = do
   describe "dotMember" $ do
     it "returns the property name" $ do
       prop <- testParser dotMember ".someProp"
-      prop `shouldBe` EDotAccess "someProp"
+      prop `shouldBe` MDotAccess "someProp"
 
   describe "bracketMember" $ do
     it "parses simple bracket" $ do
       prop <- testParser bracketMember "['someProp']"
-      prop `shouldBe` EBracketAccess (EStringLit "someProp")
+      prop `shouldBe` MBracketAccess (EStringLit "someProp")
 
     it "parses number lit bracket" $ do
       prop <- testParser bracketMember "[5]"
-      prop `shouldBe` EBracketAccess (ENumberLit 5)
+      prop `shouldBe` MBracketAccess (ENumberLit 5)
 
   describe "stringLitExpr" $ do
     it "parses double quoted" $ do

@@ -1,5 +1,6 @@
 module JS.TestTranspile (jsTranspileSpec) where
 
+import Data.Either (either)
 import JS.Syntax qualified as S
 import JS.Transpile
   ( transpileStatement,
@@ -16,4 +17,6 @@ jsTranspileSpec =
   describe "transpileStmt" $ do
     it "transpiles return" $ do
       let res = transpileStatement (S.SReturn (S.EVar "x"))
-      res `shouldBe` S.SExpr (S.ECall (S.EMember (S.EVar "ctx") (S.EDotAccess "return")) [S.EVar "x"])
+      res `shouldBeRight` S.SExpr (S.ECall (S.EMember (S.EVar "ctx") (S.MDotAccess "return")) [S.EVar "x"])
+
+shouldBeRight lhs = (lhs `shouldBe`) . Right

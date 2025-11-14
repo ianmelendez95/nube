@@ -162,16 +162,16 @@ varExpr = S.EVar <$> identifier
 stringLitExpr :: Parser S.Expr
 stringLitExpr = S.EStringLit <$> stringLiteral
 
-memberAccess :: Parser S.EAccess
+memberAccess :: Parser S.MAccess
 memberAccess = try dotMember <|> bracketMember
 
-dotMember :: Parser S.EAccess
+dotMember :: Parser S.MAccess
 dotMember = do
   _ <- symbol "."
-  S.EDotAccess <$> identifier
+  S.MDotAccess <$> identifier
 
-bracketMember :: Parser S.EAccess
-bracketMember = S.EBracketAccess <$> between (symbol "[") (symbol "]") expr
+bracketMember :: Parser S.MAccess
+bracketMember = S.MBracketAccess <$> between (symbol "[") (symbol "]") expr
 
 identifier :: Parser T.Text
 identifier = do

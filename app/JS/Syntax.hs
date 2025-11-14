@@ -3,7 +3,7 @@ module JS.Syntax
     Fn (..),
     Stmt (..),
     Expr (..),
-    EAccess (..),
+    MAccess (..),
     scriptText,
     funText,
     IOp (..),
@@ -36,16 +36,16 @@ data Expr
   | EStringLit T.Text
   | ENumberLit Int
   | ECall Expr [Expr]
-  | EMember Expr EAccess
+  | EMember Expr MAccess
   | EInfix IOp Expr Expr
   deriving (Eq)
 
 data IOp = IPlus
   deriving (Show, Eq)
 
-data EAccess
-  = EDotAccess T.Text
-  | EBracketAccess Expr
+data MAccess
+  = MDotAccess T.Text
+  | MBracketAccess Expr
   deriving (Show, Eq)
 
 instance Show Script where
@@ -82,9 +82,9 @@ exprText (ECall lhs args) = exprText lhs <> "(" <> T.intercalate ", " (map exprT
 exprText (EMember lhs rhs) = exprText lhs <> accessText rhs
 exprText (EInfix op lhs rhs) = exprText lhs <> opText op <> exprText rhs
 
-accessText :: EAccess -> T.Text
-accessText (EDotAccess v) = "." <> v
-accessText (EBracketAccess rhs) = "[" <> exprText rhs <> "]"
+accessText :: MAccess -> T.Text
+accessText (MDotAccess v) = "." <> v
+accessText (MBracketAccess rhs) = "[" <> exprText rhs <> "]"
 
 opText :: IOp -> T.Text
 opText IPlus = "+"
