@@ -19,6 +19,7 @@ import Polysemy.Error
   )
 import Polysemy.Reader
   ( Reader,
+    asks,
     runReader,
   )
 
@@ -32,21 +33,16 @@ type Transpiler a = Sem '[Reader TContext, Error String] a
 
 runTranspile :: S.Expr -> Either String S.Expr
 runTranspile e =
-  let err_sem :: Sem '[Error String] S.Expr
-      err_sem = runReader (TContext ["capitalizeWord"]) (transpileSem e)
-
-      res_sem :: Sem '[] (Either String S.Expr)
-      res_sem = runError err_sem
-
-      res :: Either String S.Expr
-      res = run res_sem
-   in res
+  run . runError . runReader (TContext ["capitalizeWord"]) $ transpileSem e
 
 --  in run . runError . runReader (TContext ["capitalizeWord"]) $ ctx
 
 transpileSem :: S.Expr -> Transpiler S.Expr
-transpileSem (S.EVar "capitalizeWord") = throw @String "fn exists"
-transpileSem e@(S.EVar v) = pure e
+transpileSem e@(S.EVar v) = do
+  fn_names <- asks fnNames
+  if elem v fn_names
+    then throw @String "fn exists"
+    else pure e
 
 splitStmtContinuations :: [S.Stmt] -> [Cont]
 splitStmtContinuations stmts = undefined
