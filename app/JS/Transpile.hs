@@ -19,6 +19,8 @@ transpileExpr (S.ECall lhs args) =
   S.ECall <$> transpileExpr lhs <*> traverse transpileExpr args
 transpileExpr (S.EMember lhs (S.MBracketAccess rhs)) =
   S.EMember <$> transpileExpr lhs <*> (S.MBracketAccess <$> transpileExpr rhs)
+transpileExpr (S.EMember lhs dotAccess) =
+  S.EMember <$> transpileExpr lhs <*> pure dotAccess
 transpileExpr (S.EInfix op lhs rhs) =
   S.EInfix op <$> transpileExpr lhs <*> transpileExpr rhs
 transpileExpr e = Right e
