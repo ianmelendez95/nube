@@ -1,4 +1,8 @@
-module JS.Transpile where
+module JS.Transpile
+  ( ctx_var,
+    transpileStatement,
+  )
+where
 
 import Data.Text qualified as T
 import JS.Syntax qualified as S
@@ -6,6 +10,7 @@ import JS.Syntax qualified as S
 transpileStatement :: S.Stmt -> Either String S.Stmt
 transpileStatement (S.SReturn e) = Right $ ctxReturn e
 transpileStatement (S.SConst var rhs) = Right $ ctxAssign var rhs
+transpileStatement (S.SAssign _ _) = Left "Reassignment is not allowed, use a new const var"
 transpileStatement (S.SExpr _) = Left "Expression statements are not allowed"
 
 ctxAssign :: T.Text -> S.Expr -> S.Stmt
