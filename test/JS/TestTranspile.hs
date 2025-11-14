@@ -16,4 +16,4 @@ jsTranspileSpec =
   describe "transpileStmt" $ do
     it "transpiles return" $ do
       let res = transpileStatement (S.SReturn (S.EVar "x"))
-      res `shouldBe` (S.SExpr (S.ECall (S.EMember (S.EVar "ctx") (S.EDotAccess "return")) [S.EVar "x"]))
+      res `shouldBe` S.SExpr (S.ECall (S.EMember (S.EVar "ctx") (S.EDotAccess "return")) [S.EVar "x"])
