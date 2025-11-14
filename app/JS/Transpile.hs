@@ -1,11 +1,17 @@
 module JS.Transpile
   ( ctx_var_name,
     transpileStatement,
+    splitStmtContinuations,
   )
 where
 
 import Data.Text qualified as T
 import JS.Syntax qualified as S
+
+data Cont = Cont [S.Stmt]
+
+splitStmtContinuations :: [S.Stmt] -> [Cont]
+splitStmtContinuations stmts = undefined
 
 transpileStatement :: S.Stmt -> Either String S.Stmt
 transpileStatement (S.SReturn e) = transpileReturn e

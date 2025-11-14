@@ -103,6 +103,7 @@ library
         , mtl
         , shakespeare
         , text
+        , split
 
     -- Directories containing source files.
     hs-source-dirs:   app
