@@ -105,7 +105,7 @@ library
         , shakespeare
         , text
         , split
-        -- , polysemy
+        , polysemy
         -- , polysemy-plugin
 
     -- Directories containing source files.
