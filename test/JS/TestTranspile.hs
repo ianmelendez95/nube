@@ -3,8 +3,10 @@ module JS.TestTranspile (jsTranspileSpec) where
 import Data.Either (either)
 import JS.Syntax qualified as S
 import JS.Transpile
-  ( ctx_var_name,
-    runTranspile,
+  ( TContext (..),
+    ctx_var_name,
+    runTranspiler,
+    transpileSem,
     transpileStatement,
   )
 import Test.Hspec
@@ -18,11 +20,11 @@ import Test.Hspec
 jsTranspileSpec = do
   describe "transpileSem" $ do
     it "transpiles valid var" $ do
-      let res = runTranspile (S.EVar "x")
+      let res = runTranspiler (TContext ["capitalizeWord"]) $ transpileSem (S.EVar "x")
       res `shouldBeRight` S.EVar "x"
 
     it "transpiles with 'fn exists' error" $ do
-      let res = runTranspile (S.EVar "capitalizeWord")
+      let res = runTranspiler (TContext ["capitalizeWord"]) $ transpileSem (S.EVar "capitalizeWord")
       res `shouldBe` Left "fn exists"
 
   describe "transpileStmt" $ do

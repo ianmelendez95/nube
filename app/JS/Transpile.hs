@@ -1,8 +1,10 @@
 module JS.Transpile
-  ( ctx_var_name,
+  ( TContext (..),
+    transpileSem,
+    ctx_var_name,
     transpileStatement,
     splitStmtContinuations,
-    runTranspile,
+    runTranspiler,
   )
 where
 
@@ -31,11 +33,8 @@ data TContext = TContext
 
 type Transpiler a = Sem '[Reader TContext, Error String] a
 
-runTranspile :: S.Expr -> Either String S.Expr
-runTranspile e =
-  run . runError . runReader (TContext ["capitalizeWord"]) $ transpileSem e
-
---  in run . runError . runReader (TContext ["capitalizeWord"]) $ ctx
+runTranspiler :: TContext -> Transpiler a -> Either String a
+runTranspiler context = run . runError . runReader context
 
 transpileSem :: S.Expr -> Transpiler S.Expr
 transpileSem e@(S.EVar v) = do
