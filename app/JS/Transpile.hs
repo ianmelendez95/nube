@@ -2,6 +2,7 @@ module JS.Transpile
   ( ctx_var_name,
     transpileStatement,
     splitStmtContinuations,
+    runTranspile,
   )
 where
 
@@ -9,12 +10,16 @@ import Data.Text qualified as T
 import JS.Syntax qualified as S
 import Polysemy
   ( Sem,
+    run,
   )
 import Polysemy.Error
   ( Error,
+    runError,
+    throw,
   )
 import Polysemy.Reader
   ( Reader,
+    runReader,
   )
 
 data Cont = Cont [S.Stmt]
@@ -25,8 +30,23 @@ data TContext = TContext
 
 type Transpiler a = Sem '[Reader TContext, Error String] a
 
+runTranspile :: S.Expr -> Either String S.Expr
+runTranspile e =
+  let err_sem :: Sem '[Error String] S.Expr
+      err_sem = runReader (TContext ["capitalizeWord"]) (transpileSem e)
+
+      res_sem :: Sem '[] (Either String S.Expr)
+      res_sem = runError err_sem
+
+      res :: Either String S.Expr
+      res = run res_sem
+   in res
+
+--  in run . runError . runReader (TContext ["capitalizeWord"]) $ ctx
+
 transpileSem :: S.Expr -> Transpiler S.Expr
-transpileSem = undefined
+transpileSem (S.EVar "capitalizeWord") = throw @String "fn exists"
+transpileSem e@(S.EVar v) = pure e
 
 splitStmtContinuations :: [S.Stmt] -> [Cont]
 splitStmtContinuations stmts = undefined

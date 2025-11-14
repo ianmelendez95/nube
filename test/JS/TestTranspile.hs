@@ -4,6 +4,7 @@ import Data.Either (either)
 import JS.Syntax qualified as S
 import JS.Transpile
   ( ctx_var_name,
+    runTranspile,
     transpileStatement,
   )
 import Test.Hspec
@@ -14,7 +15,16 @@ import Test.Hspec
     xdescribe,
   )
 
-jsTranspileSpec =
+jsTranspileSpec = do
+  describe "transpileSem" $ do
+    it "transpiles valid var" $ do
+      let res = runTranspile (S.EVar "x")
+      res `shouldBeRight` S.EVar "x"
+
+    it "transpiles with 'fn exists' error" $ do
+      let res = runTranspile (S.EVar "capitalizeWord")
+      res `shouldBe` Left "fn exists"
+
   describe "transpileStmt" $ do
     it "transpiles simple return var" $ do
       let res = transpileStatement (S.SReturn (S.EVar "x"))
