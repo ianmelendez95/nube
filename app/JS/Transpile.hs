@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module JS.Transpile where
 
 import Data.Text qualified as T

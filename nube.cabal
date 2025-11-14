@@ -110,6 +110,9 @@ library
     -- Base language which the package is written in.
     default-language: GHC2021
 
+    default-extensions:
+        OverloadedStrings
+
 test-suite test
     type:               exitcode-stdio-1.0
     main-is:            Test.hs
@@ -129,3 +132,6 @@ test-suite test
     hs-source-dirs:     test
 
     default-language:   GHC2021
+
+    default-extensions:
+        OverloadedStrings

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module JS.TestParse
   ( jsParseSpec,
   )

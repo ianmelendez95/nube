@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module JS.Parse
   ( Parser,
     stringLitExpr,
