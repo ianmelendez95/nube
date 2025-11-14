@@ -79,7 +79,8 @@ library
     -- Import common warning flags.
     import:           warnings
 
-    ghc-options:      -O0
+    ghc-options:      
+        -O0
 
     exposed-modules: 
         Compile
@@ -104,7 +105,8 @@ library
         , shakespeare
         , text
         , split
-        , polysemy
+        -- , polysemy
+        -- , polysemy-plugin
 
     -- Directories containing source files.
     hs-source-dirs:   app
@@ -114,16 +116,16 @@ library
 
     default-extensions:
         OverloadedStrings
-        DataKinds
-        FlexibleContexts
-        GADTs
-        LambdaCase
-        PolyKinds
-        RankNTypes
-        ScopedTypeVariables
-        TypeApplications
-        TypeOperators
-        TypeFamilies
+        -- DataKinds
+        -- FlexibleContexts
+        -- GADTs
+        -- LambdaCase
+        -- PolyKinds
+        -- RankNTypes
+        -- ScopedTypeVariables
+        -- TypeApplications
+        -- TypeOperators
+        -- TypeFamilies
 
 test-suite test
     type:               exitcode-stdio-1.0
