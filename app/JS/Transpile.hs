@@ -8,22 +8,25 @@ module JS.Transpile
   )
 where
 
+import Control.Monad.Except
+import Control.Monad.Reader
 import Data.Text qualified as T
 import JS.Syntax qualified as S
-import Polysemy
-  ( Sem,
-    run,
-  )
-import Polysemy.Error
-  ( Error,
-    runError,
-    throw,
-  )
-import Polysemy.Reader
-  ( Reader,
-    asks,
-    runReader,
-  )
+
+-- import Polysemy
+--   ( Sem,
+--     run,
+--   )
+-- import Polysemy.Error
+--   ( Error,
+--     runError,
+--     throw,
+--   )
+-- import Polysemy.Reader
+--   ( Reader,
+--     asks,
+--     runReader,
+--   )
 
 data Cont = Cont [S.Stmt]
 
@@ -31,16 +34,18 @@ data TContext = TContext
   { fnNames :: [T.Text]
   }
 
-type Transpiler a = Sem '[Reader TContext, Error String] a
+-- type Transpiler a = Sem '[Reader TContext, Error String] a
+
+type Transpiler a = ReaderT TContext (Except String) a
 
 runTranspiler :: TContext -> Transpiler a -> Either String a
-runTranspiler context = run . runError . runReader context
+runTranspiler context transpiler = runExcept $ runReaderT transpiler context
 
 transpileSem :: S.Expr -> Transpiler S.Expr
 transpileSem e@(S.EVar v) = do
   fn_names <- asks fnNames
   if elem v fn_names
-    then throw @String "fn exists"
+    then throwError "fn exists"
     else pure e
 
 splitStmtContinuations :: [S.Stmt] -> [Cont]
