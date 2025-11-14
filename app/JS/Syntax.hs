@@ -7,6 +7,8 @@ module JS.Syntax
     scriptText,
     funText,
     IOp (..),
+    dotMemberExpr,
+    dotMembers,
   )
 where
 
@@ -85,6 +87,12 @@ exprText (EInfix op lhs rhs) = exprText lhs <> opText op <> exprText rhs
 accessText :: MAccess -> T.Text
 accessText (MDotAccess v) = "." <> v
 accessText (MBracketAccess rhs) = "[" <> exprText rhs <> "]"
+
+dotMembers :: Expr -> [T.Text] -> Expr
+dotMembers = foldr (flip dotMemberExpr)
+
+dotMemberExpr :: Expr -> T.Text -> Expr
+dotMemberExpr lhs var = EMember lhs (MDotAccess var)
 
 opText :: IOp -> T.Text
 opText IPlus = "+"

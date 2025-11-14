@@ -8,7 +8,7 @@ import Data.Text qualified as T
 import JS.Syntax qualified as S
 
 transpileStatement :: S.Stmt -> Either String S.Stmt
-transpileStatement (S.SReturn e) = ctxReturn <$> transpileExpr e
+transpileStatement (S.SReturn e) = transpileReturn e
 transpileStatement (S.SConst var rhs) = transpileAssign var rhs
 transpileStatement (S.SAssign _ _) = Left "Reassignment is not allowed, use a new const var"
 transpileStatement (S.SExpr _) = Left "Expression statements are not allowed"
@@ -27,13 +27,18 @@ transpileAssign :: T.Text -> S.Expr -> Either String S.Stmt
 transpileAssign var rhs = S.SAssign <$> transpileVar var <*> Right rhs
 
 transpileVar :: T.Text -> Either String S.Expr
-transpileVar v = Right $ S.EMember (ctxDotMember v) (S.MDotAccess v)
+transpileVar v = Right $ ctxFrameVar v
 
-ctxReturn :: S.Expr -> S.Stmt
-ctxReturn e = S.SExpr (S.ECall (ctxDotMember "return") [e])
+transpileReturn :: S.Expr -> Either String S.Stmt
+transpileReturn e = do
+  e' <- transpileExpr e
+  pure $ S.SExpr (S.ECall (ctxDotMember "return") [e'])
+
+ctxFrameVar :: T.Text -> S.Expr
+ctxFrameVar v = S.dotMembers ctx_var_name ["frame", v]
 
 ctxDotMember :: T.Text -> S.Expr
-ctxDotMember prop = S.EMember ctx_var_name (S.MDotAccess prop)
+ctxDotMember = S.dotMemberExpr ctx_var_name
 
 ctx_var_name :: S.Expr
 ctx_var_name = S.EVar "_ctx"
