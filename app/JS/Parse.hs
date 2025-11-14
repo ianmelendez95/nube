@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module JS.Parse
   ( Parser,
     stringLitExpr,
@@ -109,7 +111,7 @@ statement = (try const_assign <|> return_stmt) <* symbol ";"
       _ <- symbol "const"
       var_name <- lexeme identifier
       _ <- symbol "="
-      S.SAssign var_name <$> expr
+      S.SConst var_name <$> expr
 
     return_stmt :: Parser S.Stmt
     return_stmt = do

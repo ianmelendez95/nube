@@ -25,7 +25,8 @@ data Fn = Fn
   deriving (Eq)
 
 data Stmt
-  = SAssign T.Text Expr
+  = SConst T.Text Expr
+  | SAssign Expr Expr
   | SReturn Expr
   | SExpr Expr
   deriving (Eq)
@@ -69,8 +70,9 @@ funText (Fn name params body) = "function " <> name <> params_text <> " {\n" <> 
     body_text = T.intercalate ";\n  " (map stmtText body)
 
 stmtText :: Stmt -> T.Text
-stmtText (SAssign var rhs) = "const " <> var <> " = " <> exprText rhs <> ";"
+stmtText (SConst var rhs) = "const " <> var <> " = " <> exprText rhs <> ";"
 stmtText (SReturn rhs) = "return " <> exprText rhs <> ";"
+stmtText (SExpr e) = exprText e <> ";"
 
 exprText :: Expr -> T.Text
 exprText (EVar v) = v
