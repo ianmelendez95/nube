@@ -7,8 +7,26 @@ where
 
 import Data.Text qualified as T
 import JS.Syntax qualified as S
+import Polysemy
+  ( Sem,
+  )
+import Polysemy.Error
+  ( Error,
+  )
+import Polysemy.Reader
+  ( Reader,
+  )
 
 data Cont = Cont [S.Stmt]
+
+data TContext = TContext
+  { fnNames :: [T.Text]
+  }
+
+type Transpiler a = Sem '[Reader TContext, Error String] a
+
+transpileSem :: S.Expr -> Transpiler S.Expr
+transpileSem = undefined
 
 splitStmtContinuations :: [S.Stmt] -> [Cont]
 splitStmtContinuations stmts = undefined
