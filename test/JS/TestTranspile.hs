@@ -6,8 +6,8 @@ import JS.Transpile
   ( TContext (..),
     ctx_var_name,
     runTranspiler,
+    tStatement,
     transpileSem,
-    transpileStatement,
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -29,7 +29,7 @@ jsTranspileSpec = do
 
   describe "transpileStmt" $ do
     it "transpiles simple return var" $ do
-      let res = transpileStatement (S.SReturn (S.EVar "x"))
+      let res = tStatement (S.SReturn (S.EVar "x"))
       res
         `shouldBeRight` S.SExpr
           ( S.ECall
@@ -41,7 +41,7 @@ jsTranspileSpec = do
           )
 
     it "transpiles var dot member" $ do
-      let res = transpileStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar"))
+      let res = tStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar"))
       res
         `shouldBeRight` S.SExpr
           ( S.ECall

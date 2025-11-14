@@ -2,7 +2,7 @@ module JS.Transpile
   ( TContext (..),
     transpileSem,
     ctx_var_name,
-    transpileStatement,
+    tStatement,
     splitStmtContinuations,
     runTranspiler,
   )
@@ -52,33 +52,33 @@ transpileSem _ = undefined
 splitStmtContinuations :: [S.Stmt] -> [Cont]
 splitStmtContinuations stmts = undefined
 
-transpileStatement :: S.Stmt -> Either String S.Stmt
-transpileStatement (S.SReturn e) = transpileReturn e
-transpileStatement (S.SConst var rhs) = transpileAssign var rhs
-transpileStatement (S.SAssign _ _) = Left "Reassignment is not allowed, use a new const var"
-transpileStatement (S.SExpr _) = Left "Expression statements are not allowed"
+tStatement :: S.Stmt -> Either String S.Stmt
+tStatement (S.SReturn e) = tReturn e
+tStatement (S.SConst var rhs) = tAssign var rhs
+tStatement (S.SAssign _ _) = Left "Reassignment is not allowed, use a new const var"
+tStatement (S.SExpr _) = Left "Expression statements are not allowed"
 
-transpileExpr :: S.Expr -> Either String S.Expr
-transpileExpr (S.EVar v) = transpileVar v
-transpileExpr (S.ECall lhs args) =
-  S.ECall <$> transpileExpr lhs <*> traverse transpileExpr args
-transpileExpr (S.EMember lhs (S.MBracketAccess rhs)) =
-  S.EMember <$> transpileExpr lhs <*> (S.MBracketAccess <$> transpileExpr rhs)
-transpileExpr (S.EMember lhs dotAccess) =
-  S.EMember <$> transpileExpr lhs <*> pure dotAccess
-transpileExpr (S.EInfix op lhs rhs) =
-  S.EInfix op <$> transpileExpr lhs <*> transpileExpr rhs
-transpileExpr e = Right e
+tExpr :: S.Expr -> Either String S.Expr
+tExpr (S.EVar v) = tVar v
+tExpr (S.ECall lhs args) =
+  S.ECall <$> tExpr lhs <*> traverse tExpr args
+tExpr (S.EMember lhs (S.MBracketAccess rhs)) =
+  S.EMember <$> tExpr lhs <*> (S.MBracketAccess <$> tExpr rhs)
+tExpr (S.EMember lhs dotAccess) =
+  S.EMember <$> tExpr lhs <*> pure dotAccess
+tExpr (S.EInfix op lhs rhs) =
+  S.EInfix op <$> tExpr lhs <*> tExpr rhs
+tExpr e = Right e
 
-transpileAssign :: T.Text -> S.Expr -> Either String S.Stmt
-transpileAssign var rhs = S.SAssign <$> transpileVar var <*> Right rhs
+tAssign :: T.Text -> S.Expr -> Either String S.Stmt
+tAssign var rhs = S.SAssign <$> tVar var <*> Right rhs
 
-transpileVar :: T.Text -> Either String S.Expr
-transpileVar v = Right $ ctxFrameVar v
+tVar :: T.Text -> Either String S.Expr
+tVar v = Right $ ctxFrameVar v
 
-transpileReturn :: S.Expr -> Either String S.Stmt
-transpileReturn e = do
-  e' <- transpileExpr e
+tReturn :: S.Expr -> Either String S.Stmt
+tReturn e = do
+  e' <- tExpr e
   pure $ S.SExpr (S.ECall (ctxDotMember "return") [e'])
 
 ctxFrameVar :: T.Text -> S.Expr
