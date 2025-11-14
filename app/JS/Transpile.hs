@@ -44,9 +44,10 @@ runTranspiler context transpiler = runExcept $ runReaderT transpiler context
 transpileSem :: S.Expr -> Transpiler S.Expr
 transpileSem e@(S.EVar v) = do
   fn_names <- asks fnNames
-  if elem v fn_names
+  if v `elem` fn_names
     then throwError "fn exists"
     else pure e
+transpileSem _ = undefined
 
 splitStmtContinuations :: [S.Stmt] -> [Cont]
 splitStmtContinuations stmts = undefined
