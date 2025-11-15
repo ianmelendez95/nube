@@ -49,14 +49,6 @@ transpileScript (S.Script name fns) =
 transpileFn :: S.Fn -> Transpiler [S.Fn]
 transpileFn (S.Fn name params stmts) = _
 
-transpileSem :: S.Expr -> Transpiler S.Expr
-transpileSem e@(S.EVar v) = do
-  fn_names <- asks fnNames
-  if v `elem` fn_names
-    then throwError "fn exists"
-    else pure e
-transpileSem _ = undefined
-
 splitStmtContinuations :: [S.Stmt] -> Transpiler [[(S.Stmt, [T.Text])]]
 splitStmtContinuations stmts = do
   -- stmts_with_fn_calls :: [(S.Stmt, [T.Text])]
