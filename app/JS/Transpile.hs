@@ -10,6 +10,7 @@ where
 
 import Control.Monad.Except
 import Control.Monad.Reader
+import Data.List.Split
 import Data.Text qualified as T
 import JS.Syntax qualified as S
 
@@ -38,8 +39,15 @@ data TContext = TContext
 
 type Transpiler a = ReaderT TContext (Except String) a
 
-transpileScript :: S.Script -> S.Script
-transpileScript (S.Script name fns) = _
+transpileScript :: S.Script -> Either String S.Script
+transpileScript (S.Script name fns) =
+  let ctx = TContext (map S.fnName fns)
+   in runTranspiler ctx $ do
+        fns' <- mconcat <$> mapM transpileFn fns
+        pure $ S.Script name fns'
+
+transpileFn :: S.Fn -> Transpiler [S.Fn]
+transpileFn (S.Fn name params stmts) = _
 
 transpileSem :: S.Expr -> Transpiler S.Expr
 transpileSem e@(S.EVar v) = do
@@ -49,8 +57,52 @@ transpileSem e@(S.EVar v) = do
     else pure e
 transpileSem _ = undefined
 
-splitStmtContinuations :: [S.Stmt] -> [Cont]
-splitStmtContinuations stmts = undefined
+splitStmtContinuations :: [S.Stmt] -> Transpiler [[(S.Stmt, [T.Text])]]
+splitStmtContinuations stmts = do
+  -- stmts_with_fn_calls :: [(S.Stmt, [T.Text])]
+  stmts_with_fn_calls <- mapM (\stmt -> (stmt,) <$> userFnCallsInStmt stmt) stmts
+  pure $ splitOnFnCalls stmts_with_fn_calls
+  where
+    splitOnFnCalls :: [(S.Stmt, [T.Text])] -> [[(S.Stmt, [T.Text])]]
+    splitOnFnCalls = split . whenElt $ (not . null . snd)
+
+-- splitStmtsOnFnCalls :: [S.Stmt] -> Transpiler [([S.Stmt], S.Stmt)]
+-- splitStmtsOnFnCalls stmts = _
+
+userFnCallsInStmt :: S.Stmt -> Transpiler [T.Text]
+userFnCallsInStmt (S.SConst _ rhs) = do
+  fn_calls <- userFnCallsInExpr rhs
+  if length fn_calls > 1
+    then throwError $ "Cannot call multiple user-defined functions in a const assignment: " ++ show fn_calls
+    else pure fn_calls
+userFnCallsInStmt (S.SAssign lhs rhs) = do
+  fn_calls <- userFnCallsInExprs [lhs, rhs]
+  if not . null $ fn_calls
+    then throwError $ "Cannot call user-defined functions in variable assignment: " ++ show fn_calls
+    else pure []
+userFnCallsInStmt (S.SReturn _) = throwError "Reassignment is not allowed, use a new const var"
+userFnCallsInStmt (S.SExpr _) = throwError "Expression statements are not allowed"
+
+userFnCallsInExpr :: S.Expr -> Transpiler [T.Text]
+userFnCallsInExpr (S.EVar v) = do
+  is_ufn <- isUserFn v
+  if is_ufn then pure [v] else pure []
+userFnCallsInExpr (S.ECall lhs args) = userFnCallsInExprs (lhs : args)
+userFnCallsInExpr (S.EMember lhs (S.MBracketAccess rhs)) = userFnCallsInExprs [lhs, rhs]
+userFnCallsInExpr (S.EMember lhs _) = userFnCallsInExpr lhs
+userFnCallsInExpr (S.EInfix _ lhs rhs) = userFnCallsInExprs [lhs, rhs]
+userFnCallsInExpr (S.EStringLit _) = pure []
+userFnCallsInExpr (S.ENumberLit _) = pure []
+
+userFnCallsInExprs :: [S.Expr] -> Transpiler [T.Text]
+userFnCallsInExprs es = concat <$> traverse userFnCallsInExpr es
+
+--   S.EMember <$> userFnCallsInExpr lhs <*> pure dotAccess
+--   S.EInfix op <$> userFnCallsInExpr lhs <*> userFnCallsInExpr rhs
+-- userFnCallsInExpr e = pure e
+
+isUserFn :: T.Text -> Transpiler Bool
+isUserFn name = asks ((name `elem`) . fnNames)
 
 transpileStatement :: TContext -> S.Stmt -> Either String S.Stmt
 transpileStatement ctx = runTranspiler ctx . tStatement
