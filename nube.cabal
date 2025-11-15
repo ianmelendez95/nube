@@ -104,7 +104,6 @@ library
         , shakespeare
         , text
         , split
-        -- , polysemy
 
     -- Directories containing source files.
     hs-source-dirs:   app
@@ -130,8 +129,10 @@ test-suite test
     main-is:            Test.hs
 
     other-modules: 
-        JS.TestParse
-        JS.TestTranspile
+        Test.JS.Parse
+        Test.JS.Transpile
+        Test.Util.Parse
+        Test.Example.CapitalizeTwoWords
 
     build-depends:  
         base ^>=4.21.0.0

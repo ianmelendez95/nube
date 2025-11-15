@@ -1,4 +1,4 @@
-module JS.TestParse
+module Test.JS.Parse
   ( jsParseSpec,
     testParser,
   )
@@ -25,6 +25,10 @@ import JS.Syntax
     MAccess (..),
     Stmt (..),
   )
+import Test.Example.CapitalizeTwoWords
+  ( capitalizeTwoWords_ast,
+    capitalizeTwoWords_text,
+  )
 import Test.Hspec
   ( SpecWith (..),
     describe,
@@ -34,9 +38,9 @@ import Test.Hspec
     shouldSatisfy,
     xdescribe,
   )
-import Text.Megaparsec
-  ( errorBundlePretty,
-    runParser,
+import Test.Util.Parse
+  ( runParser,
+    testParser,
   )
 
 jsParseSpec = do
@@ -46,7 +50,7 @@ jsParseSpec = do
       res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
 
     it "parses capitalizeTwoWords" $ do
-      (Fn name params stmts) <- testParser function test_capitalizeTwoWords_text
+      (Fn name params stmts) <- testParser function capitalizeTwoWords_text
       name `shouldBe` "capitalizeTwoWords"
       params `shouldBe` ["string"]
       length stmts `shouldBe` 6
@@ -128,20 +132,3 @@ jsParseSpec = do
     it "parses single quoted" $ do
       slit <- testParser stringLitExpr "'hello world!'"
       slit `shouldBe` EStringLit "hello world!"
-
-test_capitalizeTwoWords_text :: Text
-test_capitalizeTwoWords_text =
-  pack $
-    "function capitalizeTwoWords(string) {\n\
-    \    const words = string.split(' ');\n\
-    \    const word1 = words[0];\n\
-    \    const word2 = words[1];\n\
-    \    const capitalizedWord1 = capitalizeWord(word1);\n\
-    \    const capitalizedWord2 = capitalizeWord(word2);\n\
-    \    return capitalizedWord1 + ' ' + capitalizedWord2;\n\
-    \}"
-
-testParser :: Parser a -> Text -> IO a
-testParser parser content = do
-  let result = either (error . errorBundlePretty) id $ runParser parser "test.js" content
-  pure result

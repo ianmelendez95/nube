@@ -1,9 +1,8 @@
-module JS.TestTranspile (jsTranspileSpec) where
+module Test.JS.Transpile (jsTranspileSpec) where
 
 import Data.Either (either)
 import JS.Parse qualified as P
 import JS.Syntax qualified as S
-import JS.TestParse (testParser)
 import JS.Transpile
   ( TContext (..),
     ctx_var_name,
@@ -17,6 +16,7 @@ import Test.Hspec
     shouldBe,
     xdescribe,
   )
+import Test.JS.Parse (testParser)
 
 jsTranspileSpec = do
   describe "transpileStatement" $ do
