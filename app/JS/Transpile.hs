@@ -38,6 +38,9 @@ data TContext = TContext
 
 type Transpiler a = ReaderT TContext (Except String) a
 
+transpileScript :: S.Script -> S.Script
+transpileScript (S.Script name fns) = _
+
 transpileSem :: S.Expr -> Transpiler S.Expr
 transpileSem e@(S.EVar v) = do
   fn_names <- asks fnNames

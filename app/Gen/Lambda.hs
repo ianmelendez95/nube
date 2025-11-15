@@ -40,7 +40,7 @@ writeScripts dist deploy_script proxies_script handler_scripts = do
 jsScriptToDeployScript :: S.Script -> T.Text
 jsScriptToDeployScript script =
   let name = S.scriptName script
-      funs = S.scriptFuns script
+      funs = S.scriptFns script
    in mkDeployScript
         (CF.bucketNameFromScriptName name)
         (templateNameFromScriptName name)

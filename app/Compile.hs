@@ -19,7 +19,7 @@ compileFile js_file = do
   assertValidJsFileName js_file
 
   script <- P.parseJsFile js_file
-  let js = S.scriptFuns script
+  let js = S.scriptFns script
       proxies_script = GL.jsFunsToProxiesScript js
       scripts = GL.jsFunsToScripts js
       deploy_script = GL.jsScriptToDeployScript script

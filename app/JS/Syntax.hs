@@ -16,7 +16,7 @@ import Data.Text qualified as T
 
 data Script = Script
   { scriptName :: T.Text, -- file basename
-    scriptFuns :: [Fn]
+    scriptFns :: [Fn]
   }
 
 data Fn = Fn

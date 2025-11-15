@@ -365,7 +365,7 @@ templateFromScript script =
               (namedRef role)
               (namedRef layer)
           )
-          (S.scriptFuns script)
+          (S.scriptFns script)
    in Template bucket api stage role layer funs
 
 jsFunToLambda :: Ref -> Ref -> Ref -> Ref -> Ref -> S.Fn -> LambdaRGroup
