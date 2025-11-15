@@ -8,7 +8,6 @@ import JS.Transpile
   ( TContext (..),
     ctx_var_name,
     runTranspiler,
-    transpileSem,
     transpileStatement,
   )
 import Test.Hspec
@@ -20,15 +19,6 @@ import Test.Hspec
   )
 
 jsTranspileSpec = do
-  -- describe "transpileSem" $ do
-  --   it "transpiles valid var" $ do
-  --     let res = transpileStatement test_context (S.EVar "x")
-  --     res `shouldBeRight` S.EVar "x"
-
-  --   it "transpiles with 'fn exists' error" $ do
-  --     let res = transpileStatement test_context (S.EVar "capitalizeWord")
-  --     res `shouldBe` Left "fn exists"
-
   describe "transpileStatement" $ do
     it "transpiles simple return var" $ do
       let res = transpileStatement test_context (S.SReturn (S.EVar "x"))

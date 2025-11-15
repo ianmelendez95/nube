@@ -1,6 +1,6 @@
 module JS.TestParse
   ( jsParseSpec,
-    testParser
+    testParser,
   )
 where
 
@@ -28,8 +28,10 @@ import JS.Syntax
 import Test.Hspec
   ( SpecWith (..),
     describe,
+    expectationFailure,
     it,
     shouldBe,
+    shouldSatisfy,
     xdescribe,
   )
 import Text.Megaparsec
@@ -42,6 +44,12 @@ jsParseSpec = do
     it "parses simple function" $ do
       res <- testParser function "function foo(x) { return x; }"
       res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
+
+    it "parses capitalizeTwoWords" $ do
+      (Fn name params stmts) <- testParser function test_capitalizeTwoWords_text
+      name `shouldBe` "capitalizeTwoWords"
+      params `shouldBe` ["string"]
+      length stmts `shouldBe` 6
 
   describe "statement" $ do
     it "parses assign statement" $ do
@@ -120,6 +128,18 @@ jsParseSpec = do
     it "parses single quoted" $ do
       slit <- testParser stringLitExpr "'hello world!'"
       slit `shouldBe` EStringLit "hello world!"
+
+test_capitalizeTwoWords_text :: Text
+test_capitalizeTwoWords_text =
+  pack $
+    "function capitalizeTwoWords(string) {\n\
+    \    const words = string.split(' ');\n\
+    \    const word1 = words[0];\n\
+    \    const word2 = words[1];\n\
+    \    const capitalizedWord1 = capitalizeWord(word1);\n\
+    \    const capitalizedWord2 = capitalizeWord(word2);\n\
+    \    return capitalizedWord1 + ' ' + capitalizedWord2;\n\
+    \}"
 
 testParser :: Parser a -> Text -> IO a
 testParser parser content = do
