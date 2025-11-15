@@ -29,7 +29,9 @@ jsTranspileSpec = do
     it "splits capitalizeTwoWords stmts" $ do
       let ctx = TContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testTranspiler ctx (splitStmtContinuations (S.fnStmts capitalizeTwoWords_fn_ast))
-      map length res `shouldBe` [3, 1, 1, 1]
+      -- mapM_ (\stmts -> putStrLn "---" >> mapM_ (\stmt -> putStr "  " >> print stmt) stmts) res
+      -- res `shouldSatisfy` [3, 1, 1, 1]
+      length res `shouldBe` 3
 
   describe "transpileStatement" $ do
     it "transpiles simple return var" $ do

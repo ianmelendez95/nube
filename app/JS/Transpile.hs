@@ -10,6 +10,7 @@ where
 
 import Control.Monad.Except
 import Control.Monad.Reader
+import Data.Bifunctor (first)
 import Data.List.Split
 import Data.Text qualified as T
 import JS.Syntax qualified as S
@@ -39,6 +40,14 @@ data TContext = TContext
 
 type Transpiler a = ReaderT TContext (Except String) a
 
+data ContSplit
+  = ContBlock [S.Stmt]
+  | ContCall
+      { _contCallVar :: T.Text,
+        _contCallFn :: T.Text,
+        _contCallArgs :: [S.Expr]
+      }
+
 transpileScript :: S.Script -> Either String S.Script
 transpileScript (S.Script name fns) =
   let ctx = TContext (map S.fnName fns)
@@ -46,28 +55,86 @@ transpileScript (S.Script name fns) =
         fns' <- mconcat <$> mapM transpileFn fns
         pure $ S.Script name fns'
 
-transpileFn :: S.Fn -> Transpiler [S.Fn]
-transpileFn (S.Fn name params stmts) = undefined
+transpileFn = undefined
 
-splitStmtContinuations :: [S.Stmt] -> Transpiler [[(S.Stmt, [T.Text])]]
+tContStatements :: [S.Stmt] -> Transpiler [[S.Stmt]]
+tContStatements orig_stmts = do
+  split_stmts <- splitStmtContinuations orig_stmts
+  undefined
+
+-- where
+--   tContInSplits :: [[S.Stmt]] -> [[S.Stmt]]
+--   tContInSplits (head_stmts : [call_stmt] : rest_stmts) =
+--     let call_fn :: S.Stmt
+--         call_fn = _
+--      in _
+--   tContInSplits _ = _
+
+splitStmtContinuations :: [S.Stmt] -> Transpiler [ContSplit]
 splitStmtContinuations stmts = do
   -- stmts_with_fn_calls :: [(S.Stmt, [T.Text])]
-  stmts_with_fn_calls <- mapM (\stmt -> (stmt,) <$> userFnCallsInStmt stmt) stmts
-  pure $ splitOnFnCalls stmts_with_fn_calls
+  cont_splits <- mapM stmtToContSplit stmts
+  pure $ concatContSplits cont_splits
   where
     splitOnFnCalls :: [(S.Stmt, [T.Text])] -> [[(S.Stmt, [T.Text])]]
     splitOnFnCalls = split . dropInnerBlanks . whenElt $ (not . null . snd)
 
--- splitStmtsOnFnCalls :: [S.Stmt] -> Transpiler [([S.Stmt], S.Stmt)]
--- splitStmtsOnFnCalls stmts = _
+concatContSplits :: [ContSplit] -> [ContSplit]
+concatContSplits splits =
+  case spanBlockStmts splits of
+    ([], []) -> []
+    (block_stmts, []) -> [ContBlock block_stmts]
+    (block_stmts, ContCall var fn_name fn_args : rest_splits) ->
+      let cont_call :: S.Stmt
+          cont_call = ctxCallStmt fn_name fn_args "__test_continuation__"
+
+          block' :: ContSplit
+          block' = ContBlock (block_stmts ++ [cont_call])
+
+          cont_result_block :: ContSplit
+          cont_result_block = ContBlock [ctxAssignArgStmt var 0]
+       in block' : concatContSplits (cont_result_block : rest_splits)
+    -- TODO - improve span approach
+    (_, ContBlock {} : _) -> error "spanBlockStmts did not chunk correctly"
+  where
+    spanBlockStmts :: [ContSplit] -> ([S.Stmt], [ContSplit])
+    spanBlockStmts = first concat . spanMaybe maybeBlock
+
+    maybeBlock :: ContSplit -> Maybe [S.Stmt]
+    maybeBlock (ContBlock stmts) = Just stmts
+    maybeBlock _ = Nothing
+
+spanMaybe :: (a -> Maybe b) -> [a] -> ([b], [a])
+spanMaybe m_fn (x : xs) =
+  case m_fn x of
+    Just y ->
+      let (ys, rest) = spanMaybe m_fn xs
+       in (y : ys, rest)
+    Nothing -> ([], xs)
+spanMaybe _ [] = ([], [])
+
+stmtToContSplit :: S.Stmt -> Transpiler ContSplit
+stmtToContSplit (S.SConst var (S.ECall (S.EVar fn_name) fn_args)) =
+  pure $ ContCall var fn_name fn_args
+stmtToContSplit stmt = do
+  fn_calls <- userFnCallsInStmt stmt
+  if null fn_calls
+    then pure $ ContBlock [stmt]
+    else throwError $ "Can only call user-defined functions in a simple const assignment call: " ++ show stmt
 
 userFnCallsInStmt :: S.Stmt -> Transpiler [T.Text]
-userFnCallsInStmt (S.SConst _ rhs) = do
+userFnCallsInStmt e@(S.SConst _ rhs) = do
   fn_calls <- userFnCallsInExpr rhs
   if length fn_calls > 1
     then throwError $ "Cannot call multiple user-defined functions in a const assignment: " ++ show fn_calls
+    else case rhs of
+      (S.ECall (S.EVar _) _) -> pure fn_calls
+      _ -> throwError $ "Calls to user-defined functions must be a simple fn(args) call: " ++ show e
+userFnCallsInStmt e@(S.SReturn rhs) = do
+  fn_calls <- userFnCallsInExpr rhs
+  if not . null $ fn_calls
+    then throwError $ "Cannot call user-defined functions in a return statement: " ++ show e
     else pure fn_calls
-userFnCallsInStmt (S.SReturn rhs) = userFnCallsInExpr rhs
 userFnCallsInStmt (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
 userFnCallsInStmt (S.SExpr _) = throwError "Expression statements are not allowed"
 
@@ -127,8 +194,19 @@ tReturn e = do
   e' <- tExpr e
   pure $ S.SExpr (S.ECall (ctxDotMember "return") [e'])
 
+ctxAssignArgStmt :: T.Text -> Int -> S.Stmt
+ctxAssignArgStmt var_name arg_idx =
+  S.SAssign (ctxFrameVar var_name) (ctxArg arg_idx)
+
+ctxCallStmt :: T.Text -> [S.Expr] -> T.Text -> S.Stmt
+ctxCallStmt fn_name args cont_name =
+  S.SExpr (S.ECall (S.dotMemberExpr ctx_var_name fn_name) [S.EVar fn_name, S.EListLit args, S.EVar cont_name])
+
 ctxFrameVar :: T.Text -> S.Expr
 ctxFrameVar v = S.dotMembers ctx_var_name ["frame", v]
+
+ctxArg :: Int -> S.Expr
+ctxArg arg_idx = S.mkBracketMember (ctxDotMember "args") (S.ENumberLit arg_idx)
 
 ctxDotMember :: T.Text -> S.Expr
 ctxDotMember = S.dotMemberExpr ctx_var_name

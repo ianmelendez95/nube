@@ -9,6 +9,7 @@ module JS.Syntax
     IOp (..),
     dotMemberExpr,
     dotMembers,
+    mkBracketMember,
   )
 where
 
@@ -35,6 +36,7 @@ data Stmt
 
 data Expr
   = EVar T.Text
+  | EListLit [Expr]
   | EStringLit T.Text
   | ENumberLit Int
   | ECall Expr [Expr]
@@ -93,6 +95,9 @@ dotMembers = foldl dotMemberExpr
 
 dotMemberExpr :: Expr -> T.Text -> Expr
 dotMemberExpr lhs var = EMember lhs (MDotAccess var)
+
+mkBracketMember :: Expr -> Expr -> Expr
+mkBracketMember lhs member_epxr = EMember lhs (MBracketAccess member_epxr)
 
 opText :: IOp -> T.Text
 opText IPlus = "+"
