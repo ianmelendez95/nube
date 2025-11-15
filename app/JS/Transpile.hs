@@ -1,6 +1,5 @@
 module JS.Transpile
   ( TContext (..),
-    transpileSem,
     ctx_var_name,
     transpileStatement,
     splitStmtContinuations,
@@ -47,7 +46,7 @@ transpileScript (S.Script name fns) =
         pure $ S.Script name fns'
 
 transpileFn :: S.Fn -> Transpiler [S.Fn]
-transpileFn (S.Fn name params stmts) = _
+transpileFn (S.Fn name params stmts) = undefined
 
 splitStmtContinuations :: [S.Stmt] -> Transpiler [[(S.Stmt, [T.Text])]]
 splitStmtContinuations stmts = do

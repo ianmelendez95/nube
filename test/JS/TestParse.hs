@@ -1,5 +1,6 @@
 module JS.TestParse
   ( jsParseSpec,
+    testParser
   )
 where
 

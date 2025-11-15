@@ -1,7 +1,9 @@
 module JS.TestTranspile (jsTranspileSpec) where
 
 import Data.Either (either)
+import JS.Parse qualified as P
 import JS.Syntax qualified as S
+import JS.TestParse (testParser)
 import JS.Transpile
   ( TContext (..),
     ctx_var_name,
@@ -27,7 +29,7 @@ jsTranspileSpec = do
   --     let res = transpileStatement test_context (S.EVar "capitalizeWord")
   --     res `shouldBe` Left "fn exists"
 
-  describe "transpileStmt" $ do
+  describe "transpileStatement" $ do
     it "transpiles simple return var" $ do
       let res = transpileStatement test_context (S.SReturn (S.EVar "x"))
       res
