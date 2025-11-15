@@ -1,5 +1,5 @@
 module JS.Transpile
-  ( Transpiler, 
+  ( Transpiler,
     TContext (..),
     ctx_var_name,
     transpileStatement,
@@ -67,12 +67,8 @@ userFnCallsInStmt (S.SConst _ rhs) = do
   if length fn_calls > 1
     then throwError $ "Cannot call multiple user-defined functions in a const assignment: " ++ show fn_calls
     else pure fn_calls
-userFnCallsInStmt (S.SAssign lhs rhs) = do
-  fn_calls <- userFnCallsInExprs [lhs, rhs]
-  if not . null $ fn_calls
-    then throwError $ "Cannot call user-defined functions in variable assignment: " ++ show fn_calls
-    else pure []
-userFnCallsInStmt (S.SReturn _) = throwError "Reassignment is not allowed, use a new const var"
+userFnCallsInStmt (S.SReturn rhs) = userFnCallsInExpr rhs
+userFnCallsInStmt (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
 userFnCallsInStmt (S.SExpr _) = throwError "Expression statements are not allowed"
 
 userFnCallsInExpr :: S.Expr -> Transpiler [T.Text]
