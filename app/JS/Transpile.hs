@@ -56,7 +56,7 @@ splitStmtContinuations stmts = do
   pure $ splitOnFnCalls stmts_with_fn_calls
   where
     splitOnFnCalls :: [(S.Stmt, [T.Text])] -> [[(S.Stmt, [T.Text])]]
-    splitOnFnCalls = split . whenElt $ (not . null . snd)
+    splitOnFnCalls = split . dropInnerBlanks . whenElt $ (not . null . snd)
 
 -- splitStmtsOnFnCalls :: [S.Stmt] -> Transpiler [([S.Stmt], S.Stmt)]
 -- splitStmtsOnFnCalls stmts = _
