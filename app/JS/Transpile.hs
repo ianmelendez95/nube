@@ -1,5 +1,6 @@
 module JS.Transpile
-  ( TContext (..),
+  ( Transpiler, 
+    TContext (..),
     ctx_var_name,
     transpileStatement,
     splitStmtContinuations,

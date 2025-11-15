@@ -1,4 +1,4 @@
-module Test.Example.CapitalizeTwoWords (capitalizeTwoWords_ast, capitalizeTwoWords_text) where
+module Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text) where
 
 import Data.Text (Text, pack)
 import JS.Parse
@@ -11,11 +11,11 @@ import Test.Util.Parse
   ( runParser,
   )
 
-capitalizeTwoWords_ast :: Fn
-capitalizeTwoWords_ast = runParser function capitalizeTwoWords_text
+capitalizeTwoWords_fn_ast :: Fn
+capitalizeTwoWords_fn_ast = runParser function capitalizeTwoWords_fn_text
 
-capitalizeTwoWords_text :: Text
-capitalizeTwoWords_text =
+capitalizeTwoWords_fn_text :: Text
+capitalizeTwoWords_fn_text =
   pack
     "function capitalizeTwoWords(string) {\n\
     \    const words = string.split(' ');\n\

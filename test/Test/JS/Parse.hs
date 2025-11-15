@@ -26,8 +26,8 @@ import JS.Syntax
     Stmt (..),
   )
 import Test.Example.CapitalizeTwoWords
-  ( capitalizeTwoWords_ast,
-    capitalizeTwoWords_text,
+  ( capitalizeTwoWords_fn_ast,
+    capitalizeTwoWords_fn_text,
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -50,7 +50,7 @@ jsParseSpec = do
       res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
 
     it "parses capitalizeTwoWords" $ do
-      (Fn name params stmts) <- testParser function capitalizeTwoWords_text
+      (Fn name params stmts) <- testParser function capitalizeTwoWords_fn_text
       name `shouldBe` "capitalizeTwoWords"
       params `shouldBe` ["string"]
       length stmts `shouldBe` 6
