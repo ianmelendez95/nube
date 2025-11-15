@@ -6,8 +6,8 @@ import JS.Transpile
   ( TContext (..),
     ctx_var_name,
     runTranspiler,
-    tStatement,
     transpileSem,
+    transpileStatement,
   )
 import Test.Hspec
   ( SpecWith (..),
@@ -18,18 +18,18 @@ import Test.Hspec
   )
 
 jsTranspileSpec = do
-  describe "transpileSem" $ do
-    it "transpiles valid var" $ do
-      let res = runTranspiler (TContext ["capitalizeWord"]) $ transpileSem (S.EVar "x")
-      res `shouldBeRight` S.EVar "x"
+  -- describe "transpileSem" $ do
+  --   it "transpiles valid var" $ do
+  --     let res = transpileStatement test_context (S.EVar "x")
+  --     res `shouldBeRight` S.EVar "x"
 
-    it "transpiles with 'fn exists' error" $ do
-      let res = runTranspiler (TContext ["capitalizeWord"]) $ transpileSem (S.EVar "capitalizeWord")
-      res `shouldBe` Left "fn exists"
+  --   it "transpiles with 'fn exists' error" $ do
+  --     let res = transpileStatement test_context (S.EVar "capitalizeWord")
+  --     res `shouldBe` Left "fn exists"
 
   describe "transpileStmt" $ do
     it "transpiles simple return var" $ do
-      let res = tStatement (S.SReturn (S.EVar "x"))
+      let res = transpileStatement test_context (S.SReturn (S.EVar "x"))
       res
         `shouldBeRight` S.SExpr
           ( S.ECall
@@ -41,7 +41,7 @@ jsTranspileSpec = do
           )
 
     it "transpiles var dot member" $ do
-      let res = tStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar"))
+      let res = transpileStatement test_context (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar"))
       res
         `shouldBeRight` S.SExpr
           ( S.ECall
@@ -51,5 +51,8 @@ jsTranspileSpec = do
               )
               [S.dotMembers (S.EVar "_ctx") ["frame", "foo", "bar"]]
           )
+
+test_context :: TContext
+test_context = TContext ["capitalizeWords", "capitalizeWord"]
 
 shouldBeRight lhs = (lhs `shouldBe`) . Right

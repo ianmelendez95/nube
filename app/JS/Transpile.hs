@@ -2,7 +2,7 @@ module JS.Transpile
   ( TContext (..),
     transpileSem,
     ctx_var_name,
-    tStatement,
+    transpileStatement,
     splitStmtContinuations,
     runTranspiler,
   )
@@ -38,9 +38,6 @@ data TContext = TContext
 
 type Transpiler a = ReaderT TContext (Except String) a
 
-runTranspiler :: TContext -> Transpiler a -> Either String a
-runTranspiler context transpiler = runExcept $ runReaderT transpiler context
-
 transpileSem :: S.Expr -> Transpiler S.Expr
 transpileSem e@(S.EVar v) = do
   fn_names <- asks fnNames
@@ -52,13 +49,19 @@ transpileSem _ = undefined
 splitStmtContinuations :: [S.Stmt] -> [Cont]
 splitStmtContinuations stmts = undefined
 
-tStatement :: S.Stmt -> Either String S.Stmt
+transpileStatement :: TContext -> S.Stmt -> Either String S.Stmt
+transpileStatement ctx = runTranspiler ctx . tStatement
+
+runTranspiler :: TContext -> Transpiler a -> Either String a
+runTranspiler context transpiler = runExcept $ runReaderT transpiler context
+
+tStatement :: S.Stmt -> Transpiler S.Stmt
 tStatement (S.SReturn e) = tReturn e
 tStatement (S.SConst var rhs) = tAssign var rhs
-tStatement (S.SAssign _ _) = Left "Reassignment is not allowed, use a new const var"
-tStatement (S.SExpr _) = Left "Expression statements are not allowed"
+tStatement (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
+tStatement (S.SExpr _) = throwError "Expression statements are not allowed"
 
-tExpr :: S.Expr -> Either String S.Expr
+tExpr :: S.Expr -> Transpiler S.Expr
 tExpr (S.EVar v) = tVar v
 tExpr (S.ECall lhs args) =
   S.ECall <$> tExpr lhs <*> traverse tExpr args
@@ -68,15 +71,15 @@ tExpr (S.EMember lhs dotAccess) =
   S.EMember <$> tExpr lhs <*> pure dotAccess
 tExpr (S.EInfix op lhs rhs) =
   S.EInfix op <$> tExpr lhs <*> tExpr rhs
-tExpr e = Right e
+tExpr e = pure e
 
-tAssign :: T.Text -> S.Expr -> Either String S.Stmt
-tAssign var rhs = S.SAssign <$> tVar var <*> Right rhs
+tAssign :: T.Text -> S.Expr -> Transpiler S.Stmt
+tAssign var rhs = S.SAssign <$> tVar var <*> pure rhs
 
-tVar :: T.Text -> Either String S.Expr
-tVar v = Right $ ctxFrameVar v
+tVar :: T.Text -> Transpiler S.Expr
+tVar v = pure $ ctxFrameVar v
 
-tReturn :: S.Expr -> Either String S.Stmt
+tReturn :: S.Expr -> Transpiler S.Stmt
 tReturn e = do
   e' <- tExpr e
   pure $ S.SExpr (S.ECall (ctxDotMember "return") [e'])
