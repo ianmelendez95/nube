@@ -132,9 +132,11 @@ test-suite test
     main-is:            Test.hs
 
     other-modules: 
+        Test.Compile.Cont
         Test.JS.Parse
         Test.JS.Transpile
         Test.Util.Parse
+        Test.Util.Compile
         Test.Example.CapitalizeTwoWords
 
     build-depends:  

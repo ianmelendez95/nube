@@ -1,5 +1,8 @@
 module Test.JS.Transpile (jsTranspileSpec) where
 
+import Compile.JSCtx
+  ( ctx_var_name,
+  )
 import Data.Either (either)
 import Data.Text qualified as T
 import JS.Parse qualified as P
@@ -8,7 +11,6 @@ import JS.Transpile
   ( ContSplit (..),
     TContext (..),
     Transpiler,
-    ctx_var_name,
     runTranspiler,
     splitStmtContinuations,
     transpileStatement,
