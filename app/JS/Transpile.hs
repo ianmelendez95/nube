@@ -12,9 +12,8 @@ where
 import Control.Monad.Except
 import Control.Monad.Reader
 import Data.Bifunctor (first)
-import Data.List.Split
 import Data.Text qualified as T
-import Debug.Trace (trace, traceShowId)
+-- import Debug.Trace (trace, traceShowId)
 import JS.Syntax qualified as S
 
 -- import Polysemy
@@ -32,9 +31,7 @@ import JS.Syntax qualified as S
 --     runReader,
 --   )
 
-data Cont = Cont [S.Stmt]
-
-data TContext = TContext
+newtype TContext = TContext
   { fnNames :: [T.Text]
   }
 
@@ -151,6 +148,8 @@ userFnCallsInExpr (S.EMember lhs _) = userFnCallsInExpr lhs
 userFnCallsInExpr (S.EInfix _ lhs rhs) = userFnCallsInExprs [lhs, rhs]
 userFnCallsInExpr (S.EStringLit _) = pure []
 userFnCallsInExpr (S.ENumberLit _) = pure []
+userFnCallsInExpr (S.EListLit es) =
+  concat <$> traverse userFnCallsInExpr es
 
 userFnCallsInExprs :: [S.Expr] -> Transpiler [T.Text]
 userFnCallsInExprs es = concat <$> traverse userFnCallsInExpr es
