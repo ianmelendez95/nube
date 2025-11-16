@@ -24,13 +24,13 @@ import Test.Hspec
     xdescribe,
   )
 import Test.JS.Parse (testParser)
-import Test.Util.Compile (testTranspiler)
+import Test.Util.Compile (testCompiler)
 
 jsCompileContSpec = do
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do
       let ctx = TContext ["capitalizeTwoWords", "capitalizeWord"]
-          res = testTranspiler ctx (splitStmtContinuations (S.fnStmts capitalizeTwoWords_fn_ast))
+          res = testCompiler ctx (splitStmtContinuations (S.fnStmts capitalizeTwoWords_fn_ast))
       -- print capitalizeTwoWords_fn_ast
       -- mapM_ (printContSplit "  ") res
       -- res `shouldSatisfy` [3, 1, 1, 1]

@@ -8,10 +8,10 @@ import Data.Text qualified as T
 import JS.Parse qualified as P
 import JS.Syntax qualified as S
 import JS.Transpile
-  ( ContSplit (..),
+  ( Compiler,
+    ContSplit (..),
     TContext (..),
-    Transpiler,
-    runTranspiler,
+    runCompiler,
     transpileStatement,
   )
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)

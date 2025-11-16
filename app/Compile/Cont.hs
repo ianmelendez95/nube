@@ -4,7 +4,7 @@ module Compile.Cont
   )
 where
 
-import Compile.Compiler (TContext (..), Transpiler)
+import Compile.Compiler (Compiler, TContext (..))
 -- import Debug.Trace (trace, traceShowId)
 
 import Compile.JSCtx (ctxAssignArgStmt, ctxCallStmt)
@@ -23,7 +23,7 @@ data ContSplit
       }
   deriving (Show)
 
-splitStmtContinuations :: [S.Stmt] -> Transpiler [ContSplit]
+splitStmtContinuations :: [S.Stmt] -> Compiler [ContSplit]
 splitStmtContinuations stmts = do
   -- stmts_with_fn_calls :: [(S.Stmt, [T.Text])]
   cont_splits <- mapM stmtToContSplit stmts
@@ -63,7 +63,7 @@ spanMaybe m_fn rest@(x : xs) =
     Nothing -> ([], rest)
 spanMaybe _ [] = ([], [])
 
-stmtToContSplit :: S.Stmt -> Transpiler ContSplit
+stmtToContSplit :: S.Stmt -> Compiler ContSplit
 stmtToContSplit (S.SConst var (S.ECall (S.EVar fn_name) fn_args)) =
   pure $ ContCall var fn_name fn_args
 stmtToContSplit stmt = do
@@ -72,7 +72,7 @@ stmtToContSplit stmt = do
     then pure $ ContBlock [stmt]
     else throwError $ "Can only call user-defined functions in a simple const assignment call: " ++ show stmt
 
-userFnCallsInStmt :: S.Stmt -> Transpiler [T.Text]
+userFnCallsInStmt :: S.Stmt -> Compiler [T.Text]
 userFnCallsInStmt e@(S.SConst _ rhs) = do
   fn_calls <- userFnCallsInExpr rhs
   if null fn_calls
@@ -91,7 +91,7 @@ userFnCallsInStmt e@(S.SReturn rhs) = do
 userFnCallsInStmt (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
 userFnCallsInStmt (S.SExpr _) = throwError "Expression statements are not allowed"
 
-userFnCallsInExpr :: S.Expr -> Transpiler [T.Text]
+userFnCallsInExpr :: S.Expr -> Compiler [T.Text]
 userFnCallsInExpr (S.EVar v) = do
   is_ufn <- isUserFn v
   if is_ufn then pure [v] else pure []
@@ -104,8 +104,8 @@ userFnCallsInExpr (S.ENumberLit _) = pure []
 userFnCallsInExpr (S.EListLit es) =
   concat <$> traverse userFnCallsInExpr es
 
-userFnCallsInExprs :: [S.Expr] -> Transpiler [T.Text]
+userFnCallsInExprs :: [S.Expr] -> Compiler [T.Text]
 userFnCallsInExprs es = concat <$> traverse userFnCallsInExpr es
 
-isUserFn :: T.Text -> Transpiler Bool
+isUserFn :: T.Text -> Compiler Bool
 isUserFn name = asks ((name `elem`) . fnNames)

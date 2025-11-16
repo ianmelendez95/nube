@@ -1,6 +1,6 @@
 module Compile.Compiler
   ( TContext (..),
-    Transpiler,
+    Compiler,
   )
 where
 
@@ -12,4 +12,4 @@ newtype TContext = TContext
   { fnNames :: [T.Text]
   }
 
-type Transpiler a = ReaderT TContext (Except String) a
+type Compiler a = ReaderT TContext (Except String) a

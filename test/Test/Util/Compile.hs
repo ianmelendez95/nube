@@ -1,13 +1,13 @@
 module Test.Util.Compile
-  ( testTranspiler,
+  ( testCompiler,
     shouldBeRight,
   )
 where
 
 import JS.Transpile
-  ( TContext (..),
-    Transpiler,
-    runTranspiler,
+  ( Compiler,
+    TContext (..),
+    runCompiler,
     transpileStatement,
   )
 import Test.Hspec
@@ -15,8 +15,8 @@ import Test.Hspec
     shouldBe,
   )
 
-testTranspiler :: TContext -> Transpiler a -> a
-testTranspiler ctx = either error id . runTranspiler ctx
+testCompiler :: TContext -> Compiler a -> a
+testCompiler ctx = either error id . runCompiler ctx
 
 shouldBeRight :: (Show a1, Show a2, Eq a1, Eq a2) => Either a1 a2 -> a2 -> Expectation
 shouldBeRight lhs = (lhs `shouldBe`) . Right
