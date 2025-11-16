@@ -14,6 +14,7 @@ import Control.Monad.Reader
 import Data.Bifunctor (first)
 import Data.List.Split
 import Data.Text qualified as T
+import Debug.Trace (trace, traceShowId)
 import JS.Syntax qualified as S
 
 -- import Polysemy
@@ -104,12 +105,12 @@ concatContSplits splits =
     maybeBlock _ = Nothing
 
 spanMaybe :: (a -> Maybe b) -> [a] -> ([b], [a])
-spanMaybe m_fn (x : xs) =
+spanMaybe m_fn rest@(x : xs) =
   case m_fn x of
     Just y ->
-      let (ys, rest) = spanMaybe m_fn xs
-       in (y : ys, rest)
-    Nothing -> ([], xs)
+      let (ys, rest') = spanMaybe m_fn xs
+       in (y : ys, rest')
+    Nothing -> ([], rest)
 spanMaybe _ [] = ([], [])
 
 stmtToContSplit :: S.Stmt -> Transpiler ContSplit
