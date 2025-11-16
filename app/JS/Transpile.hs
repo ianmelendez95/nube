@@ -77,9 +77,6 @@ splitStmtContinuations stmts = do
   -- stmts_with_fn_calls :: [(S.Stmt, [T.Text])]
   cont_splits <- mapM stmtToContSplit stmts
   pure $ concatContSplits cont_splits
-  where
-    splitOnFnCalls :: [(S.Stmt, [T.Text])] -> [[(S.Stmt, [T.Text])]]
-    splitOnFnCalls = split . dropInnerBlanks . whenElt $ (not . null . snd)
 
 concatContSplits :: [ContSplit] -> [ContSplit]
 concatContSplits splits =
