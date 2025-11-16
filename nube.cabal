@@ -83,6 +83,9 @@ library
 
     exposed-modules: 
         Compile
+        Compile.Cont
+        Compile.Compiler
+        Compile.JSCtx
         Gen.CF
         Gen.Lambda
         Util.Aeson
