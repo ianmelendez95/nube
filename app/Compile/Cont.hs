@@ -1,5 +1,6 @@
 module Compile.Cont
-  (
+  ( ContSplit (..),
+    splitStmtContinuations,
   )
 where
 
@@ -7,8 +8,8 @@ import Compile.Compiler (TContext (..), Transpiler)
 -- import Debug.Trace (trace, traceShowId)
 
 import Compile.JSCtx (ctxAssignArgStmt, ctxCallStmt)
-import Control.Monad.Except (MonadError (throwError), runExcept)
-import Control.Monad.Reader (ReaderT (runReaderT), asks)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.Reader (asks)
 import Data.Bifunctor (first)
 import Data.Text qualified as T
 import JS.Syntax qualified as S

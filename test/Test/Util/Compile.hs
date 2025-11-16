@@ -8,7 +8,6 @@ import JS.Transpile
   ( TContext (..),
     Transpiler,
     runTranspiler,
-    splitStmtContinuations,
     transpileStatement,
   )
 import Test.Hspec

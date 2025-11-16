@@ -12,7 +12,6 @@ import JS.Transpile
     TContext (..),
     Transpiler,
     runTranspiler,
-    splitStmtContinuations,
     transpileStatement,
   )
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
@@ -27,17 +26,9 @@ import Test.Hspec
     xdescribe,
   )
 import Test.JS.Parse (testParser)
+import Test.Util.Compile
 
 jsTranspileSpec = do
-  describe "splitStmtContinuations" $ do
-    it "splits capitalizeTwoWords stmts" $ do
-      let ctx = TContext ["capitalizeTwoWords", "capitalizeWord"]
-          res = testTranspiler ctx (splitStmtContinuations (S.fnStmts capitalizeTwoWords_fn_ast))
-      -- print capitalizeTwoWords_fn_ast
-      -- mapM_ (printContSplit "  ") res
-      -- res `shouldSatisfy` [3, 1, 1, 1]
-      length res `shouldBe` 3
-
   describe "transpileStatement" $ do
     it "transpiles simple return var" $ do
       let res = transpileStatement test_context (S.SReturn (S.EVar "x"))
@@ -63,18 +54,5 @@ jsTranspileSpec = do
               [S.dotMembers (S.EVar "_ctx") ["frame", "foo", "bar"]]
           )
 
-printContSplit :: String -> ContSplit -> IO ()
-printContSplit prefix (ContBlock stmts) = do
-  putStrLn "--- BLOCK ---"
-  mapM_ (\stmt -> putStr prefix >> print stmt) stmts
-  putStrLn "--- END BLOCK ---"
-printContSplit prefix cont_call = putStrLn "--- CONT ---" >> putStr prefix >> print cont_call
-
-testTranspiler :: TContext -> Transpiler a -> a
-testTranspiler ctx = either error id . runTranspiler ctx
-
 test_context :: TContext
 test_context = TContext ["capitalizeWords", "capitalizeWord"]
-
-shouldBeRight :: (Show a1, Show a2, Eq a1, Eq a2) => Either a1 a2 -> a2 -> Expectation
-shouldBeRight lhs = (lhs `shouldBe`) . Right
