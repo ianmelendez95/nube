@@ -77,14 +77,19 @@ stmtText :: Stmt -> T.Text
 stmtText (SConst var rhs) = "const " <> var <> " = " <> exprText rhs <> ";"
 stmtText (SReturn rhs) = "return " <> exprText rhs <> ";"
 stmtText (SExpr e) = exprText e <> ";"
+stmtText (SAssign lhs rhs) = exprText lhs <> " = " <> exprText rhs
 
 exprText :: Expr -> T.Text
 exprText (EVar v) = v
 exprText (EStringLit s) = "\"" <> s <> "\""
 exprText (ENumberLit n) = T.show n
-exprText (ECall lhs args) = exprText lhs <> "(" <> T.intercalate ", " (map exprText args) <> ")"
+exprText (ECall lhs args) = exprText lhs <> csExprs "(" ")" args
 exprText (EMember lhs rhs) = exprText lhs <> accessText rhs
 exprText (EInfix op lhs rhs) = exprText lhs <> opText op <> exprText rhs
+exprText (EListLit xs) = csExprs "[" "]" xs
+
+csExprs :: T.Text -> T.Text -> [Expr] -> T.Text
+csExprs bra cket xs = bra <> T.intercalate ", " (map exprText xs) <> cket
 
 accessText :: MAccess -> T.Text
 accessText (MDotAccess v) = "." <> v

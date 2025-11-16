@@ -1,6 +1,7 @@
 module JS.Transpile
   ( Transpiler,
     TContext (..),
+    ContSplit (..),
     ctx_var_name,
     transpileStatement,
     splitStmtContinuations,
@@ -47,6 +48,7 @@ data ContSplit
         _contCallFn :: T.Text,
         _contCallArgs :: [S.Expr]
       }
+  deriving (Show)
 
 transpileScript :: S.Script -> Either String S.Script
 transpileScript (S.Script name fns) =
@@ -125,11 +127,14 @@ stmtToContSplit stmt = do
 userFnCallsInStmt :: S.Stmt -> Transpiler [T.Text]
 userFnCallsInStmt e@(S.SConst _ rhs) = do
   fn_calls <- userFnCallsInExpr rhs
-  if length fn_calls > 1
-    then throwError $ "Cannot call multiple user-defined functions in a const assignment: " ++ show fn_calls
-    else case rhs of
-      (S.ECall (S.EVar _) _) -> pure fn_calls
-      _ -> throwError $ "Calls to user-defined functions must be a simple fn(args) call: " ++ show e
+  if null fn_calls
+    then pure []
+    else
+      if length fn_calls > 1
+        then throwError $ "Cannot call multiple user-defined functions in a const assignment: " ++ show fn_calls
+        else case rhs of
+          (S.ECall (S.EVar _) _) -> pure fn_calls
+          _ -> throwError $ "Calls to user-defined functions must be a simple fn(args) call: " ++ show e
 userFnCallsInStmt e@(S.SReturn rhs) = do
   fn_calls <- userFnCallsInExpr rhs
   if not . null $ fn_calls
