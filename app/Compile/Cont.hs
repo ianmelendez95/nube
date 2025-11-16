@@ -4,7 +4,7 @@ module Compile.Cont
   )
 where
 
-import Compile.Compiler (CContext (..), Compiler)
+import Compile.Compiler (CContext (..), Compiler, isUserFn)
 -- import Debug.Trace (trace, traceShowId)
 
 import Compile.JSCtx (ctxAssignArgStmt, ctxCallStmt)
@@ -106,6 +106,3 @@ userFnCallsInExpr (S.EListLit es) =
 
 userFnCallsInExprs :: [S.Expr] -> Compiler [T.Text]
 userFnCallsInExprs es = concat <$> traverse userFnCallsInExpr es
-
-isUserFn :: T.Text -> Compiler Bool
-isUserFn name = asks ((name `elem`) . fnNames)

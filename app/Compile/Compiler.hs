@@ -1,6 +1,7 @@
 module Compile.Compiler
   ( CContext (..),
     Compiler,
+    isUserFn,
   )
 where
 
@@ -13,3 +14,6 @@ newtype CContext = CContext
   }
 
 type Compiler a = ReaderT CContext (Except String) a
+
+isUserFn :: T.Text -> Compiler Bool
+isUserFn name = asks ((name `elem`) . fnNames)
