@@ -1,13 +1,13 @@
 module JS.Transpile
   ( Compiler,
-    TContext (..),
+    CContext (..),
     ContSplit (..),
     transpileStatement,
     runCompiler,
   )
 where
 
-import Compile.Compiler (Compiler, TContext (..))
+import Compile.Compiler (CContext (..), Compiler)
 -- import Debug.Trace (trace, traceShowId)
 
 import Compile.Cont (splitStmtContinuations)
@@ -28,7 +28,7 @@ data ContSplit
 
 transpileScript :: S.Script -> Either String S.Script
 transpileScript (S.Script name fns) =
-  let ctx = TContext (map S.fnName fns)
+  let ctx = CContext (map S.fnName fns)
    in runCompiler ctx $ do
         fns' <- mconcat <$> mapM transpileFn fns
         pure $ S.Script name fns'
@@ -48,10 +48,10 @@ tContStatements orig_stmts = do
 --      in _
 --   tContInSplits _ = _
 
-transpileStatement :: TContext -> S.Stmt -> Either String S.Stmt
+transpileStatement :: CContext -> S.Stmt -> Either String S.Stmt
 transpileStatement ctx = runCompiler ctx . tStatement
 
-runCompiler :: TContext -> Compiler a -> Either String a
+runCompiler :: CContext -> Compiler a -> Either String a
 runCompiler context transpiler = runExcept $ runReaderT transpiler context
 
 tStatement :: S.Stmt -> Compiler S.Stmt

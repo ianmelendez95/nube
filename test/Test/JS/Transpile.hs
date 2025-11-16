@@ -8,9 +8,9 @@ import Data.Text qualified as T
 import JS.Parse qualified as P
 import JS.Syntax qualified as S
 import JS.Transpile
-  ( Compiler,
+  ( CContext (..),
+    Compiler,
     ContSplit (..),
-    TContext (..),
     runCompiler,
     transpileStatement,
   )
@@ -54,5 +54,5 @@ jsTranspileSpec = do
               [S.dotMembers (S.EVar "_ctx") ["frame", "foo", "bar"]]
           )
 
-test_context :: TContext
-test_context = TContext ["capitalizeWords", "capitalizeWord"]
+test_context :: CContext
+test_context = CContext ["capitalizeWords", "capitalizeWord"]

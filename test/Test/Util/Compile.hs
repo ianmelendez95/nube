@@ -5,8 +5,8 @@ module Test.Util.Compile
 where
 
 import JS.Transpile
-  ( Compiler,
-    TContext (..),
+  ( CContext (..),
+    Compiler,
     runCompiler,
     transpileStatement,
   )
@@ -15,7 +15,7 @@ import Test.Hspec
     shouldBe,
   )
 
-testCompiler :: TContext -> Compiler a -> a
+testCompiler :: CContext -> Compiler a -> a
 testCompiler ctx = either error id . runCompiler ctx
 
 shouldBeRight :: (Show a1, Show a2, Eq a1, Eq a2) => Either a1 a2 -> a2 -> Expectation

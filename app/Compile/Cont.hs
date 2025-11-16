@@ -4,7 +4,7 @@ module Compile.Cont
   )
 where
 
-import Compile.Compiler (Compiler, TContext (..))
+import Compile.Compiler (CContext (..), Compiler)
 -- import Debug.Trace (trace, traceShowId)
 
 import Compile.JSCtx (ctxAssignArgStmt, ctxCallStmt)

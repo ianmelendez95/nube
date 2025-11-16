@@ -1,7 +1,7 @@
 module Test.Compile.Cont (jsCompileContSpec) where
 
 import Compile.Compiler
-  ( TContext (..),
+  ( CContext (..),
   )
 import Compile.Cont
 import Compile.Cont
@@ -29,7 +29,7 @@ import Test.Util.Compile (testCompiler)
 jsCompileContSpec = do
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do
-      let ctx = TContext ["capitalizeTwoWords", "capitalizeWord"]
+      let ctx = CContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testCompiler ctx (splitStmtContinuations (S.fnStmts capitalizeTwoWords_fn_ast))
       -- print capitalizeTwoWords_fn_ast
       -- mapM_ (printContSplit "  ") res

@@ -1,5 +1,5 @@
 module Compile.Compiler
-  ( TContext (..),
+  ( CContext (..),
     Compiler,
   )
 where
@@ -8,8 +8,8 @@ import Control.Monad.Except
 import Control.Monad.Reader
 import Data.Text qualified as T
 
-newtype TContext = TContext
+newtype CContext = CContext
   { fnNames :: [T.Text]
   }
 
-type Compiler a = ReaderT TContext (Except String) a
+type Compiler a = ReaderT CContext (Except String) a
