@@ -1,4 +1,4 @@
-module Compile.Compiler
+module Nube.Compiler
   ( CContext (..),
     Compiler,
     isUserFn,

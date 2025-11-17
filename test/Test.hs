@@ -1,7 +1,6 @@
 module Main where
 
 import Control.Exception (evaluate)
-import Test.Compile.Cont (jsCompileContSpec)
 import Test.Hspec
   ( SpecWith (..),
     anyException,
@@ -13,6 +12,7 @@ import Test.Hspec
   )
 import Test.JS.Parse (jsParseSpec)
 import Test.JS.Transpile (jsTranspileSpec)
+import Test.Nube.Cont (jsCompileContSpec)
 
 main :: IO ()
 main = hspec $ do

@@ -1,17 +1,17 @@
-module Test.Compile.Cont (jsCompileContSpec) where
+module Test.Nube.Cont (jsCompileContSpec) where
 
-import Compile.Compiler
-  ( CContext (..),
-  )
-import Compile.Cont
-import Compile.Cont
-  ( splitStmtContinuations,
-  )
-import Compile.JSCtx
-import Compile.Parse qualified as P
-import Compile.Syntax qualified as S
 import Data.Either (either)
 import Data.Text qualified as T
+import Nube.Compiler
+  ( CContext (..),
+  )
+import Nube.Cont
+import Nube.Cont
+  ( splitStmtContinuations,
+  )
+import Nube.JSCtx
+import Nube.Parse qualified as P
+import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec
   ( Expectation,

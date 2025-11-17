@@ -83,15 +83,15 @@ library
 
     exposed-modules: 
         Compile
-        Compile.Cont
-        Compile.Compiler
-        Compile.FrameRefs
-        Compile.JSCtx
-        Compile.Parse
+        Nube.Cont
+        Nube.Compiler
+        Nube.FrameRefs
+        Nube.JSCtx
+        Nube.Parse
         Gen.CF
         Gen.Lambda
         Util.Aeson
-        Compile.Syntax
+        Nube.Syntax
     
     build-depends:    
         base ^>=4.21.0.0
@@ -132,7 +132,7 @@ test-suite test
     main-is:            Test.hs
 
     other-modules: 
-        Test.Compile.Cont
+        Test.Nube.Cont
         Test.JS.Parse
         Test.JS.Transpile
         Test.Util.Parse

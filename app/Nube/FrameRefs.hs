@@ -1,14 +1,14 @@
-module Compile.FrameRefs (tStatement) where
+module Nube.FrameRefs (tStatement) where
 
-import Compile.Compiler (CContext (..), Compiler)
 -- import Debug.Trace (trace, traceShowId)
 
-import Compile.Cont (splitStmtContinuations)
-import Compile.JSCtx (ctxDotMember, ctxFrameVar)
-import Compile.Syntax qualified as S
 import Control.Monad.Except (MonadError (throwError), runExcept)
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Text qualified as T
+import Nube.Compiler (CContext (..), Compiler)
+import Nube.Cont (splitStmtContinuations)
+import Nube.JSCtx (ctxDotMember, ctxFrameVar)
+import Nube.Syntax qualified as S
 
 tStatement :: S.Stmt -> Compiler S.Stmt
 tStatement (S.SReturn e) = tReturn e

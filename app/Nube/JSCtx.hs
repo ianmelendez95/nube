@@ -1,4 +1,4 @@
-module Compile.JSCtx
+module Nube.JSCtx
   ( ctxAssignArgStmt,
     ctxCallStmt,
     ctxFrameVar,
@@ -8,8 +8,8 @@ module Compile.JSCtx
   )
 where
 
-import Compile.Syntax qualified as S
 import Data.Text qualified as T
+import Nube.Syntax qualified as S
 
 ctxAssignArgStmt :: T.Text -> Int -> S.Stmt
 ctxAssignArgStmt var_name arg_idx =

@@ -7,7 +7,7 @@ where
 import Compile
   ( runCompiler,
   )
-import Compile.Compiler (CContext (..), Compiler)
+import Nube.Compiler (CContext (..), Compiler)
 import Test.Hspec
   ( Expectation,
     shouldBe,

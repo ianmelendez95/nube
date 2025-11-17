@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Compile.Parse
+module Nube.Parse
   ( Parser,
     stringLitExpr,
     parseJsFile,
@@ -13,12 +13,12 @@ module Compile.Parse
   )
 where
 
-import Compile.Syntax qualified as S
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Data.Void (Void)
+import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),

@@ -1,12 +1,12 @@
 module Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text) where
 
-import Compile.Parse
+import Data.Text (Text, pack)
+import Nube.Parse
   ( function,
   )
-import Compile.Syntax
+import Nube.Syntax
   ( Fn (..),
   )
-import Data.Text (Text, pack)
 import Test.Util.Parse
   ( runParser,
   )

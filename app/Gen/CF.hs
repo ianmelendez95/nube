@@ -5,11 +5,11 @@ module Gen.CF
   )
 where
 
-import Compile.Syntax qualified as S
 import Data.Aeson
 import Data.Aeson.Key (fromText)
 import Data.Char
 import Data.Text qualified as T
+import Nube.Syntax qualified as S
 
 data Named a = Named
   { namedName :: T.Text,

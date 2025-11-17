@@ -1,4 +1,4 @@
-module Compile.Syntax
+module Nube.Syntax
   ( Script (..),
     Fn (..),
     Stmt (..),

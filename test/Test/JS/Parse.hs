@@ -4,7 +4,11 @@ module Test.JS.Parse
   )
 where
 
-import Compile.Parse
+import Data.Text
+  ( Text,
+    pack,
+  )
+import Nube.Parse
   ( Parser (..),
     bracketMember,
     dotMember,
@@ -14,16 +18,12 @@ import Compile.Parse
     statement,
     stringLitExpr,
   )
-import Compile.Syntax
+import Nube.Syntax
   ( Expr (..),
     Fn (..),
     IOp (..),
     MAccess (..),
     Stmt (..),
-  )
-import Data.Text
-  ( Text,
-    pack,
   )
 import Test.Example.CapitalizeTwoWords
   ( capitalizeTwoWords_fn_ast,

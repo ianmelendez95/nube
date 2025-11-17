@@ -1,14 +1,14 @@
 module Test.JS.Transpile (jsTranspileSpec) where
 
-import Compile.Compiler (CContext (CContext))
-import Compile.FrameRefs (tStatement)
-import Compile.JSCtx
-  ( ctx_var_name,
-  )
-import Compile.Parse qualified as P
-import Compile.Syntax qualified as S
 import Data.Either (either)
 import Data.Text qualified as T
+import Nube.Compiler (CContext (CContext))
+import Nube.FrameRefs (tStatement)
+import Nube.JSCtx
+  ( ctx_var_name,
+  )
+import Nube.Parse qualified as P
+import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec
   ( Expectation,
