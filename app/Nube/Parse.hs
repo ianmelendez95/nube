@@ -94,10 +94,7 @@ asyncFunction = do
 function :: Parser S.Fn
 function = do
   _ <- symbol "function"
-  fname <- identifier
-  is_existing <- ctxGetIsFnM fname
-  ctxAddFnM fname
-  S.Fn fname <$> fn_parameters <*> fn_body
+  S.Fn <$> parseFnName <*> fn_parameters <*> fn_body
   where
     fn_parameters :: Parser [T.Text]
     fn_parameters = between (symbol "(") (symbol ")") $ sepBy identifier (symbol ",")
@@ -111,7 +108,9 @@ function = do
       is_existing <- ctxGetIsFnM fname
       if is_existing
         then fail $ "Duplicate function names: " ++ show fname
-        else pure fname
+        else do
+          ctxAddFnM fname
+          return fname
 
 statement :: Parser S.Stmt
 statement = (try const_assign <|> return_stmt) <* symbol ";"
