@@ -1,5 +1,7 @@
 module Test.JS.Transpile (jsTranspileSpec) where
 
+import Compile.Compiler (CContext (CContext))
+import Compile.FrameRefs (tStatement)
 import Compile.JSCtx
   ( ctx_var_name,
   )
@@ -7,13 +9,6 @@ import Data.Either (either)
 import Data.Text qualified as T
 import JS.Parse qualified as P
 import JS.Syntax qualified as S
-import JS.Transpile
-  ( CContext (..),
-    Compiler,
-    ContSplit (..),
-    runCompiler,
-    transpileStatement,
-  )
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec
   ( Expectation,
@@ -26,14 +21,14 @@ import Test.Hspec
     xdescribe,
   )
 import Test.JS.Parse (testParser)
-import Test.Util.Compile
+import Test.Util.Compile (testCompiler)
 
 jsTranspileSpec = do
   describe "transpileStatement" $ do
     it "transpiles simple return var" $ do
-      let res = transpileStatement test_context (S.SReturn (S.EVar "x"))
+      let res = testCompiler test_context (tStatement (S.SReturn (S.EVar "x")))
       res
-        `shouldBeRight` S.SExpr
+        `shouldBe` S.SExpr
           ( S.ECall
               ( S.EMember
                   ctx_var_name
@@ -43,9 +38,9 @@ jsTranspileSpec = do
           )
 
     it "transpiles var dot member" $ do
-      let res = transpileStatement test_context (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar"))
+      let res = testCompiler test_context (tStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar")))
       res
-        `shouldBeRight` S.SExpr
+        `shouldBe` S.SExpr
           ( S.ECall
               ( S.EMember
                   ctx_var_name

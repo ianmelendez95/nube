@@ -4,12 +4,10 @@ module Test.Util.Compile
   )
 where
 
-import JS.Transpile
-  ( CContext (..),
-    Compiler,
-    runCompiler,
-    transpileStatement,
+import Compile
+  ( runCompiler,
   )
+import Compile.Compiler (CContext (..), Compiler)
 import Test.Hspec
   ( Expectation,
     shouldBe,
