@@ -88,6 +88,7 @@ library
         Nube.Rename
         Nube.JSCtx
         Nube.Parse
+        Nube.Parser
         Gen.CF
         Gen.Lambda
         Util.Aeson

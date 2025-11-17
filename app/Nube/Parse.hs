@@ -14,16 +14,14 @@ module Nube.Parse
 where
 
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Control.Monad.State (State (..), modify, runState)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Data.Void (Void)
+import Nube.Parser (PContext (..), Parser, addFName, runParser)
 import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
-  ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
-    ParsecT,
+  ( MonadParsec (lookAhead, takeWhileP, try),
     anySingle,
     between,
     choice,
@@ -31,7 +29,6 @@ import Text.Megaparsec
     many,
     manyTill,
     optional,
-    runParserT,
     sepBy,
     (<|>),
   )
@@ -45,21 +42,8 @@ import Text.Megaparsec.Char.Lexer qualified as L
     space,
     symbol,
   )
-import Text.Megaparsec.Error (ParseErrorBundle)
 
 -- import Text.Megaparsec.Debug (dbg)
-
--- ParsecT e=Void s=T.Text m=PState a
-type Parser = ParsecT Void T.Text PState
-
-type PState = State PContext
-
-newtype PContext = PContext
-  { cUserFns :: [T.Text]
-  }
-  deriving (Show, Eq)
-
-type PErrorBundle = ParseErrorBundle T.Text Void
 
 parseJsFile :: FilePath -> IO (S.Script, PContext)
 parseJsFile path = parseJsContent path <$> TIO.readFile path
@@ -69,12 +53,6 @@ parseJsContent path content =
   let run_res = runParser (PContext []) jsFunctions path content
       (result, ctx) = either (error . errorBundlePretty) id run_res
    in (S.Script (T.pack $ takeBaseName path) result, ctx)
-
-runParser :: forall a. PContext -> Parser a -> FilePath -> T.Text -> Either PErrorBundle (a, PContext)
-runParser context p path = joinEither . (`runState` context) . runParserT p path
-  where
-    joinEither :: (Either PErrorBundle a, PContext) -> Either PErrorBundle (a, PContext)
-    joinEither (result_a, ctx) = (,ctx) <$> result_a
 
 jsFunctions :: Parser [S.Fn]
 jsFunctions = many asyncFunction
@@ -226,12 +204,3 @@ spaceConsumer = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*"
 
 space' :: Parser T.Text
 space' = takeWhileP (Just "whitespace") isSpace
-
-space1' :: Parser T.Text
-space1' = takeWhile1P (Just "whitespace") isSpace
-
-addFName :: T.Text -> Parser ()
-addFName = modify . addInCtx
-  where
-    addInCtx :: T.Text -> PContext -> PContext
-    addInCtx fname (PContext fnames) = PContext (fname : fnames)
