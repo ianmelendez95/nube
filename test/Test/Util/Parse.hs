@@ -15,5 +15,5 @@ testParser parser = pure . runParser parser
 
 runParser :: NP.Parser a -> Text -> a
 runParser parser content =
-  let parse_result = NP.runParser (NP.PContext []) parser "test.js" content
+  let (parse_result, _ctx) = NP.runParser (NP.PContext []) parser "test.js" content
    in either (error . MP.errorBundlePretty) id parse_result
