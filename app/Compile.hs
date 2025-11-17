@@ -2,6 +2,8 @@ module Compile where
 
 import Compile.Compiler (CContext (CContext), Compiler)
 import Compile.Cont (ContSplit, splitStmtContinuations)
+import Compile.Parse qualified as P
+import Compile.Syntax qualified as S
 import Control.Monad
   ( unless,
   )
@@ -11,8 +13,6 @@ import Data.Char
 import Data.Text qualified as T
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
-import Compile.Parse qualified as P
-import JS.Syntax qualified as S
 import System.FilePath
   ( takeBaseName,
     takeDirectory,

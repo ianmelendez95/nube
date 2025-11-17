@@ -1,4 +1,4 @@
-module JS.Syntax
+module Compile.Syntax
   ( Script (..),
     Fn (..),
     Stmt (..),

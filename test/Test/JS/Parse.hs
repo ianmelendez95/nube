@@ -14,16 +14,16 @@ import Compile.Parse
     statement,
     stringLitExpr,
   )
-import Data.Text
-  ( Text,
-    pack,
-  )
-import JS.Syntax
+import Compile.Syntax
   ( Expr (..),
     Fn (..),
     IOp (..),
     MAccess (..),
     Stmt (..),
+  )
+import Data.Text
+  ( Text,
+    pack,
   )
 import Test.Example.CapitalizeTwoWords
   ( capitalizeTwoWords_fn_ast,

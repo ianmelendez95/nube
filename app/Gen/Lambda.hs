@@ -2,12 +2,12 @@
 
 module Gen.Lambda where
 
+import Compile.Syntax (Fn (fnName))
+import Compile.Syntax qualified as S
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Data.Text.Lazy qualified as TLazy
 import Gen.CF qualified as CF
-import JS.Syntax (Fn (fnName))
-import JS.Syntax qualified as S
 import System.Directory
 import System.FilePath
 import Text.Julius hiding (renderJavascript)

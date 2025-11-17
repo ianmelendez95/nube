@@ -3,10 +3,10 @@ module Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwo
 import Compile.Parse
   ( function,
   )
-import Data.Text (Text, pack)
-import JS.Syntax
+import Compile.Syntax
   ( Fn (..),
   )
+import Data.Text (Text, pack)
 import Test.Util.Parse
   ( runParser,
   )

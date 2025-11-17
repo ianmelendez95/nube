@@ -8,11 +8,11 @@ import Compile.Compiler (CContext (..), Compiler, isUserFn)
 -- import Debug.Trace (trace, traceShowId)
 
 import Compile.JSCtx (ctxAssignArgStmt, ctxCallStmt)
+import Compile.Syntax qualified as S
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (asks)
 import Data.Bifunctor (first)
 import Data.Text qualified as T
-import JS.Syntax qualified as S
 
 data ContSplit
   = ContBlock [S.Stmt]

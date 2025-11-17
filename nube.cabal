@@ -91,7 +91,7 @@ library
         Gen.CF
         Gen.Lambda
         Util.Aeson
-        JS.Syntax
+        Compile.Syntax
     
     build-depends:    
         base ^>=4.21.0.0
