@@ -2,12 +2,12 @@ module Test.Nube.Rename (jsTranspileSpec) where
 
 import Data.Either (either)
 import Data.Text qualified as T
-import Nube.Compiler (CContext (CContext))
-import Nube.Rename (tStatement)
+import Nube.Context (NContext (NContext))
 import Nube.JSCtx
   ( ctx_var_name,
   )
 import Nube.Parse qualified as P
+import Nube.Rename (tStatement)
 import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec
@@ -49,5 +49,5 @@ jsTranspileSpec = do
               [S.dotMembers (S.EVar "_ctx") ["frame", "foo", "bar"]]
           )
 
-test_context :: CContext
-test_context = CContext ["capitalizeWords", "capitalizeWord"]
+test_context :: NContext
+test_context = NContext ["capitalizeWords", "capitalizeWord"]

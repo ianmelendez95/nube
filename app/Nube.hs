@@ -9,8 +9,9 @@ import Data.Char
 import Data.Text qualified as T
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
-import Nube.Compiler (CContext (CContext), Compiler)
+import Nube.Compiler (Compiler)
 import Nube.Cont (ContSplit, splitStmtContinuations)
+import Nube.Context (NContext (NContext))
 import Nube.Parse qualified as P
 import Nube.Syntax qualified as S
 import System.FilePath
@@ -59,12 +60,12 @@ assertValidJsFileName file_path =
 
 compileScript :: S.Script -> Either String S.Script
 compileScript (S.Script name fns) =
-  let ctx = CContext (map S.fnName fns)
+  let ctx = NContext (map S.fnName fns)
    in runCompiler ctx $ do
         fns' <- mconcat <$> mapM compileFunction fns
         pure $ S.Script name fns'
 
--- compileStatement :: CContext -> S.Stmt -> Either String S.Stmt
+-- compileStatement :: NContext -> S.Stmt -> Either String S.Stmt
 -- compileStatement ctx = runCompiler ctx . tStatement
 
 compileFunction :: S.Fn -> Compiler [S.Fn]
@@ -72,5 +73,5 @@ compileFunction (S.Fn _name _params stmts) = do
   splits <- splitStmtContinuations stmts
   undefined
 
-runCompiler :: CContext -> Compiler a -> Either String a
+runCompiler :: NContext -> Compiler a -> Either String a
 runCompiler context transpiler = runExcept $ runReaderT transpiler context

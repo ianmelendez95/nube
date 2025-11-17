@@ -2,12 +2,12 @@ module Test.Nube.Cont (jsCompileContSpec) where
 
 import Data.Either (either)
 import Data.Text qualified as T
-import Nube.Compiler
-  ( CContext (..),
-  )
 import Nube.Cont
 import Nube.Cont
   ( splitStmtContinuations,
+  )
+import Nube.Context
+  ( NContext (..),
   )
 import Nube.JSCtx
 import Nube.Parse qualified as P
@@ -29,7 +29,7 @@ import Test.Util.Nube (testCompiler)
 jsCompileContSpec = do
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do
-      let ctx = CContext ["capitalizeTwoWords", "capitalizeWord"]
+      let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testCompiler ctx (splitStmtContinuations (S.fnStmts capitalizeTwoWords_fn_ast))
       -- print capitalizeTwoWords_fn_ast
       -- mapM_ (printContSplit "  ") res

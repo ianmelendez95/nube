@@ -10,7 +10,8 @@ import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader (asks)
 import Data.Bifunctor (first)
 import Data.Text qualified as T
-import Nube.Compiler (CContext (..), Compiler, isUserFn)
+import Nube.Compiler (Compiler)
+import Nube.Context (NContext (..), ctxAskIsFn, ctxIsFnM)
 import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt)
 import Nube.Syntax qualified as S
 
@@ -93,7 +94,7 @@ userFnCallsInStmt (S.SExpr _) = throwError "Expression statements are not allowe
 
 userFnCallsInExpr :: S.Expr -> Compiler [T.Text]
 userFnCallsInExpr (S.EVar v) = do
-  is_ufn <- isUserFn v
+  is_ufn <- ctxAskIsFn v
   if is_ufn then pure [v] else pure []
 userFnCallsInExpr (S.ECall lhs args) = userFnCallsInExprs (lhs : args)
 userFnCallsInExpr (S.EMember lhs (S.MBracketAccess rhs)) = userFnCallsInExprs [lhs, rhs]

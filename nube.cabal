@@ -89,6 +89,7 @@ library
         Nube.JSCtx
         Nube.Parse
         Nube.Parser
+        Nube.Context
         Gen.CF
         Gen.Lambda
         Util.Aeson

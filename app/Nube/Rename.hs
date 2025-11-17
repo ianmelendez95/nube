@@ -5,8 +5,9 @@ module Nube.Rename (tStatement) where
 import Control.Monad.Except (MonadError (throwError), runExcept)
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Text qualified as T
-import Nube.Compiler (CContext (..), Compiler)
+import Nube.Compiler (Compiler)
 import Nube.Cont (splitStmtContinuations)
+import Nube.Context (NContext (..))
 import Nube.JSCtx (ctxDotMember, ctxFrameVar)
 import Nube.Syntax qualified as S
 

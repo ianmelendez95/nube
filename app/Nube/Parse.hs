@@ -16,7 +16,7 @@ import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Nube.Compiler (CContext (..), ctxAddFnM)
+import Nube.Context (NContext (..), ctxAddFnM)
 import Nube.Parser (Parser, runParser)
 import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
@@ -45,12 +45,12 @@ import Text.Megaparsec.Char.Lexer qualified as L
 
 -- import Text.Megaparsec.Debug (dbg)
 
-parseJsFile :: FilePath -> IO (S.Script, CContext)
+parseJsFile :: FilePath -> IO (S.Script, NContext)
 parseJsFile path = parseJsContent path <$> TIO.readFile path
 
-parseJsContent :: FilePath -> T.Text -> (S.Script, CContext)
+parseJsContent :: FilePath -> T.Text -> (S.Script, NContext)
 parseJsContent path content =
-  let run_res = runParser (CContext []) jsFunctions path content
+  let run_res = runParser (NContext []) jsFunctions path content
       (result, ctx) = either (error . errorBundlePretty) id run_res
    in (S.Script (T.pack $ takeBaseName path) result, ctx)
 

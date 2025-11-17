@@ -1,7 +1,7 @@
 module Test.Util.Parse (testParser, runParser, runParser') where
 
 import Data.Text (Text)
-import Nube.Compiler (CContext (..))
+import Nube.Context (NContext (..))
 import Nube.Parse qualified as NP
   ( Parser,
     runParser,
@@ -16,7 +16,7 @@ testParser parser = pure . runParser parser
 runParser :: NP.Parser a -> Text -> a
 runParser parser = fst . runParser' parser
 
-runParser' :: NP.Parser a -> Text -> (a, CContext)
+runParser' :: NP.Parser a -> Text -> (a, NContext)
 runParser' parser content =
-  let parse_result = NP.runParser (CContext []) parser "test.js" content
+  let parse_result = NP.runParser (NContext []) parser "test.js" content
    in either (error . MP.errorBundlePretty) id parse_result
