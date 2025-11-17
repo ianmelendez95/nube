@@ -16,7 +16,7 @@ import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Nube.Context (NContext (..), ctxAddFnM)
+import Nube.Context (NContext (..), ctxAddFnM, ctxGetIsFnM)
 import Nube.Parser (Parser, runParser)
 import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
@@ -95,6 +95,7 @@ function :: Parser S.Fn
 function = do
   _ <- symbol "function"
   fname <- identifier
+  is_existing <- ctxGetIsFnM fname
   ctxAddFnM fname
   S.Fn fname <$> fn_parameters <*> fn_body
   where
@@ -103,6 +104,14 @@ function = do
 
     fn_body :: Parser [S.Stmt]
     fn_body = between (symbol "{") (symbol "}") $ many statement
+
+    parseFnName :: Parser T.Text
+    parseFnName = do
+      fname <- identifier
+      is_existing <- ctxGetIsFnM fname
+      if is_existing
+        then fail $ "Duplicate function names: " ++ show fname
+        else pure fname
 
 statement :: Parser S.Stmt
 statement = (try const_assign <|> return_stmt) <* symbol ";"

@@ -2,7 +2,7 @@ module Nube.Context
   ( NContext (..),
     ctxAddFnM,
     ctxAddFn,
-    ctxIsFnM,
+    ctxGetIsFnM,
     ctxIsFn,
     ctxAskIsFn,
   )
@@ -20,8 +20,8 @@ newtype NContext = NContext
 ctxAddFnM :: (MonadState NContext m) => T.Text -> m ()
 ctxAddFnM = modify . ctxAddFn
 
-ctxIsFnM :: (MonadState NContext m) => T.Text -> m Bool
-ctxIsFnM = gets . ctxIsFn
+ctxGetIsFnM :: (MonadState NContext m) => T.Text -> m Bool
+ctxGetIsFnM = gets . ctxIsFn
 
 ctxAskIsFn :: (MonadReader NContext m) => T.Text -> m Bool
 ctxAskIsFn = asks . ctxIsFn

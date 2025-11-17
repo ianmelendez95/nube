@@ -28,7 +28,7 @@ compileFile :: FilePath -> IO ()
 compileFile js_file = do
   assertValidJsFileName js_file
 
-  (script, _ctx) <- P.parseJsFile js_file
+  (script, ctx) <- P.parseJsFile js_file
   let js = S.scriptFns script
       proxies_script = GL.jsFunsToProxiesScript js
       scripts = GL.jsFunsToScripts js
