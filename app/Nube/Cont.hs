@@ -7,11 +7,10 @@ where
 -- import Debug.Trace (trace, traceShowId)
 
 import Control.Monad.Except (MonadError (throwError))
-import Control.Monad.Reader (asks)
 import Data.Bifunctor (first)
 import Data.Text qualified as T
 import Nube.Compiler (Compiler)
-import Nube.Context (NContext (..), ctxAskIsFn, ctxIsFnM)
+import Nube.Context (ctxAskIsFn)
 import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt)
 import Nube.Syntax qualified as S
 

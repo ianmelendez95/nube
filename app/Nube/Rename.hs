@@ -2,12 +2,9 @@ module Nube.Rename (tStatement) where
 
 -- import Debug.Trace (trace, traceShowId)
 
-import Control.Monad.Except (MonadError (throwError), runExcept)
-import Control.Monad.Reader (ReaderT (runReaderT))
+import Control.Monad.Except (MonadError (throwError))
 import Data.Text qualified as T
 import Nube.Compiler (Compiler)
-import Nube.Cont (splitStmtContinuations)
-import Nube.Context (NContext (..))
 import Nube.JSCtx (ctxDotMember, ctxFrameVar)
 import Nube.Syntax qualified as S
 
