@@ -1,7 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Nube.Parse
   ( Parser,
+    PContext (..),
     stringLitExpr,
     parseJsFile,
     identifier,
@@ -10,10 +9,12 @@ module Nube.Parse
     expr,
     statement,
     function,
+    runParser,
   )
 where
 
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
+import Control.Monad.State (State (..), evalState)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -22,7 +23,7 @@ import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
   ( MonadParsec (lookAhead, takeWhile1P, takeWhileP, try),
-    Parsec,
+    ParsecT,
     anySingle,
     between,
     choice,
@@ -30,7 +31,7 @@ import Text.Megaparsec
     many,
     manyTill,
     optional,
-    runParser,
+    runParserT,
     sepBy,
     (<|>),
   )
@@ -44,16 +45,30 @@ import Text.Megaparsec.Char.Lexer qualified as L
     space,
     symbol,
   )
+import Text.Megaparsec.Error (ParseErrorBundle)
 
 -- import Text.Megaparsec.Debug (dbg)
 
-type Parser = Parsec Void T.Text
+-- ParsecT e=Void s=T.Text m=PState a
+type Parser = ParsecT Void T.Text PState
+
+type PState = State PContext
+
+newtype PContext = PContext
+  { cUserFns :: [T.Text]
+  }
+
+type PErrorBundle = ParseErrorBundle T.Text Void
 
 parseJsFile :: FilePath -> IO S.Script
 parseJsFile path = do
   content <- TIO.readFile path
-  let result = either (error . errorBundlePretty) id $ runParser jsFunctions path content
+  let run_res = runParser (PContext []) jsFunctions path content
+      result = either (error . errorBundlePretty) id run_res
   pure $ S.Script (T.pack $ takeBaseName path) result
+
+runParser :: PContext -> Parser a -> FilePath -> T.Text -> Either PErrorBundle a
+runParser context p path = (`evalState` context) . runParserT p path
 
 jsFunctions :: Parser [S.Fn]
 jsFunctions = many asyncFunction
