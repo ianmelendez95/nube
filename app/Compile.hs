@@ -1,8 +1,12 @@
 module Compile where
 
+import Compile.Compiler (CContext (CContext), Compiler)
+import Compile.Cont (ContSplit, splitStmtContinuations)
 import Control.Monad
   ( unless,
   )
+import Control.Monad.Except (runExcept)
+import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Char
 import Data.Text qualified as T
 import Gen.CF qualified as CF
@@ -10,7 +14,12 @@ import Gen.Lambda qualified as GL
 import JS.Parse qualified as P
 import JS.Syntax qualified as S
 import System.FilePath
-import Util.Aeson
+  ( takeBaseName,
+    takeDirectory,
+    takeExtension,
+    (</>),
+  )
+import Util.Aeson (writeFileJSON)
 
 -- test_js_file = "example/capitalizeWords/capitalizeWords.js"
 
@@ -47,3 +56,21 @@ assertValidJsFileName file_path =
           unless
             (all isLetter basename)
             (error $ "Only letters allowed in file basename: " <> basename)
+
+compileScript :: S.Script -> Either String S.Script
+compileScript (S.Script name fns) =
+  let ctx = CContext (map S.fnName fns)
+   in runCompiler ctx $ do
+        fns' <- mconcat <$> mapM compileFunction fns
+        pure $ S.Script name fns'
+
+-- compileStatement :: CContext -> S.Stmt -> Either String S.Stmt
+-- compileStatement ctx = runCompiler ctx . tStatement
+
+compileFunction :: S.Fn -> Compiler [S.Fn]
+compileFunction (S.Fn _name _params stmts) = do
+  splits <- splitStmtContinuations stmts
+  undefined
+
+runCompiler :: CContext -> Compiler a -> Either String a
+runCompiler context transpiler = runExcept $ runReaderT transpiler context
