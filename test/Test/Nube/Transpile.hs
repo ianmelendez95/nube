@@ -1,4 +1,4 @@
-module Test.JS.Transpile (jsTranspileSpec) where
+module Test.Nube.Transpile (jsTranspileSpec) where
 
 import Data.Either (either)
 import Data.Text qualified as T
@@ -20,7 +20,7 @@ import Test.Hspec
     shouldSatisfy,
     xdescribe,
   )
-import Test.JS.Parse (testParser)
+import Test.Nube.Parse (testParser)
 import Test.Util.Nube (testCompiler)
 
 jsTranspileSpec = do

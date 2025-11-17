@@ -23,7 +23,7 @@ import Test.Hspec
     shouldSatisfy,
     xdescribe,
   )
-import Test.JS.Parse (testParser)
+import Test.Nube.Parse (testParser)
 import Test.Util.Nube (testCompiler)
 
 jsCompileContSpec = do

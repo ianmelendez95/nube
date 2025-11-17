@@ -1,4 +1,4 @@
-module Test.JS.Parse
+module Test.Nube.Parse
   ( jsParseSpec,
     testParser,
   )

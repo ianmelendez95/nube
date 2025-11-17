@@ -10,9 +10,9 @@ import Test.Hspec
     shouldBe,
     shouldThrow,
   )
-import Test.JS.Parse (jsParseSpec)
-import Test.JS.Transpile (jsTranspileSpec)
 import Test.Nube.Cont (jsCompileContSpec)
+import Test.Nube.Parse (jsParseSpec)
+import Test.Nube.Transpile (jsTranspileSpec)
 
 main :: IO ()
 main = hspec $ do

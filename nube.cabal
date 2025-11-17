@@ -133,8 +133,8 @@ test-suite test
 
     other-modules: 
         Test.Nube.Cont
-        Test.JS.Parse
-        Test.JS.Transpile
+        Test.Nube.Parse
+        Test.Nube.Transpile
         Test.Util.Parse
         Test.Util.Nube
         Test.Example.CapitalizeTwoWords
