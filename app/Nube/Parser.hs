@@ -3,7 +3,6 @@ module Nube.Parser
     PState,
     PErrorBundle,
     runParser,
-    pAddFn,
   )
 where
 
@@ -29,6 +28,3 @@ runParser context p path = joinEither . (`runState` context) . runParserT p path
   where
     joinEither :: (Either PErrorBundle a, CContext) -> Either PErrorBundle (a, CContext)
     joinEither (result_a, ctx) = (,ctx) <$> result_a
-
-pAddFn :: T.Text -> Parser ()
-pAddFn = modify . ctxAddFn

@@ -16,8 +16,8 @@ import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Nube.Compiler (CContext (..))
-import Nube.Parser (Parser, runParser, pAddFn)
+import Nube.Compiler (CContext (..), ctxAddFnM)
+import Nube.Parser (Parser, runParser)
 import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
@@ -95,7 +95,7 @@ function :: Parser S.Fn
 function = do
   _ <- symbol "function"
   fname <- identifier
-  pAddFn fname
+  ctxAddFnM fname
   S.Fn fname <$> fn_parameters <*> fn_body
   where
     fn_parameters :: Parser [T.Text]
