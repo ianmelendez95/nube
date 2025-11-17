@@ -60,12 +60,14 @@ newtype PContext = PContext
 
 type PErrorBundle = ParseErrorBundle T.Text Void
 
-parseJsFile :: FilePath -> IO S.Script
-parseJsFile path = do
-  content <- TIO.readFile path
+parseJsFile :: FilePath -> IO (S.Script, PContext)
+parseJsFile path = parseJsContent path <$> TIO.readFile path
+
+parseJsContent :: FilePath -> T.Text -> (S.Script, PContext)
+parseJsContent path content =
   let run_res = runParser (PContext []) jsFunctions path content
-      (result, _ctx) = either (error . errorBundlePretty) id run_res
-  pure $ S.Script (T.pack $ takeBaseName path) result
+      (result, ctx) = either (error . errorBundlePretty) id run_res
+   in (S.Script (T.pack $ takeBaseName path) result, ctx)
 
 runParser :: forall a. PContext -> Parser a -> FilePath -> T.Text -> Either PErrorBundle (a, PContext)
 runParser context p path = joinEither . (`runState` context) . runParserT p path
