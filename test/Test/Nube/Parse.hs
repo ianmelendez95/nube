@@ -9,7 +9,8 @@ import Data.Text
     pack,
   )
 import Nube.Parse
-  ( Parser (..),
+  ( PContext (..),
+    Parser (..),
     bracketMember,
     dotMember,
     expr,
@@ -40,14 +41,16 @@ import Test.Hspec
   )
 import Test.Util.Parse
   ( runParser,
+    runParser',
     testParser,
   )
 
 jsParseSpec = do
   describe "function" $ do
     it "parses simple function" $ do
-      res <- testParser function "function foo(x) { return x; }"
+      let (res, ctx) = runParser' function "function foo(x) { return x; }"
       res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
+      ctx `shouldBe` PContext ["foo"]
 
     it "parses capitalizeTwoWords" $ do
       (Fn name params stmts) <- testParser function capitalizeTwoWords_fn_text

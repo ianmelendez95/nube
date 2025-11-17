@@ -14,7 +14,7 @@ module Nube.Parse
 where
 
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Control.Monad.State (State (..), runState)
+import Control.Monad.State (State (..), modify, runState)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
@@ -57,6 +57,7 @@ type PState = State PContext
 newtype PContext = PContext
   { cUserFns :: [T.Text]
   }
+  deriving (Show, Eq)
 
 type PErrorBundle = ParseErrorBundle T.Text Void
 
@@ -115,7 +116,9 @@ asyncFunction = do
 function :: Parser S.Fn
 function = do
   _ <- symbol "function"
-  S.Fn <$> identifier <*> fn_parameters <*> fn_body
+  fname <- identifier
+  addFName fname
+  S.Fn fname <$> fn_parameters <*> fn_body
   where
     fn_parameters :: Parser [T.Text]
     fn_parameters = between (symbol "(") (symbol ")") $ sepBy identifier (symbol ",")
@@ -226,3 +229,9 @@ space' = takeWhileP (Just "whitespace") isSpace
 
 space1' :: Parser T.Text
 space1' = takeWhile1P (Just "whitespace") isSpace
+
+addFName :: T.Text -> Parser ()
+addFName = modify . addInCtx
+  where
+    addInCtx :: T.Text -> PContext -> PContext
+    addInCtx fname (PContext fnames) = PContext (fname : fnames)
