@@ -1,6 +1,5 @@
 module Nube.Parse
   ( Parser,
-    PContext (..),
     stringLitExpr,
     parseJsFile,
     identifier,
@@ -17,7 +16,8 @@ import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Data.Char (isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Nube.Parser (PContext (..), Parser, addFName, runParser)
+import Nube.Compiler (CContext (..))
+import Nube.Parser (Parser, runParser, pAddFn)
 import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
@@ -45,12 +45,12 @@ import Text.Megaparsec.Char.Lexer qualified as L
 
 -- import Text.Megaparsec.Debug (dbg)
 
-parseJsFile :: FilePath -> IO (S.Script, PContext)
+parseJsFile :: FilePath -> IO (S.Script, CContext)
 parseJsFile path = parseJsContent path <$> TIO.readFile path
 
-parseJsContent :: FilePath -> T.Text -> (S.Script, PContext)
+parseJsContent :: FilePath -> T.Text -> (S.Script, CContext)
 parseJsContent path content =
-  let run_res = runParser (PContext []) jsFunctions path content
+  let run_res = runParser (CContext []) jsFunctions path content
       (result, ctx) = either (error . errorBundlePretty) id run_res
    in (S.Script (T.pack $ takeBaseName path) result, ctx)
 
@@ -95,7 +95,7 @@ function :: Parser S.Fn
 function = do
   _ <- symbol "function"
   fname <- identifier
-  addFName fname
+  pAddFn fname
   S.Fn fname <$> fn_parameters <*> fn_body
   where
     fn_parameters :: Parser [T.Text]
