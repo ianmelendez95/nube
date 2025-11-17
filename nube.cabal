@@ -85,7 +85,7 @@ library
         Nube
         Nube.Cont
         Nube.Compiler
-        Nube.FrameRefs
+        Nube.Rename
         Nube.JSCtx
         Nube.Parse
         Gen.CF
@@ -134,7 +134,7 @@ test-suite test
     other-modules: 
         Test.Nube.Cont
         Test.Nube.Parse
-        Test.Nube.FrameRefs
+        Test.Nube.Rename
         Test.Util.Parse
         Test.Util.Nube
         Test.Example.CapitalizeTwoWords

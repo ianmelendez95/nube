@@ -1,4 +1,4 @@
-module Nube.FrameRefs (tStatement) where
+module Nube.Rename (tStatement) where
 
 -- import Debug.Trace (trace, traceShowId)
 

@@ -1,9 +1,9 @@
-module Test.Nube.FrameRefs (jsTranspileSpec) where
+module Test.Nube.Rename (jsTranspileSpec) where
 
 import Data.Either (either)
 import Data.Text qualified as T
 import Nube.Compiler (CContext (CContext))
-import Nube.FrameRefs (tStatement)
+import Nube.Rename (tStatement)
 import Nube.JSCtx
   ( ctx_var_name,
   )
