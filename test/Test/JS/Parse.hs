@@ -4,11 +4,7 @@ module Test.JS.Parse
   )
 where
 
-import Data.Text
-  ( Text,
-    pack,
-  )
-import JS.Parse
+import Compile.Parse
   ( Parser (..),
     bracketMember,
     dotMember,
@@ -17,6 +13,10 @@ import JS.Parse
     identifier,
     statement,
     stringLitExpr,
+  )
+import Data.Text
+  ( Text,
+    pack,
   )
 import JS.Syntax
   ( Expr (..),

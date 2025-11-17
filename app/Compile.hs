@@ -11,7 +11,7 @@ import Data.Char
 import Data.Text qualified as T
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
-import JS.Parse qualified as P
+import Compile.Parse qualified as P
 import JS.Syntax qualified as S
 import System.FilePath
   ( takeBaseName,

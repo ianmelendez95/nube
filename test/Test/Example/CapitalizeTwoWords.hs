@@ -1,9 +1,9 @@
 module Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text) where
 
-import Data.Text (Text, pack)
-import JS.Parse
+import Compile.Parse
   ( function,
   )
+import Data.Text (Text, pack)
 import JS.Syntax
   ( Fn (..),
   )

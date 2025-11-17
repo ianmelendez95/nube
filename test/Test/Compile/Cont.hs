@@ -8,9 +8,9 @@ import Compile.Cont
   ( splitStmtContinuations,
   )
 import Compile.JSCtx
+import Compile.Parse qualified as P
 import Data.Either (either)
 import Data.Text qualified as T
-import JS.Parse qualified as P
 import JS.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec

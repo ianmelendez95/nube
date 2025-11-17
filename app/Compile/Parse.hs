@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module JS.Parse
+module Compile.Parse
   ( Parser,
     stringLitExpr,
     parseJsFile,

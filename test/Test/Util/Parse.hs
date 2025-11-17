@@ -1,9 +1,9 @@
 module Test.Util.Parse (testParser, runParser) where
 
-import Data.Text (Text)
-import JS.Parse
+import Compile.Parse
   ( Parser,
   )
+import Data.Text (Text)
 import Text.Megaparsec qualified as MP
   ( errorBundlePretty,
     runParser,

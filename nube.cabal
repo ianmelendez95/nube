@@ -87,10 +87,10 @@ library
         Compile.Compiler
         Compile.FrameRefs
         Compile.JSCtx
+        Compile.Parse
         Gen.CF
         Gen.Lambda
         Util.Aeson
-        JS.Parse
         JS.Syntax
     
     build-depends:    
