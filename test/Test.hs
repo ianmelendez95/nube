@@ -11,8 +11,8 @@ import Test.Hspec
     shouldThrow,
   )
 import Test.Nube.Cont (jsCompileContSpec)
+import Test.Nube.FrameRefs (jsTranspileSpec)
 import Test.Nube.Parse (jsParseSpec)
-import Test.Nube.Transpile (jsTranspileSpec)
 
 main :: IO ()
 main = hspec $ do

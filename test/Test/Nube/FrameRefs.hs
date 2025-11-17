@@ -1,4 +1,4 @@
-module Test.Nube.Transpile (jsTranspileSpec) where
+module Test.Nube.FrameRefs (jsTranspileSpec) where
 
 import Data.Either (either)
 import Data.Text qualified as T
