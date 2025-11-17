@@ -21,7 +21,7 @@ import Test.Hspec
     xdescribe,
   )
 import Test.JS.Parse (testParser)
-import Test.Util.Compile (testCompiler)
+import Test.Util.Nube (testCompiler)
 
 jsTranspileSpec = do
   describe "transpileStatement" $ do

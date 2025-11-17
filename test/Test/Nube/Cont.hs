@@ -24,7 +24,7 @@ import Test.Hspec
     xdescribe,
   )
 import Test.JS.Parse (testParser)
-import Test.Util.Compile (testCompiler)
+import Test.Util.Nube (testCompiler)
 
 jsCompileContSpec = do
   describe "splitStmtContinuations" $ do

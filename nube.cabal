@@ -82,7 +82,7 @@ library
     ghc-options:      -O0
 
     exposed-modules: 
-        Compile
+        Nube
         Nube.Cont
         Nube.Compiler
         Nube.FrameRefs
@@ -136,7 +136,7 @@ test-suite test
         Test.JS.Parse
         Test.JS.Transpile
         Test.Util.Parse
-        Test.Util.Compile
+        Test.Util.Nube
         Test.Example.CapitalizeTwoWords
 
     build-depends:  

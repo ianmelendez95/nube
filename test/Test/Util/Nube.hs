@@ -1,10 +1,10 @@
-module Test.Util.Compile
+module Test.Util.Nube
   ( testCompiler,
     shouldBeRight,
   )
 where
 
-import Compile
+import Nube
   ( runCompiler,
   )
 import Nube.Compiler (CContext (..), Compiler)

@@ -1,14 +1,14 @@
 module Main (main) where
 
+import Nube
 import System.Environment
-import Compile
 
 main :: IO ()
-main = do 
+main = do
   args <- getArgs
-  case args of 
+  case args of
     [] -> putStrLn "usage: nube <js-file>"
-    [js_file] -> do 
+    [js_file] -> do
       putStrLn $ "compiling: " <> js_file
       compileFile js_file
       putStrLn "done"
