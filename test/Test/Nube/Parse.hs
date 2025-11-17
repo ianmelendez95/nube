@@ -43,20 +43,22 @@ import Test.Util.Parse
   ( runParser,
     runParser',
     testParser,
+    testParser',
   )
 
 jsParseSpec = do
   describe "function" $ do
     it "parses simple function" $ do
-      let (res, ctx) = runParser' function "function foo(x) { return x; }"
+      (res, ctx) <- testParser' function "function foo(x) { return x; }"
       res `shouldBe` Fn "foo" ["x"] [SReturn (EVar "x")]
       ctx `shouldBe` NContext ["foo"]
 
     it "parses capitalizeTwoWords" $ do
-      (Fn name params stmts) <- testParser function capitalizeTwoWords_fn_text
+      (Fn name params stmts, ctx) <- testParser' function capitalizeTwoWords_fn_text
       name `shouldBe` "capitalizeTwoWords"
       params `shouldBe` ["string"]
       length stmts `shouldBe` 6
+      ctx `shouldBe` NContext ["capitalizeTwoWords"]
 
   describe "statement" $ do
     it "parses assign statement" $ do
