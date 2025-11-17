@@ -63,12 +63,15 @@ type PErrorBundle = ParseErrorBundle T.Text Void
 parseJsFile :: FilePath -> IO S.Script
 parseJsFile path = do
   content <- TIO.readFile path
-  let (run_res, _ctx) = runParser (PContext []) jsFunctions path content
-      result = either (error . errorBundlePretty) id run_res
+  let run_res = runParser (PContext []) jsFunctions path content
+      (result, _ctx) = either (error . errorBundlePretty) id run_res
   pure $ S.Script (T.pack $ takeBaseName path) result
 
-runParser :: PContext -> Parser a -> FilePath -> T.Text -> (Either PErrorBundle a, PContext)
-runParser context p path = (`runState` context) . runParserT p path
+runParser :: forall a. PContext -> Parser a -> FilePath -> T.Text -> Either PErrorBundle (a, PContext)
+runParser context p path = joinEither . (`runState` context) . runParserT p path
+  where
+    joinEither :: (Either PErrorBundle a, PContext) -> Either PErrorBundle (a, PContext)
+    joinEither (result_a, ctx) = (,ctx) <$> result_a
 
 jsFunctions :: Parser [S.Fn]
 jsFunctions = many asyncFunction
