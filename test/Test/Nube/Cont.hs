@@ -33,7 +33,7 @@ jsCompileContSpec = do
       let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
        in do
-            putStrLn "--- BEFORE ---" >> print capitalizeTwoWords_fn_ast
+            -- putStrLn "--- BEFORE ---" >> print capitalizeTwoWords_fn_ast
             putStrLn "--- AFTER  ---" >> mapM_ print res
             length res `shouldBe` 3
             let [prim_fn, cont_fn1, cont_fn2] = res

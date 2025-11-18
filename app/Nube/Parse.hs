@@ -56,41 +56,7 @@ parseJsContent path content =
    in (S.Script (T.pack $ takeBaseName path) result, ctx)
 
 jsFunctions :: Parser [S.Fn]
-jsFunctions = many asyncFunction
-
-asyncFunction :: Parser S.Fn
-asyncFunction = do
-  _ <- symbol "async" >> symbol "function"
-  S.Fn
-    <$> lexeme identifier
-    <*> undefined
-    <*> undefined
-  where
-    -- Parameters of the function
-    parameters :: Parser T.Text
-    parameters =
-      between'
-        (symbol' "(")
-        (symbol' ")")
-        (takeWhileP (Just "not paren") (\c -> c /= '(' && c /= ')'))
-
-    _body :: Parser T.Text
-    _body = between' (symbol' "{") (symbol "}") _bodyContent
-
-    _innerBody :: Parser T.Text
-    _innerBody = between' (symbol' "{") (symbol' "}") _bodyContent
-
-    _bodyContent :: Parser T.Text
-    _bodyContent = do
-      pre_brace <- takeWhileP (Just "not curly brace") (\c -> c /= '{' && c /= '}')
-      next <- lookAhead anySingle
-      case next of
-        '{' -> do
-          inner_bdy <- _innerBody
-          rest_content <- _bodyContent
-          pure $ pre_brace <> inner_bdy <> rest_content
-        '}' -> pure pre_brace
-        _ -> fail $ "Expecting to stop at a curly brace, got: " <> [next]
+jsFunctions = many function
 
 function :: Parser S.Fn
 function = do
@@ -204,23 +170,11 @@ stringLiteral = stringLiteral' (char '\'') <|> stringLiteral' (char '"')
 stringLiteral' :: Parser a -> Parser T.Text
 stringLiteral' quotes = T.pack <$> (quotes >> manyTill L.charLiteral quotes)
 
-between' :: Parser T.Text -> Parser T.Text -> Parser T.Text -> Parser T.Text
-between' bra cket p = T.concat <$> sequence [bra, p, cket]
-
-symbol' :: T.Text -> Parser T.Text
-symbol' sym = lexeme' (string sym)
-
 symbol :: T.Text -> Parser T.Text
 symbol = L.symbol spaceConsumer
 
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
-lexeme' :: Parser T.Text -> Parser T.Text
-lexeme' p = (<>) <$> p <*> space'
-
 spaceConsumer :: Parser ()
 spaceConsumer = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
-
-space' :: Parser T.Text
-space' = takeWhileP (Just "whitespace") isSpace
