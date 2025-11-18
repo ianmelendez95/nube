@@ -10,7 +10,7 @@ import Data.Text qualified as T
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
 import Nube.Compiler (Compiler)
-import Nube.Cont (ContSplit, splitStmtContinuations)
+import Nube.Cont (ContSplit, splitFnContinuations, splitStmtContinuations)
 import Nube.Context (NContext (NContext))
 import Nube.Parse qualified as P
 import Nube.Syntax qualified as S
@@ -30,6 +30,7 @@ compileFile js_file = do
 
   (script, ctx) <- P.parseJsFile js_file
   let js = S.scriptFns script
+      -- cont_fns = concat <$> mapM splitFnContinuations
       proxies_script = GL.jsFunsToProxiesScript js
       scripts = GL.jsFunsToScripts js
       deploy_script = GL.jsScriptToDeployScript script

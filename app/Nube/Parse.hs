@@ -42,16 +42,17 @@ import Text.Megaparsec.Char.Lexer qualified as L
     space,
     symbol,
   )
-import Text.Megaparsec.Debug (dbg)
+
+-- import Text.Megaparsec.Debug (dbg)
 
 parseJsFile :: FilePath -> IO (S.Script, NContext)
-parseJsFile path = parseJsContent path <$> TIO.readFile path
+parseJsFile path = parseJsContent path =<< TIO.readFile path
 
-parseJsContent :: FilePath -> T.Text -> (S.Script, NContext)
-parseJsContent path content =
+parseJsContent :: FilePath -> T.Text -> IO (S.Script, NContext)
+parseJsContent path content = do
   let run_res = runParser (NContext []) jsFunctions path content
-      (result, ctx) = either (error . errorBundlePretty) id run_res
-   in (S.Script (T.pack $ takeBaseName path) result, ctx)
+  (result, ctx) <- either (fail . errorBundlePretty) pure run_res
+  pure (S.Script (T.pack $ takeBaseName path) result, ctx)
 
 jsFunctions :: Parser [S.Fn]
 jsFunctions = many function
