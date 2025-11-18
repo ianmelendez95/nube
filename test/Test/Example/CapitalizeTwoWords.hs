@@ -25,3 +25,8 @@ capitalizeTwoWords_fn_text =
     \    const capitalizedWord2 = capitalizeWord(word2);\n\
     \    return capitalizedWord1 + ' ' + capitalizedWord2;\n\
     \}"
+
+capitalizeTwoWords_fn_cont0_text :: Text
+capitalizeTwoWords_fn_cont0_text = 
+  pack 
+    "function capitalizeTwoWords(_ctx) {"

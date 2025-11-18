@@ -13,7 +13,7 @@ module Nube.Parse
 where
 
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Data.Char (isAlphaNum, isSpace)
+import Data.Char (isAlpha, isAlphaNum, isSpace)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Nube.Context (NContext (..), ctxAddFnM, ctxGetIsFnM)
@@ -29,6 +29,7 @@ import Text.Megaparsec
     many,
     manyTill,
     optional,
+    satisfy,
     sepBy,
     (<|>),
   )
@@ -183,8 +184,11 @@ bracketMember :: Parser S.MAccess
 bracketMember = S.MBracketAccess <$> between (symbol "[") (symbol "]") expr
 
 identifier :: Parser T.Text
-identifier = do
-  T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
+identifier =
+  do
+    T.cons
+    <$> satisfy (\c -> c == '_' || isAlpha c)
+    <*> takeWhileP (Just "identifier char") (\c -> c == '_' || isAlphaNum c)
 
 stringLiteral :: Parser T.Text
 stringLiteral = stringLiteral' (char '\'') <|> stringLiteral' (char '"')

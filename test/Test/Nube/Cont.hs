@@ -24,8 +24,8 @@ import Test.Hspec
     shouldSatisfy,
     xdescribe,
   )
-import Test.Nube.Parse (testParser)
 import Test.Util.Nube (testCompiler)
+import Test.Util.Parse (runParser, testParser)
 
 jsCompileContSpec = do
   describe "splitFnContinuations" $ do
@@ -33,10 +33,11 @@ jsCompileContSpec = do
       let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
        in do
-            putStrLn "--- BEFORE ---" >> mapM_ print res
-            print capitalizeTwoWords_fn_ast
+            putStrLn "--- BEFORE ---" >> print capitalizeTwoWords_fn_ast
             putStrLn "--- AFTER  ---" >> mapM_ print res
             length res `shouldBe` 3
+            let [prim_fn, cont_fn1, cont_fn2] = res
+            prim_fn `shouldBe` runParser P.function capitalizeTwoWords_fn_prim_text
 
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do
@@ -53,3 +54,14 @@ printContSplit prefix (ContBlock stmts) = do
   mapM_ (\stmt -> putStr prefix >> print stmt) stmts
   putStrLn "--- END BLOCK ---"
 printContSplit prefix cont_call = putStrLn "--- CONT ---" >> putStr prefix >> print cont_call
+
+capitalizeTwoWords_fn_prim_text :: T.Text
+capitalizeTwoWords_fn_prim_text =
+  T.pack
+    "function capitalizeTwoWords(_ctx) {\n\
+    \  _ctx.frame.string = _ctx.args[0];\n\
+    \  const words = string.split(' ');\n\
+    \  const word1 = words[0];\n\
+    \  const word2 = words[1];\n\
+    \  _ctx.call('capitalizeWord', [word1], __test_continuation__);\n\
+    \}"

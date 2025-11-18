@@ -20,8 +20,8 @@ import Test.Hspec
     shouldSatisfy,
     xdescribe,
   )
-import Test.Nube.Parse (testParser)
 import Test.Util.Nube (testCompiler)
+import Test.Util.Parse (testParser)
 
 jsTranspileSpec = do
   describe "transpileStatement" $ do

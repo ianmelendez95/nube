@@ -1,6 +1,5 @@
 module Test.Nube.Parse
   ( jsParseSpec,
-    testParser,
   )
 where
 
@@ -122,6 +121,10 @@ jsParseSpec = do
     it "returns the identifier" $ do
       id <- testParser identifier "hello"
       id `shouldBe` "hello"
+
+    it "allows underscore" $ do
+      id <- testParser identifier "_hello_there_world_"
+      id `shouldBe` "_hello_there_world_"
 
   describe "dotMember" $ do
     it "returns the property name" $ do
