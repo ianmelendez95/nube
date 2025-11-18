@@ -1,5 +1,6 @@
 module Nube.Cont
   ( ContSplit (..),
+    splitFnContinuations,
     splitStmtContinuations,
   )
 where
@@ -11,7 +12,7 @@ import Data.Bifunctor (first)
 import Data.Text qualified as T
 import Nube.Compiler (Compiler)
 import Nube.Context (ctxAskIsFn)
-import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt)
+import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt, ctx_var_text)
 import Nube.Syntax qualified as S
 
 data ContSplit
@@ -23,23 +24,37 @@ data ContSplit
       }
   deriving (Show)
 
-splitStmtContinuations :: [S.Stmt] -> Compiler [ContSplit]
+splitFnContinuations :: S.Fn -> Compiler [S.Fn]
+splitFnContinuations fn@(S.Fn _ _ []) = pure [fn]
+splitFnContinuations (S.Fn fn_name fn_params fn_stmts) = do
+  split_blocks <- splitStmtContinuations fn_stmts
+  case split_blocks of
+    [] -> throwError "Continuation splitting returned empty result"
+    (first_block : rest_blocks) ->
+      let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
+          primary_fn = S.Fn fn_name [ctx_var_text] (arg_stmts ++ first_block)
+          cont_fns = zipWith mkFnFromBlock [1 ..] rest_blocks
+       in pure $ primary_fn : cont_fns
+  where
+    mkFnFromBlock :: Int -> [S.Stmt] -> S.Fn
+    mkFnFromBlock cont_num = S.Fn (fn_name <> "_c" <> T.show cont_num) [ctx_var_text]
+
+splitStmtContinuations :: [S.Stmt] -> Compiler [[S.Stmt]]
 splitStmtContinuations stmts = do
-  -- stmts_with_fn_calls :: [(S.Stmt, [T.Text])]
   cont_splits <- mapM stmtToContSplit stmts
   pure $ concatContSplits cont_splits
 
-concatContSplits :: [ContSplit] -> [ContSplit]
+concatContSplits :: [ContSplit] -> [[S.Stmt]]
 concatContSplits splits =
   case spanBlockStmts splits of
     ([], []) -> []
-    (block_stmts, []) -> [ContBlock block_stmts]
+    (block_stmts, []) -> [block_stmts]
     (block_stmts, ContCall var fn_name fn_args : rest_splits) ->
       let cont_call :: S.Stmt
           cont_call = ctxCallStmt fn_name fn_args "__test_continuation__"
 
-          block' :: ContSplit
-          block' = ContBlock (block_stmts ++ [cont_call])
+          block' :: [S.Stmt]
+          block' = block_stmts ++ [cont_call]
 
           cont_result_block :: ContSplit
           cont_result_block = ContBlock [ctxAssignArgStmt var 0]

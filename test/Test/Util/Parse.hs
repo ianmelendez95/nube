@@ -9,10 +9,7 @@ where
 
 import Data.Text (Text)
 import Nube.Context (NContext (..))
-import Nube.Parse qualified as NP
-  ( Parser,
-    runParser,
-  )
+import Nube.Parser qualified as NP ( Parser, runParser )
 import Nube.Parser (PErrorBundle)
 import Text.Megaparsec qualified as MP
   ( errorBundlePretty,

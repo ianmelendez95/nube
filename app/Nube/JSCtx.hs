@@ -5,6 +5,7 @@ module Nube.JSCtx
     ctxArg,
     ctxDotMember,
     ctx_var_name,
+    ctx_var_text,
   )
 where
 
@@ -29,4 +30,7 @@ ctxDotMember :: T.Text -> S.Expr
 ctxDotMember = S.dotMemberExpr ctx_var_name
 
 ctx_var_name :: S.Expr
-ctx_var_name = S.EVar "_ctx"
+ctx_var_name = S.EVar ctx_var_text
+
+ctx_var_text :: T.Text
+ctx_var_text = "_ctx"

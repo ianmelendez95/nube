@@ -4,7 +4,8 @@ import Data.Either (either)
 import Data.Text qualified as T
 import Nube.Cont
 import Nube.Cont
-  ( splitStmtContinuations,
+  ( splitFnContinuations,
+    splitStmtContinuations,
   )
 import Nube.Context
   ( NContext (..),
@@ -27,6 +28,12 @@ import Test.Nube.Parse (testParser)
 import Test.Util.Nube (testCompiler)
 
 jsCompileContSpec = do
+  describe "splitFnContinuations" $ do
+    it "splitsCapitalizeTwoWords conts" $ do
+      let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
+          res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
+       in length res `shouldBe` 3
+
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do
       let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
