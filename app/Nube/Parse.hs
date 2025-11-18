@@ -13,7 +13,7 @@ module Nube.Parse
 where
 
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Data.Char (isAlpha, isAlphaNum, isSpace)
+import Data.Char (isAlpha, isAlphaNum)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Nube.Context (NContext (..), ctxAddFnM, ctxGetIsFnM)
@@ -21,8 +21,7 @@ import Nube.Parser (Parser, runParser)
 import Nube.Syntax qualified as S
 import System.FilePath (takeBaseName)
 import Text.Megaparsec
-  ( MonadParsec (lookAhead, takeWhileP, try),
-    anySingle,
+  ( MonadParsec (takeWhileP, try),
     between,
     choice,
     errorBundlePretty,
@@ -33,7 +32,7 @@ import Text.Megaparsec
     sepBy,
     (<|>),
   )
-import Text.Megaparsec.Char (char, letterChar, space1, string)
+import Text.Megaparsec.Char (char, space1)
 import Text.Megaparsec.Char.Lexer qualified as L
   ( charLiteral,
     decimal,
