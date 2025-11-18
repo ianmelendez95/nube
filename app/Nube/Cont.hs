@@ -27,7 +27,7 @@ data ContSplit
 splitFnContinuations :: S.Fn -> Compiler [S.Fn]
 splitFnContinuations fn@(S.Fn _ _ []) = pure [fn]
 splitFnContinuations (S.Fn fn_name fn_params fn_stmts) = do
-  split_blocks <- splitStmtContinuations fn_stmts
+  split_blocks <- splitStmtContinuations fn_name fn_stmts
   case split_blocks of
     [] -> throwError "Continuation splitting returned empty result"
     (first_block : rest_blocks) ->
@@ -39,26 +39,28 @@ splitFnContinuations (S.Fn fn_name fn_params fn_stmts) = do
     mkFnFromBlock :: Int -> [S.Stmt] -> S.Fn
     mkFnFromBlock cont_num = S.Fn (fn_name <> "_c" <> T.show cont_num) [ctx_var_text]
 
-splitStmtContinuations :: [S.Stmt] -> Compiler [[S.Stmt]]
-splitStmtContinuations stmts = do
+splitStmtContinuations :: T.Text -> [S.Stmt] -> Compiler [[S.Stmt]]
+splitStmtContinuations fn_name stmts = do
   cont_splits <- mapM stmtToContSplit stmts
-  pure $ concatContSplits cont_splits
+  pure $ concatContSplits fn_name 0 cont_splits
 
-concatContSplits :: [ContSplit] -> [[S.Stmt]]
-concatContSplits splits =
+concatContSplits :: T.Text -> Int -> [ContSplit] -> [[S.Stmt]]
+concatContSplits fn_name cont_num splits =
   case spanBlockStmts splits of
     ([], []) -> []
     (block_stmts, []) -> [block_stmts]
-    (block_stmts, ContCall var fn_name fn_args : rest_splits) ->
-      let cont_call :: S.Stmt
-          cont_call = ctxCallStmt fn_name fn_args "__test_continuation__"
+    (block_stmts, ContCall var call_fn_name call_fn_args : rest_splits) ->
+      let -- call the function with the next continuation
+          cont_call :: S.Stmt
+          cont_call = ctxCallStmt call_fn_name call_fn_args (fn_name <> "_c" <> T.show (cont_num + 1))
 
+          -- the final current block, with the call with continuation at the end
           block' :: [S.Stmt]
           block' = block_stmts ++ [cont_call]
 
           cont_result_block :: ContSplit
           cont_result_block = ContBlock [ctxAssignArgStmt var 0]
-       in block' : concatContSplits (cont_result_block : rest_splits)
+       in block' : concatContSplits fn_name (cont_num + 1) (cont_result_block : rest_splits)
     -- TODO - improve span approach
     (_, ContBlock {} : _) -> error "spanBlockStmts did not chunk correctly"
   where

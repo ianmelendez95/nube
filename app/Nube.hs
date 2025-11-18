@@ -70,7 +70,7 @@ compileScript (S.Script name fns) =
 
 compileFunction :: S.Fn -> Compiler [S.Fn]
 compileFunction (S.Fn _name _params stmts) = do
-  splits <- splitStmtContinuations stmts
+  splits <- splitStmtContinuations _name stmts
   undefined
 
 runCompiler :: NContext -> Compiler a -> Either String a
