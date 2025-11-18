@@ -67,6 +67,10 @@ jsParseSpec = do
       let result = tryParserWithContext function (NContext ["capitalizeTwoWords"]) capitalizeTwoWords_fn_text
       result `shouldSatisfy` isLeft
 
+    it "parses function with function call" $ do
+      res <- testParser function "function foo(x) { _ctx.call('fun'); }"
+      res `shouldBe` Fn "foo" ["x"] [SExpr (ECall (EMember (EVar "_ctx") (MDotAccess "call")) [EStringLit "fun"])]
+
   describe "statement" $ do
     it "parses assign statement" $ do
       res <- testParser statement "const word = 'hello';"
