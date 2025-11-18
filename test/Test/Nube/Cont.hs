@@ -13,7 +13,7 @@ import Nube.Context
 import Nube.JSCtx
 import Nube.Parse qualified as P
 import Nube.Syntax qualified as S
-import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
+import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text)
 import Test.Hspec
   ( Expectation,
     SpecWith (..),
@@ -33,7 +33,9 @@ jsCompileContSpec = do
       let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
        in do
-            putStrLn "---" >> mapM_ print res
+            putStrLn "--- BEFORE ---" >> mapM_ print res
+            print capitalizeTwoWords_fn_ast
+            putStrLn "--- AFTER  ---" >> mapM_ print res
             length res `shouldBe` 3
 
   describe "splitStmtContinuations" $ do

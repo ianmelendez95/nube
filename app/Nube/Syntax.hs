@@ -81,11 +81,11 @@ stmtText (SAssign lhs rhs) = exprText lhs <> " = " <> exprText rhs
 
 exprText :: Expr -> T.Text
 exprText (EVar v) = v
-exprText (EStringLit s) = "\"" <> s <> "\""
+exprText (EStringLit s) = "'" <> s <> "'"
 exprText (ENumberLit n) = T.show n
 exprText (ECall lhs args) = exprText lhs <> csExprs "(" ")" args
 exprText (EMember lhs rhs) = exprText lhs <> accessText rhs
-exprText (EInfix op lhs rhs) = exprText lhs <> opText op <> exprText rhs
+exprText (EInfix op lhs rhs) = exprText lhs <> " " <> opText op <> " " <> exprText rhs
 exprText (EListLit xs) = csExprs "[" "]" xs
 
 csExprs :: T.Text -> T.Text -> [Expr] -> T.Text

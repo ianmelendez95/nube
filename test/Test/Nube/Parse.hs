@@ -138,6 +138,10 @@ jsParseSpec = do
       prop `shouldBe` MBracketAccess (ENumberLit 5)
 
   describe "stringLitExpr" $ do
+    it "parses whitespace" $ do
+      slit <- testParser stringLitExpr "'    '"
+      slit `shouldBe` EStringLit "    "
+
     it "parses double quoted" $ do
       slit <- testParser stringLitExpr "\"hello world!\""
       slit `shouldBe` EStringLit "hello world!"

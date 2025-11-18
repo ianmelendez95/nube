@@ -32,7 +32,7 @@ import Text.Megaparsec
     sepBy,
     (<|>),
   )
-import Text.Megaparsec.Char (letterChar, space1, string)
+import Text.Megaparsec.Char (char, letterChar, space1, string)
 import Text.Megaparsec.Char.Lexer qualified as L
   ( charLiteral,
     decimal,
@@ -187,7 +187,7 @@ identifier = do
   T.cons <$> letterChar <*> takeWhileP (Just "identifier char") (\c -> isAlphaNum c || c == '_' || c == '-')
 
 stringLiteral :: Parser T.Text
-stringLiteral = stringLiteral' (symbol "\"") <|> stringLiteral' (symbol "'")
+stringLiteral = stringLiteral' (char '\'') <|> stringLiteral' (char '"')
 
 stringLiteral' :: Parser a -> Parser T.Text
 stringLiteral' quotes = T.pack <$> (quotes >> manyTill L.charLiteral quotes)
