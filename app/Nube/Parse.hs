@@ -114,7 +114,7 @@ function = do
           return fname
 
 statement :: Parser S.Stmt
-statement = (try const_assign <|> return_stmt) <* symbol ";"
+statement = (try const_assign <|> return_stmt <|> assign_or_expr) <* symbol ";"
   where
     const_assign :: Parser S.Stmt
     const_assign = do
@@ -127,6 +127,14 @@ statement = (try const_assign <|> return_stmt) <* symbol ";"
     return_stmt = do
       _ <- symbol "return"
       S.SReturn <$> expr
+
+    assign_or_expr :: Parser S.Stmt
+    assign_or_expr = do
+      lhs <- expr
+      eq_sign <- optional $ symbol "="
+      case eq_sign of
+        Nothing -> pure $ S.SExpr lhs
+        Just _ -> S.SAssign lhs <$> expr
 
 expr :: Parser S.Expr
 expr = makeExprParser (lexeme term) exprTable

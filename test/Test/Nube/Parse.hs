@@ -76,6 +76,10 @@ jsParseSpec = do
       res <- testParser statement "return x;"
       res `shouldBe` SReturn (EVar "x")
 
+    it "parses function call statement" $ do
+      res <- testParser statement "_ctx.call('capitalizeWord');"
+      res `shouldBe` SExpr (ECall (EMember (EVar "_ctx") (MDotAccess "call")) [EStringLit "capitalizeWord"])
+
   describe "expr" $ do
     it "parses string literal" $ do
       res <- testParser expr "\"hello world!\""
