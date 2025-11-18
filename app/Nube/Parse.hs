@@ -42,8 +42,7 @@ import Text.Megaparsec.Char.Lexer qualified as L
     space,
     symbol,
   )
-
--- import Text.Megaparsec.Debug (dbg)
+import Text.Megaparsec.Debug (dbg)
 
 parseJsFile :: FilePath -> IO (S.Script, NContext)
 parseJsFile path = parseJsContent path <$> TIO.readFile path
@@ -125,7 +124,8 @@ expr = makeExprParser (lexeme term) exprTable
       choice
         [ try varExpr,
           stringLitExpr,
-          S.ENumberLit <$> L.decimal
+          S.ENumberLit <$> L.decimal,
+          listLitExpr
         ]
 
 exprTable :: [[Operator Parser S.Expr]]
@@ -141,6 +141,9 @@ callParens = between (symbol "(") (symbol ")") (sepBy expr (symbol ","))
 
 varExpr :: Parser S.Expr
 varExpr = S.EVar <$> identifier
+
+listLitExpr :: Parser S.Expr
+listLitExpr = S.EListLit <$> between (symbol "[") (symbol "]") (sepBy expr (symbol ","))
 
 stringLitExpr :: Parser S.Expr
 stringLitExpr = S.EStringLit <$> stringLiteral

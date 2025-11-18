@@ -125,6 +125,16 @@ jsParseSpec = do
           )
           [ENumberLit 1]
 
+    it "parses capitalizeWord continuation call" $ do
+      res <- testParser expr "_ctx.call('capitalizeWord', [word1], __test_continuation__)"
+      res
+        `shouldBe` ECall
+          (EMember (EVar "_ctx") (MDotAccess "call"))
+          [ EStringLit "capitalizeWord",
+            EListLit [EVar "word1"],
+            EVar "__test_continuation__"
+          ]
+
   describe "identifier" $ do
     it "returns the identifier" $ do
       id <- testParser identifier "hello"
