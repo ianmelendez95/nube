@@ -79,7 +79,7 @@ library
     -- Import common warning flags.
     import:           warnings
 
-    ghc-options:      -O0
+    ghc-options:      -O0 -haddock
 
     exposed-modules: 
         Nube

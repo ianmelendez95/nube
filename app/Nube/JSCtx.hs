@@ -21,6 +21,7 @@ ctxCallStmt fn_name args cont_name =
   -- S.SExpr (S.ECall (S.dotMemberExpr ctx_var_name fn_name) [S.EVar fn_name, S.EListLit args, S.EVar cont_name])
   S.SExpr (S.ECall (S.dotMemberExpr ctx_var_name "call") [S.EStringLit fn_name, S.EListLit args, S.EStringLit cont_name])
 
+-- | ctxFrameVar "foo" = _ctx.frame.foo
 ctxFrameVar :: T.Text -> S.Expr
 ctxFrameVar v = S.dotMembers ctx_var_name ["frame", v]
 

@@ -1,3 +1,3 @@
-packages: nube.cabal
+packages: ./nube.cabal
 
 optimization: False
