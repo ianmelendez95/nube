@@ -7,7 +7,7 @@ import Nube.JSCtx
   ( ctx_var_name,
   )
 import Nube.Parse qualified as P
-import Nube.Rename (tStatement)
+import Nube.Rename (renameInStatement)
 import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec
@@ -26,7 +26,7 @@ import Test.Util.Parse (testParser)
 jsTranspileSpec = do
   describe "transpileStatement" $ do
     it "transpiles simple return var" $ do
-      let res = testCompiler test_context (tStatement (S.SReturn (S.EVar "x")))
+      let res = testCompiler test_context (renameInStatement (S.SReturn (S.EVar "x")))
       res
         `shouldBe` S.SExpr
           ( S.ECall
@@ -38,7 +38,7 @@ jsTranspileSpec = do
           )
 
     it "transpiles var dot member" $ do
-      let res = testCompiler test_context (tStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar")))
+      let res = testCompiler test_context (renameInStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar")))
       res
         `shouldBe` S.SExpr
           ( S.ECall

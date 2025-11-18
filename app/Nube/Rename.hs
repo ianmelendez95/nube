@@ -1,4 +1,4 @@
-module Nube.Rename (tStatement) where
+module Nube.Rename (renameInStatement) where
 
 -- import Debug.Trace (trace, traceShowId)
 
@@ -8,11 +8,11 @@ import Nube.Compiler (Compiler)
 import Nube.JSCtx (ctxDotMember, ctxFrameVar)
 import Nube.Syntax qualified as S
 
-tStatement :: S.Stmt -> Compiler S.Stmt
-tStatement (S.SReturn e) = tReturn e
-tStatement (S.SConst var rhs) = tAssign var rhs
-tStatement (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
-tStatement (S.SExpr _) = throwError "Expression statements are not allowed"
+renameInStatement :: S.Stmt -> Compiler S.Stmt
+renameInStatement (S.SReturn e) = tReturn e
+renameInStatement (S.SConst var rhs) = tAssign var rhs
+renameInStatement (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
+renameInStatement (S.SExpr _) = throwError "Expression statements are not allowed"
 
 tExpr :: S.Expr -> Compiler S.Expr
 tExpr (S.EVar v) = tVar v

@@ -66,7 +66,7 @@ compileScript (S.Script name fns) =
         pure $ S.Script name fns'
 
 -- compileStatement :: NContext -> S.Stmt -> Either String S.Stmt
--- compileStatement ctx = runCompiler ctx . tStatement
+-- compileStatement ctx = runCompiler ctx . renameInStatement
 
 compileFunction :: S.Fn -> Compiler [S.Fn]
 compileFunction (S.Fn _name _params stmts) = do
