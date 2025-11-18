@@ -68,15 +68,15 @@ scriptText :: Script -> T.Text
 scriptText (Script name funcs) = T.unlines $ name : map funText funcs
 
 funText :: Fn -> T.Text
-funText (Fn name params body) = "function " <> name <> params_text <> " {\n" <> body_text <> "\n}"
+funText (Fn name params body) = "function " <> name <> params_text <> " {\n  " <> body_text <> ";\n}"
   where
     params_text = "(" <> T.intercalate ", " params <> ")"
     body_text = T.intercalate ";\n  " (map stmtText body)
 
 stmtText :: Stmt -> T.Text
-stmtText (SConst var rhs) = "const " <> var <> " = " <> exprText rhs <> ";"
-stmtText (SReturn rhs) = "return " <> exprText rhs <> ";"
-stmtText (SExpr e) = exprText e <> ";"
+stmtText (SConst var rhs) = "const " <> var <> " = " <> exprText rhs
+stmtText (SReturn rhs) = "return " <> exprText rhs
+stmtText (SExpr e) = exprText e
 stmtText (SAssign lhs rhs) = exprText lhs <> " = " <> exprText rhs
 
 exprText :: Expr -> T.Text

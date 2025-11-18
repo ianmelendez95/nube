@@ -29,10 +29,12 @@ import Test.Util.Nube (testCompiler)
 
 jsCompileContSpec = do
   describe "splitFnContinuations" $ do
-    it "splitsCapitalizeTwoWords conts" $ do
+    it "splits ctw fns" $ do
       let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
           res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
-       in length res `shouldBe` 3
+       in do
+            putStrLn "---" >> mapM_ print res
+            length res `shouldBe` 3
 
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do
