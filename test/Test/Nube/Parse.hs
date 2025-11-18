@@ -4,6 +4,7 @@ module Test.Nube.Parse
   )
 where
 
+import Data.Either (isLeft)
 import Data.Text
   ( Text,
     pack,
@@ -32,11 +33,13 @@ import Test.Example.CapitalizeTwoWords
   )
 import Test.Hspec
   ( SpecWith (..),
+    anyException,
     describe,
     expectationFailure,
     it,
     shouldBe,
     shouldSatisfy,
+    shouldThrow,
     xdescribe,
   )
 import Test.Util.Parse
@@ -44,6 +47,7 @@ import Test.Util.Parse
     runParser',
     testParser,
     testParser',
+    tryParserWithContext,
   )
 
 jsParseSpec = do
@@ -59,6 +63,10 @@ jsParseSpec = do
       params `shouldBe` ["string"]
       length stmts `shouldBe` 6
       ctx `shouldBe` NContext ["capitalizeTwoWords"]
+
+    it "rejects duplicate function" $ do
+      let result = tryParserWithContext function (NContext ["capitalizeTwoWords"]) capitalizeTwoWords_fn_text
+      result `shouldSatisfy` isLeft
 
   describe "statement" $ do
     it "parses assign statement" $ do
