@@ -1,13 +1,20 @@
 module Nube.Compiler
   ( Compiler,
+    IOCompiler,
+    runCompiler,
   )
 where
 
-import Control.Monad.Except (Except, ExceptT)
+import Control.Monad.Except (ExceptT, runExcept)
 import Control.Monad.Identity (Identity)
-import Control.Monad.Reader (ReaderT)
+import Control.Monad.Reader (ReaderT, runReaderT)
 import Nube.Context (NContext (..))
 
 type Compiler a = CompilerT Identity a
 
+type IOCompiler a = CompilerT IO a
+
 type CompilerT m a = ReaderT NContext (ExceptT String m) a
+
+runCompiler :: NContext -> Compiler a -> Either String a
+runCompiler context transpiler = runExcept $ runReaderT transpiler context

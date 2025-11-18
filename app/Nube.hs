@@ -1,4 +1,4 @@
-module Nube where
+module Nube (compileFile) where
 
 import Control.Monad
   ( unless,
@@ -9,7 +9,7 @@ import Data.Char
 import Data.Text qualified as T
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
-import Nube.Compiler (Compiler)
+import Nube.Compiler (Compiler, IOCompiler, runCompiler)
 import Nube.Cont (ContSplit, splitFnContinuations, splitStmtContinuations)
 import Nube.Context (NContext (NContext))
 import Nube.Parse qualified as P
@@ -73,6 +73,3 @@ compileFunction :: S.Fn -> Compiler [S.Fn]
 compileFunction (S.Fn _name _params stmts) = do
   splits <- splitStmtContinuations _name stmts
   undefined
-
-runCompiler :: NContext -> Compiler a -> Either String a
-runCompiler context transpiler = runExcept $ runReaderT transpiler context
