@@ -34,5 +34,6 @@ ctxDotMember = S.dotMemberExpr ctx_var_name
 ctx_var_name :: S.Expr
 ctx_var_name = S.EVar ctx_var_text
 
+-- | "_ctx"
 ctx_var_text :: T.Text
 ctx_var_text = "_ctx"

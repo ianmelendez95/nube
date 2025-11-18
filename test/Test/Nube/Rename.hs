@@ -24,8 +24,8 @@ import Test.Util.Nube (testCompiler)
 import Test.Util.Parse (testParser)
 
 jsTranspileSpec = do
-  describe "transpileStatement" $ do
-    it "transpiles simple return var" $ do
+  describe "renameInStatement" $ do
+    it "renames simple return var" $ do
       let res = testCompiler test_context (renameInStatement (S.SReturn (S.EVar "x")))
       res
         `shouldBe` S.SExpr
@@ -37,7 +37,7 @@ jsTranspileSpec = do
               [S.dotMembers (S.EVar "_ctx") ["frame", "x"]]
           )
 
-    it "transpiles var dot member" $ do
+    it "renames var dot member" $ do
       let res = testCompiler test_context (renameInStatement (S.SReturn (S.dotMemberExpr (S.EVar "foo") "bar")))
       res
         `shouldBe` S.SExpr
