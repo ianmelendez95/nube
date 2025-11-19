@@ -12,7 +12,7 @@ import Nube.JSCtx (ctxDotMember, ctxFrameVar, ctx_var_text)
 import Nube.Syntax qualified as S
 
 renameInScript :: S.Script -> Compiler S.Script
-renameInScript = S.mapStatementsM renameInStatement
+renameInScript = S.mapScriptStmtsM renameInStatement
 
 renameInStatement :: S.Stmt -> Compiler S.Stmt
 renameInStatement (S.SReturn e) = rReturn e

@@ -109,6 +109,7 @@ library
         , shakespeare
         , text
         , split
+        , lens
 
     -- Directories containing source files.
     hs-source-dirs:   app
