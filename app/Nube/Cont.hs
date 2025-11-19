@@ -40,7 +40,7 @@ splitFnContinuations (S.Fn fn_name fn_params fn_stmts) = do
        in pure $ primary_fn : cont_fns
   where
     mkFnFromBlock :: Int -> [S.Stmt] -> S.Fn
-    mkFnFromBlock cont_num = S.Fn (fn_name <> "_c" <> T.show cont_num) [ctx_var_text]
+    mkFnFromBlock cont_num = S.Fn (fn_name <> "C" <> T.show cont_num) [ctx_var_text]
 
 splitStmtContinuations :: T.Text -> [S.Stmt] -> Compiler [[S.Stmt]]
 splitStmtContinuations fn_name stmts = do
@@ -55,7 +55,7 @@ concatContSplits fn_name cont_num splits =
     (block_stmts, ContCall var call_fn_name call_fn_args : rest_splits) ->
       let -- call the function with the next continuation
           cont_call :: S.Stmt
-          cont_call = ctxCallStmt call_fn_name call_fn_args (fn_name <> "_c" <> T.show (cont_num + 1))
+          cont_call = ctxCallStmt call_fn_name call_fn_args (fn_name <> "C" <> T.show (cont_num + 1))
 
           -- the final current block, with the call with continuation at the end
           block' :: [S.Stmt]

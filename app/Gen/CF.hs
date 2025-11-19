@@ -266,7 +266,7 @@ instance ToJSON RFun where
               "Layers" .= [layer],
               "Role" .= GetArn (refId role),
               "Runtime" .= fromText "nodejs22.x",
-              "Timeout" .= (60 :: Int)
+              "Timeout" .= (20 :: Int)
             ]
       ]
 
