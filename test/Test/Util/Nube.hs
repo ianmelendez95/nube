@@ -4,10 +4,7 @@ module Test.Util.Nube
   )
 where
 
-import Nube
-  ( runCompiler,
-  )
-import Nube.Compiler (Compiler)
+import Nube.Compiler (Compiler, runCompiler)
 import Nube.Context (NContext (..))
 import Test.Hspec
   ( Expectation,

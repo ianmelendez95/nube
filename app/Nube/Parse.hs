@@ -2,6 +2,7 @@ module Nube.Parse
   ( Parser,
     stringLitExpr,
     parseJsFile,
+    parseJsContent,
     identifier,
     dotMember,
     bracketMember,
@@ -48,7 +49,7 @@ import Text.Megaparsec.Char.Lexer qualified as L
 parseJsFile :: FilePath -> IO (S.Script, NContext)
 parseJsFile path = parseJsContent path =<< TIO.readFile path
 
-parseJsContent :: FilePath -> T.Text -> IO (S.Script, NContext)
+parseJsContent :: (MonadFail m) => FilePath -> T.Text -> m (S.Script, NContext)
 parseJsContent path content = do
   let run_res = runParser (NContext []) jsFunctions path content
   (result, ctx) <- either (fail . errorBundlePretty) pure run_res
