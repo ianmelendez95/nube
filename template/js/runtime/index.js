@@ -1,6 +1,6 @@
-import {SQSClient} from '@aws-sdk/client-sqs';
-import {SendMessageCommand} from '@aws-sdk/client-sqs';
-import {DynamoDBClient, GetItemCommand, UpdateItemCommand, PutItemCommand} from '@aws-sdk/client-dynamodb';
+import { SQSClient } from '@aws-sdk/client-sqs';
+import { SendMessageCommand } from '@aws-sdk/client-sqs';
+import { DynamoDBClient, GetItemCommand, UpdateItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 
 export const sqsClient = new SQSClient();
@@ -64,7 +64,7 @@ export class Context {
     const nextFrameItem = await Context.makeNewFrameItem(
       this.frameId,
       contFnName,
-    ); 
+    );
 
     // invoke the function by sending a message to its SQS queue
     return Context.invoke(fnName, args, nextFrameItem.frameId.S);
@@ -204,9 +204,9 @@ export const eventHandler = (fn) => async (event) => {
 
 export function parseHttpArgs(argsString) {
   console.trace('parseHttpArgs', argsString);
-  let args = (typeof argsString === 'undefined' || argsString.trim().length === 0) 
-    ? [] 
-    : JSON.parse(argsString) 
+  let args = (typeof argsString === 'undefined' || argsString.trim().length === 0)
+    ? []
+    : JSON.parse(argsString)
 
   if (!Array.isArray(args)) {
     args = [args]
