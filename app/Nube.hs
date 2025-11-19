@@ -34,13 +34,11 @@ compileFile js_file = do
   js_text <- TIO.readFile js_file
   (js_script, ctx) <- P.parseJsContent js_file js_text
   script@(S.Script script_name script_fns) <- compileScript ctx js_script
-  let proxies_script = GL.jsFunsToProxiesScript script_fns
-      scripts = GL.jsFunsToScripts script_fns
+  let scripts = GL.jsFunsToScripts script_fns
       deploy_script = GL.jsScriptToDeployScript script
   GL.writeScripts
     (takeDirectory js_file </> "dist")
     deploy_script
-    proxies_script
     scripts
 
   let template = CF.templateFromScript script
