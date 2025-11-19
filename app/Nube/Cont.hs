@@ -24,6 +24,9 @@ data ContSplit
       }
   deriving (Show)
 
+splitContInScript :: S.Script -> Compiler S.Script
+splitContInScript (S.Script s_name s_fns) = S.Script s_name . concat <$> mapM splitFnContinuations s_fns
+
 splitFnContinuations :: S.Fn -> Compiler [S.Fn]
 splitFnContinuations fn@(S.Fn _ _ []) = pure [fn]
 splitFnContinuations (S.Fn fn_name fn_params fn_stmts) = do

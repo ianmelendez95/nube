@@ -69,3 +69,7 @@ compileScript ctx (S.Script name fns) =
         fns' <- mconcat <$> mapM splitFnContinuations fns
         pure $ S.Script name fns'
    in either fail pure result
+
+compileScriptC :: NContext -> S.Script -> Compiler S.Script
+compileScriptC ctx script = do
+  undefined

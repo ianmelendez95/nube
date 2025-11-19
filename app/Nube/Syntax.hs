@@ -4,6 +4,7 @@ module Nube.Syntax
     Stmt (..),
     Expr (..),
     MAccess (..),
+    MapStatementsM (..),
     scriptText,
     funText,
     IOp (..),
@@ -63,6 +64,20 @@ instance Show Stmt where
 
 instance Show Expr where
   show = T.unpack . exprText
+
+class MapStatementsM a where
+  mapStatementsM :: (Monad m) => (Stmt -> m Stmt) -> a -> m a
+
+instance MapStatementsM Script where
+  mapStatementsM :: (Monad m) => (Stmt -> m Stmt) -> Script -> m Script
+  mapStatementsM stmt_fn_m (Script s_name s_fns) = Script s_name <$> mapM (mapStatementsM stmt_fn_m) s_fns
+
+instance MapStatementsM Fn where
+  mapStatementsM :: (Monad m) => (Stmt -> m Stmt) -> Fn -> m Fn
+  mapStatementsM stmt_fn_m (Fn f_name f_params f_stmts) = Fn f_name f_params <$> mapM stmt_fn_m f_stmts
+
+renameInFn :: (Monad m) => (Stmt -> m Stmt) -> Fn -> m Fn
+renameInFn fM (Fn f_name f_params f_stmts) = Fn f_name f_params <$> mapM fM f_stmts
 
 scriptText :: Script -> T.Text
 scriptText (Script name funcs) = T.unlines $ name : map funText funcs

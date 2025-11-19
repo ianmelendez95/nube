@@ -1,4 +1,8 @@
-module Nube.Rename (renameInStatement) where
+module Nube.Rename
+  ( renameInScript,
+    renameInStatement,
+  )
+where
 
 -- import Debug.Trace (trace, traceShowId)
 
@@ -6,6 +10,9 @@ import Data.Text qualified as T
 import Nube.Compiler (Compiler)
 import Nube.JSCtx (ctxDotMember, ctxFrameVar, ctx_var_text)
 import Nube.Syntax qualified as S
+
+renameInScript :: S.Script -> Compiler S.Script
+renameInScript = S.mapStatementsM renameInStatement
 
 renameInStatement :: S.Stmt -> Compiler S.Stmt
 renameInStatement (S.SReturn e) = rReturn e
