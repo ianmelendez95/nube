@@ -34,8 +34,7 @@ compileFile js_file = do
   js_text <- TIO.readFile js_file
   (js_script, ctx) <- P.parseJsContent js_file js_text
   script@(S.Script script_name script_fns) <- compileScript ctx js_script
-  let -- cont_fns = concat <$> mapM splitFnContinuations
-      proxies_script = GL.jsFunsToProxiesScript script_fns
+  let proxies_script = GL.jsFunsToProxiesScript script_fns
       scripts = GL.jsFunsToScripts script_fns
       deploy_script = GL.jsScriptToDeployScript script
   GL.writeScripts
