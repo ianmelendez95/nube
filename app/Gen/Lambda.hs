@@ -12,6 +12,7 @@ where
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
 import Data.Text.Lazy qualified as TLazy
+import Debug.Trace (traceId)
 import Gen.CF qualified as CF
 import Nube.Syntax (Fn (fnName))
 import Nube.Syntax qualified as S
@@ -27,7 +28,7 @@ data Script = Script
 writeScripts :: FilePath -> T.Text -> [Script] -> IO ()
 writeScripts dist deploy_script handler_scripts = do
   writeDistFile "deploy.sh" deploy_script
-  copyPath "template/js/runtime" "nodejs/node_modules/runtime"
+  copyToDist "template/js/runtime" "nodejs/node_modules/runtime"
   mapM_ doScript handler_scripts
   where
     doScript :: Script -> IO ()
@@ -43,6 +44,9 @@ writeScripts dist deploy_script handler_scripts = do
             createDirectoryIfMissing True (takeDirectory dest)
             TIO.writeFile dest content
 
+    copyToDist :: FilePath -> FilePath -> IO ()
+    copyToDist src_dir dist_dir = copyPath src_dir (dist </> dist_dir)
+
 copyPath :: FilePath -> FilePath -> IO ()
 copyPath src_path dest_path = do
   is_dir <- doesDirectoryExist src_path
@@ -50,12 +54,13 @@ copyPath src_path dest_path = do
     then do
       createDirectoryIfMissing True dest_path
       src_subpaths <- listDirectory src_path
-      mapM_ (\sub_path -> copyPath sub_path (dest_path </> takeFileName sub_path)) src_subpaths
+      mapM_ (\src_entry -> copyPath (src_path </> src_entry) (dest_path </> src_entry)) src_subpaths
     else do
       dest_exists <- doesFileExist dest_path
       if dest_exists
         then pure ()
-        else copyFile src_path dest_path
+        else do
+          copyFile (traceId src_path) dest_path
 
 jsScriptToDeployScript :: S.Script -> T.Text
 jsScriptToDeployScript script =
