@@ -17,7 +17,7 @@ import Gen.CF qualified as CF
 import Nube.Syntax (Fn (fnName))
 import Nube.Syntax qualified as S
 import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory)
-import System.FilePath (takeDirectory, takeFileName, (</>))
+import System.FilePath (takeDirectory, (</>))
 import Text.Julius hiding (renderJavascript)
 
 data Script = Script
@@ -77,42 +77,22 @@ templateNameFromScriptName :: T.Text -> T.Text
 templateNameFromScriptName name = name <> "-template.json"
 
 jsFunsToScripts :: [S.Fn] -> [Script]
-jsFunsToScripts = go []
-  where
-    go _ [] = []
-    go xs (y : ys) = jsFunsToScript y (xs ++ ys) : go (y : xs) ys
+jsFunsToScripts = map jsFunsToScript
 
-jsFunsToScript :: S.Fn -> [S.Fn] -> Script
-jsFunsToScript main_fun helper_funs =
+jsFunsToScript :: S.Fn -> Script
+jsFunsToScript main_fun@(S.Fn fn_name _ _) =
   let content =
         T.intercalate
           "\n\n"
-          [ jsFunsToProxiesImport helper_funs,
-            jsFunToHandler main_fun,
+          [ mkHandlerDecl fn_name,
             S.funText main_fun
           ]
-   in Script (fnName main_fun) content
+   in Script fn_name content
 
 -- Proxies
 
-jsFunsToProxiesImport :: [S.Fn] -> T.Text
-jsFunsToProxiesImport funs =
-  "import {\n  "
-    <> T.intercalate ",\n  " ("sqsClient" : "dynamoClient" : map S.fnName funs)
-    <> "\n} from 'proxies'"
-    <> "\nimport {PutItemCommand} from '@aws-sdk/client-dynamodb';"
-
-jsFunToHandler :: S.Fn -> T.Text
-jsFunToHandler fn = mkHandlerFun (S.fnName fn)
-
-jsFunToProxy :: S.Fn -> T.Text
-jsFunToProxy fn = mkProxyFun (S.fnName fn) undefined
-
-mkHandlerFun :: T.Text -> T.Text
-mkHandlerFun impl_fun_name = renderJavascript $(juliusFile "template/js/handler.julius")
-
-mkProxyFun :: T.Text -> T.Text -> T.Text
-mkProxyFun impl_fun_name impl_fun_params = renderJavascript $(juliusFile "template/js/proxy.julius")
+mkHandlerDecl :: T.Text -> T.Text
+mkHandlerDecl impl_fun_name = renderJavascript $(juliusFile "template/js/handler.julius")
 
 mkDeployScript ::
   T.Text ->
