@@ -359,7 +359,7 @@
                                     ],
                                     "Effect": "Allow",
                                     "Resource": {
-                                        "Fn::GetAtt": "ResponseTable.Arn"
+                                        "Fn::GetAtt": "FrameTable.Arn"
                                     }
                                 }
                             ],
@@ -513,7 +513,7 @@
                     }
                 ],
                 "TableClass": "STANDARD",
-                "TableName": "response-table"
+                "TableName": "frame-table"
             },
             "Type": "AWS::DynamoDB::Table"
         }

@@ -111,7 +111,7 @@ instance ToJSON Template where
                 namedKV stage,
                 namedKV role,
                 namedKV layer,
-                ("ResponseTable", responseTable)
+                ("ResponseTable", frameTable)
               ]
                 ++ concatMap lambdaRGroupKVs funs
             )
@@ -199,7 +199,7 @@ instance ToJSON RRole where
                                                ],
                                           "Resource"
                                             .= object
-                                              ["Fn::GetAtt" .= fromText "ResponseTable.Arn"]
+                                              ["Fn::GetAtt" .= fromText "FrameTable.Arn"]
                                         ]
                                     ]
                              ]
@@ -425,13 +425,13 @@ lambdaRGroupKVs (LambdaRGroup fn int route perm req_queue res_queue sqs_map) =
 
 -- Resources
 
-responseTable :: Value
-responseTable =
+frameTable :: Value
+frameTable =
   object
     [ "Type" .= fromText "AWS::DynamoDB::Table",
       "Properties"
         .= object
-          [ "TableName" .= fromText "response-table",
+          [ "TableName" .= fromText "frame-table",
             "TableClass" .= fromText "STANDARD",
             "AttributeDefinitions"
               .= [ object
