@@ -48,4 +48,4 @@ rVar v =
 rReturn :: S.Expr -> Compiler S.Stmt
 rReturn e = do
   e' <- rExpr e
-  pure $ S.SReturn (S.ECall (ctxDotMember "return") [e'])
+  pure $ S.SExpr (S.ECall (ctxDotMember "return") [e'])

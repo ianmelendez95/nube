@@ -147,9 +147,7 @@ done
 
 if [ "$UPDATE_LAMBDAS" = true ]; then
   update_lambdas
-fi
-
-if [ "$UPDATE_MODE" = true ]; then
+else if [ "$UPDATE_MODE" = true ]; then
   update_cf_stack
 else
   create_cf_stack

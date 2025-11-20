@@ -18,8 +18,7 @@ ctxAssignArgStmt var_name arg_idx =
 
 ctxCallStmt :: T.Text -> [S.Expr] -> T.Text -> S.Stmt
 ctxCallStmt fn_name args cont_name =
-  -- S.SExpr (S.ECall (S.dotMemberExpr ctx_var_name fn_name) [S.EVar fn_name, S.EListLit args, S.EVar cont_name])
-  S.SReturn
+  S.SExpr
     ( S.ECall
         (S.dotMemberExpr ctx_var_name "callCC")
         [S.EStringLit fn_name, S.EListLit args, S.EStringLit cont_name]
