@@ -182,9 +182,7 @@ export const eventHandler = (fn) => async (event) => {
     if (event.Records) {
       console.info(`Processing ${event.Records.length} messages.`);
 
-      for (const message of event.Records) {
-        await fn(await Context.fromMessage(message));
-      }
+      await Promise.all(async () => fn(await Context.fromMessage(message)))
     } else {
       console.info('Processing request event');
 
