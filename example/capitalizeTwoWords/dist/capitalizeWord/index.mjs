@@ -4,5 +4,5 @@ export const handler = eventHandler(capitalizeWord);
 
 function capitalizeWord(_ctx) {
   _ctx.frame.word = _ctx.args[0];
-  return word[0].toUpperCase() + word.slice(1);
+  _ctx.return(_ctx.frame.word[0].toUpperCase() + _ctx.frame.word.slice(1));
 }

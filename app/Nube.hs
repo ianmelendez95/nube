@@ -2,6 +2,7 @@ module Nube (compileFile) where
 
 import Control.Monad
   ( unless,
+    (>=>),
   )
 import Control.Monad.Except (runExcept)
 import Control.Monad.Reader (ReaderT (runReaderT))
@@ -11,9 +12,10 @@ import Data.Text.IO qualified as TIO
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
 import Nube.Compiler (Compiler, CompilerT, runCompiler, runCompilerT)
-import Nube.Cont (ContSplit, splitFnContinuations, splitStmtContinuations)
+import Nube.Cont (ContSplit, splitContInScript)
 import Nube.Context (NContext (NContext))
 import Nube.Parse qualified as P
+import Nube.Rename (renameInScript)
 import Nube.Syntax qualified as S
 import System.FilePath
   ( takeBaseName,
@@ -64,12 +66,7 @@ assertValidJsFileName file_path =
             (fail $ "Only letters allowed in file basename: " <> basename)
 
 compileScript :: NContext -> S.Script -> IO S.Script
-compileScript ctx (S.Script name fns) =
-  let result = runCompiler ctx $ do
-        fns' <- mconcat <$> mapM splitFnContinuations fns
-        pure $ S.Script name fns'
-   in either fail pure result
+compileScript ctx = either fail pure . runCompiler ctx . compileScriptC
 
-compileScriptC :: NContext -> S.Script -> Compiler S.Script
-compileScriptC ctx script = do
-  undefined
+compileScriptC :: S.Script -> Compiler S.Script
+compileScriptC = splitContInScript >=> renameInScript

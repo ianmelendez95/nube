@@ -1,5 +1,6 @@
 module Nube.Cont
   ( ContSplit (..),
+    splitContInScript,
     splitFnContinuations,
     splitStmtContinuations,
   )
