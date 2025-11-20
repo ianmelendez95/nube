@@ -9,6 +9,7 @@ import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Char
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
+import Debug.Trace (trace, traceShowId)
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
 import Nube.Compiler (Compiler, CompilerT, runCompiler, runCompilerT)
@@ -69,4 +70,4 @@ compileScript :: NContext -> S.Script -> IO S.Script
 compileScript ctx = either fail pure . runCompiler ctx . compileScriptC
 
 compileScriptC :: S.Script -> Compiler S.Script
-compileScriptC = splitContInScript >=> renameInScript
+compileScriptC = splitContInScript >=> (pure . traceShowId) >=> renameInScript >=> (pure . traceShowId)

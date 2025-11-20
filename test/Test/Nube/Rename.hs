@@ -7,7 +7,7 @@ import Nube.JSCtx
   ( ctx_var_name,
   )
 import Nube.Parse qualified as P
-import Nube.Rename (renameInStatement)
+import Nube.Rename (rExpr, renameInStatement)
 import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast)
 import Test.Hspec
@@ -48,6 +48,29 @@ jsTranspileSpec = do
               )
               [S.dotMembers (S.EVar "_ctx") ["frame", "foo", "bar"]]
           )
+
+  describe "rExpr" $ do
+    it "renames in call args" $ do
+      let test_expr :: S.Expr
+          test_expr =
+            S.ECall
+              (S.EMember (S.EVar "_ctx") (S.MDotAccess "call"))
+              [ S.EStringLit "capitalizeWord",
+                S.EListLit [S.EVar "word1"],
+                S.EStringLit "capitalizeWordsC2"
+              ]
+          res = testCompiler test_context (rExpr test_expr)
+      print test_expr
+      res
+        `shouldBe` S.ECall
+          ( S.EMember
+              (S.EVar "_ctx")
+              (S.MDotAccess "call")
+          )
+          [ S.EStringLit "capitalizeWord",
+            S.EListLit [S.EMember (S.EMember (S.EVar "_ctx") (S.MDotAccess "frame")) (S.MDotAccess "word1")],
+            S.EStringLit "capitalizeWordsC2"
+          ]
 
 test_context :: NContext
 test_context = NContext ["capitalizeWords", "capitalizeWord"]
