@@ -7,8 +7,8 @@ TEMPLATE="capitalizeTwoWords-template.json"
 STACK_NAME="capitalizeTwoWords-stack"
 LAYER="capitalizeTwoWords-layer"
 FUN_NAMES="capitalizeTwoWords
-capitalizeTwoWords_c1
-capitalizeTwoWords_c2
+capitalizeTwoWordsC1
+capitalizeTwoWordsC2
 capitalizeWord
 "
 
@@ -62,6 +62,7 @@ create_cf_stack () {
     --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
     --capabilities CAPABILITY_NAMED_IAM \
     --stack-name "$STACK_NAME" 
+    --disable-rollback
 }
 
 update_lambda () {

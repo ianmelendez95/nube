@@ -7,5 +7,5 @@ function capitalizeTwoWords(_ctx) {
   const words = string.split(' ');
   const word1 = words[0];
   const word2 = words[1];
-  _ctx.call('capitalizeWord', [word1], 'capitalizeTwoWords_c1');
+  _ctx.call('capitalizeWord', [word1], 'capitalizeTwoWordsC1');
 }
