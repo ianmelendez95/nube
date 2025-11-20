@@ -70,4 +70,4 @@ compileScript :: NContext -> S.Script -> IO S.Script
 compileScript ctx = either fail pure . runCompiler ctx . compileScriptC
 
 compileScriptC :: S.Script -> Compiler S.Script
-compileScriptC = splitContInScript >=> (pure . traceShowId) >=> renameInScript >=> (pure . traceShowId)
+compileScriptC = splitContInScript >=> renameInScript

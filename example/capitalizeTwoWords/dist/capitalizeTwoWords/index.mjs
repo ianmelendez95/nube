@@ -7,5 +7,5 @@ function capitalizeTwoWords(_ctx) {
   _ctx.frame.words = _ctx.frame.string.split(' ');
   _ctx.frame.word1 = _ctx.frame.words[0];
   _ctx.frame.word2 = _ctx.frame.words[1];
-  _ctx.call('capitalizeWord', [word1], 'capitalizeTwoWordsC1');
+  _ctx.call('capitalizeWord', [_ctx.frame.word1], 'capitalizeTwoWordsC1');
 }
