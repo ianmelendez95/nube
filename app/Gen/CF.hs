@@ -435,13 +435,13 @@ frameTable =
             "TableClass" .= fromText "STANDARD",
             "AttributeDefinitions"
               .= [ object
-                     [ "AttributeName" .= fromText "request-id",
+                     [ "AttributeName" .= fromText "frameId",
                        "AttributeType" .= fromText "S"
                      ]
                  ],
             "KeySchema"
               .= [ object
-                     [ "AttributeName" .= fromText "request-id",
+                     [ "AttributeName" .= fromText "frameId",
                        "KeyType" .= fromText "HASH"
                      ]
                  ],

@@ -501,14 +501,14 @@
             "Properties": {
                 "AttributeDefinitions": [
                     {
-                        "AttributeName": "request-id",
+                        "AttributeName": "frameId",
                         "AttributeType": "S"
                     }
                 ],
                 "BillingMode": "PAY_PER_REQUEST",
                 "KeySchema": [
                     {
-                        "AttributeName": "request-id",
+                        "AttributeName": "frameId",
                         "KeyType": "HASH"
                     }
                 ],
