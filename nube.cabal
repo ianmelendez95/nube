@@ -90,6 +90,7 @@ library
         Nube.Parse
         Nube.Parser
         Nube.Context
+        Nube.Ret
         Gen.CF
         Gen.Lambda
         Util.Aeson

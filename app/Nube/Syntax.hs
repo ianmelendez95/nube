@@ -5,8 +5,11 @@ module Nube.Syntax
     Expr (..),
     MAccess (..),
     mapScriptStmtsM,
+    mapScriptFnsM,
     scriptText,
     funText,
+    scriptFns',
+    fnStmts',
     IOp (..),
     dotMemberExpr,
     dotMembers,
@@ -14,6 +17,7 @@ module Nube.Syntax
   )
 where
 
+import Control.Lens (Lens', lens)
 import Data.Text qualified as T
 
 data Script = Script
@@ -64,6 +68,12 @@ instance Show Stmt where
 
 instance Show Expr where
   show = T.unpack . exprText
+
+scriptFns' :: Lens' Script [Fn]
+scriptFns' = lens scriptFns (\script fns -> script {scriptFns = fns})
+
+fnStmts' :: Lens' Fn [Stmt]
+fnStmts' = lens fnStmts (\fn stmts -> fn {fnStmts = stmts})
 
 mapScriptStmtsM :: (Monad m) => (Stmt -> m Stmt) -> Script -> m Script
 mapScriptStmtsM = mapScriptFnsM . mapFnStmtsM
