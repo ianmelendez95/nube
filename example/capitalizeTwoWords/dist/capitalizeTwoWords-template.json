@@ -497,7 +497,7 @@
             },
             "Type": "AWS::Lambda::EventSourceMapping"
         },
-        "ResponseTable": {
+        "FrameTable": {
             "Properties": {
                 "AttributeDefinitions": [
                     {

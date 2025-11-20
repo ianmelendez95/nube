@@ -111,7 +111,7 @@ instance ToJSON Template where
                 namedKV stage,
                 namedKV role,
                 namedKV layer,
-                ("ResponseTable", frameTable)
+                ("FrameTable", frameTable)
               ]
                 ++ concatMap lambdaRGroupKVs funs
             )
