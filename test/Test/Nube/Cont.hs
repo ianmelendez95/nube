@@ -64,5 +64,5 @@ capitalizeTwoWords_fn_prim_text =
     \  const words = string.split(' ');\n\
     \  const word1 = words[0];\n\
     \  const word2 = words[1];\n\
-    \  _ctx.call('capitalizeWord', [word1], 'capitalizeTwoWordsC1');\n\
+    \  _ctx.callCC('capitalizeWord', [word1], 'capitalizeTwoWordsC1');\n\
     \}"

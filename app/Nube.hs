@@ -17,6 +17,7 @@ import Nube.Cont (ContSplit, splitContInScript)
 import Nube.Context (NContext (NContext))
 import Nube.Parse qualified as P
 import Nube.Rename (renameInScript)
+import Nube.Ret (compileReturns)
 import Nube.Syntax qualified as S
 import System.FilePath
   ( takeBaseName,
@@ -70,4 +71,4 @@ compileScript :: NContext -> S.Script -> IO S.Script
 compileScript ctx = either fail pure . runCompiler ctx . compileScriptC
 
 compileScriptC :: S.Script -> Compiler S.Script
-compileScriptC = splitContInScript >=> renameInScript
+compileScriptC = splitContInScript >=> renameInScript >=> compileReturns

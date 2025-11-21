@@ -17,7 +17,7 @@ module Nube.Syntax
   )
 where
 
-import Control.Lens (Lens', lens)
+import Control.Lens (Traversal', traversal)
 import Data.Text qualified as T
 
 data Script = Script
@@ -69,11 +69,11 @@ instance Show Stmt where
 instance Show Expr where
   show = T.unpack . exprText
 
-scriptFns' :: Lens' Script [Fn]
-scriptFns' = lens scriptFns (\script fns -> script {scriptFns = fns})
+scriptFns' :: Traversal' Script [Fn]
+scriptFns' = traversal (\fnsFnM (Script s_name s_fns) -> Script s_name <$> fnsFnM s_fns)
 
-fnStmts' :: Lens' Fn [Stmt]
-fnStmts' = lens fnStmts (\fn stmts -> fn {fnStmts = stmts})
+fnStmts' :: Traversal' Fn [Stmt]
+fnStmts' = traversal (\stmtsFnM (Fn f_name f_args f_stmts) -> Fn f_name f_args <$> stmtsFnM f_stmts)
 
 mapScriptStmtsM :: (Monad m) => (Stmt -> m Stmt) -> Script -> m Script
 mapScriptStmtsM = mapScriptFnsM . mapFnStmtsM
