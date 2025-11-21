@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cabal run nube -- $@
+cabal run nube -- "$@"
 
