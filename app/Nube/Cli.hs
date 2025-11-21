@@ -5,13 +5,15 @@ import Options.Applicative
   ( Parser,
     command,
     execParser,
+    helper,
+    hsubparser,
     info,
     long,
     metavar,
+    progDesc,
     short,
     strArgument,
     strOption,
-    subparser,
   )
 
 data Command
@@ -30,13 +32,13 @@ run = do
     (Invoke api_id args) -> putStrLn $ "Invoking: " ++ show cmd
 
 parseArgs :: IO Command
-parseArgs = execParser (info cmdParser mempty)
+parseArgs = execParser (info (helper <*> cmdParser) (progDesc "The Nube all-in-one tool"))
 
 cmdParser :: Parser Command
 cmdParser =
-  subparser
-    ( command "build" (info buildParser mempty)
-        <> command "invoke" (info invokeParser mempty)
+  hsubparser
+    ( command "build" (info buildParser (progDesc "Build CF resources from a JS file"))
+        <> command "invoke" (info invokeParser (progDesc "Invoke a function API"))
     )
 
 buildParser :: Parser Command
