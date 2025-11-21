@@ -3,6 +3,7 @@ module Nube.Cli where
 import Nube (compileFile)
 import Options.Applicative
   ( Parser,
+    command,
     execParser,
     info,
     long,
@@ -10,6 +11,7 @@ import Options.Applicative
     short,
     strArgument,
     strOption,
+    subparser,
   )
 
 data Command
@@ -28,7 +30,18 @@ run = do
     (Invoke api_id args) -> putStrLn $ "Invoking: " ++ show cmd
 
 parseArgs :: IO Command
-parseArgs = execParser (info invokeParser mempty)
+parseArgs = execParser (info cmdParser mempty)
+
+cmdParser :: Parser Command
+cmdParser =
+  subparser
+    ( command "build" (info buildParser mempty)
+        <> command "invoke" (info invokeParser mempty)
+    )
+
+buildParser :: Parser Command
+buildParser =
+  Build <$> strArgument (metavar "js_file")
 
 invokeParser :: Parser Command
 invokeParser =
