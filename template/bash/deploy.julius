@@ -11,6 +11,7 @@ FUN_NAMES="#{rawJS fun_names}"
 # Parse command line arguments
 UPDATE_MODE=false
 UPDATE_LAMBDAS=false
+UPDATE_LAYER=false
 for arg in "$@"; do
   case $arg in
     --update-cf)
@@ -19,6 +20,10 @@ for arg in "$@"; do
       ;;
     --update-lambdas)
       UPDATE_LAMBDAS=true
+      shift
+      ;;
+    --update-layer)
+      UPDATE_LAYER=true
       shift
       ;;
     *)
@@ -62,16 +67,6 @@ create_cf_stack () {
 }
 
 update_lambda () {
-  f="$1"
-
-  echo "updating function layer: $f"
-  aws lambda update-function-configuration \
-    --no-cli-pager \
-    --function-name "$f" \
-    --layers "$layer_arn" > /dev/null
-
-  aws lambda wait function-updated --function-name "$f"
-
   echo "updating function code: $f"
   aws lambda update-function-code \
     --no-cli-pager \
@@ -82,13 +77,40 @@ update_lambda () {
   aws lambda wait function-updated --function-name "$f"
 }
 
-update_lambdas () {
+update_layer_for_lambda () {
+  f="$1"
+
+  echo "updating function layer: $f"
+  aws lambda update-function-configuration \
+    --no-cli-pager \
+    --function-name "$f" \
+    --layers "$layer_arn" > /dev/null
+
+  aws lambda wait function-updated --function-name "$f"
+}
+
+update_layer () {
   echo "updating layer: $LAYER"
   layer_response=$(aws lambda publish-layer-version \
     --no-cli-pager \
     --layer-name "$LAYER" \
     --content S3Bucket="$BUCKET",S3Key="$LAYER.zip")
 
+  layer_arn=$(echo "$layer_response" | jq -r '.LayerVersionArn')
+  if [ -z "$layer_arn" ] || [ "$layer_arn" = "null" ]; then
+    echo "ERROR: failed to publish layer version"
+    exit 1
+  fi
+
+  for f in $FUN_NAMES; do
+    update_layer_for_lambda "$f" &
+  done
+
+  wait
+  echo "DONE: updating layers"
+}
+
+update_lambdas () {
   layer_arn=$(echo "$layer_response" | jq -r '.LayerVersionArn')
   if [ -z "$layer_arn" ] || [ "$layer_arn" = "null" ]; then
     echo "ERROR: failed to publish layer version"
@@ -134,18 +156,22 @@ upload_fun_code () {
 }
 
 assert_bucket
-upload_template
-upload_layer
 
-for f in $FUN_NAMES; do 
-  upload_fun_code "$f"
-done
-
-if [ "$UPDATE_LAMBDAS" = true ]; then
+if [ "$UPDATE_LAYER" = true]; then
+  upload_layer
+elif [ "$UPDATE_LAMBDAS" = true ]; then
+  for f in $FUN_NAMES; do 
+    upload_fun_code "$f"
+  done
   update_lambdas
 elif [ "$UPDATE_MODE" = true ]; then
   update_cf_stack
 else
+  upload_template
+  upload_layer
+  for f in $FUN_NAMES; do 
+    upload_fun_code "$f"
+  done
   create_cf_stack
 fi
 
