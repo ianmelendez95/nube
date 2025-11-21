@@ -67,6 +67,8 @@ create_cf_stack () {
 }
 
 update_lambda () {
+  f="$1"
+
   echo "updating function code: $f"
   aws lambda update-function-code \
     --no-cli-pager \
@@ -157,14 +159,16 @@ upload_fun_code () {
 
 assert_bucket
 
-if [ "$UPDATE_LAYER" = true]; then
+if [ "$UPDATE_LAYER" = true ]; then
   upload_layer
+  update_layer
 elif [ "$UPDATE_LAMBDAS" = true ]; then
   for f in $FUN_NAMES; do 
     upload_fun_code "$f"
   done
   update_lambdas
 elif [ "$UPDATE_MODE" = true ]; then
+  upload_template
   update_cf_stack
 else
   upload_template

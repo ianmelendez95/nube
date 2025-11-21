@@ -111,7 +111,8 @@ instance ToJSON Template where
                 namedKV stage,
                 namedKV role,
                 namedKV layer,
-                ("FrameTable", frameTable)
+                namedKV frameTable,
+                namedKV resultTable
               ]
                 ++ concatMap lambdaRGroupKVs funs
             )
@@ -198,8 +199,9 @@ instance ToJSON RRole where
                                                  fromText "dynamodb:Query"
                                                ],
                                           "Resource"
-                                            .= object
-                                              ["Fn::GetAtt" .= fromText "FrameTable.Arn"]
+                                            .= [ object ["Fn::GetAtt" .= fromText "FrameTable.Arn"],
+                                                 object ["Fn::GetAtt" .= fromText "ResultTable.Arn"]
+                                               ]
                                         ]
                                     ]
                              ]
@@ -425,29 +427,55 @@ lambdaRGroupKVs (LambdaRGroup fn int route perm req_queue res_queue sqs_map) =
 
 -- Resources
 
-frameTable :: Value
+frameTable :: Named Value
 frameTable =
-  object
-    [ "Type" .= fromText "AWS::DynamoDB::Table",
-      "Properties"
-        .= object
-          [ "TableName" .= fromText "frame-table",
-            "TableClass" .= fromText "STANDARD",
-            "AttributeDefinitions"
-              .= [ object
-                     [ "AttributeName" .= fromText "frameId",
-                       "AttributeType" .= fromText "S"
-                     ]
-                 ],
-            "KeySchema"
-              .= [ object
-                     [ "AttributeName" .= fromText "frameId",
-                       "KeyType" .= fromText "HASH"
-                     ]
-                 ],
-            "BillingMode" .= fromText "PAY_PER_REQUEST"
-          ]
-    ]
+  Named "FrameTable" $
+    object
+      [ "Type" .= fromText "AWS::DynamoDB::Table",
+        "Properties"
+          .= object
+            [ "TableName" .= fromText "frame-table",
+              "TableClass" .= fromText "STANDARD",
+              "AttributeDefinitions"
+                .= [ object
+                       [ "AttributeName" .= fromText "frameId",
+                         "AttributeType" .= fromText "S"
+                       ]
+                   ],
+              "KeySchema"
+                .= [ object
+                       [ "AttributeName" .= fromText "frameId",
+                         "KeyType" .= fromText "HASH"
+                       ]
+                   ],
+              "BillingMode" .= fromText "PAY_PER_REQUEST"
+            ]
+      ]
+
+resultTable :: Named Value
+resultTable =
+  Named "ResultTable" $
+    object
+      [ "Type" .= fromText "AWS::DynamoDB::Table",
+        "Properties"
+          .= object
+            [ "TableName" .= fromText "result-table",
+              "TableClass" .= fromText "STANDARD",
+              "AttributeDefinitions"
+                .= [ object
+                       [ "AttributeName" .= fromText "frameId",
+                         "AttributeType" .= fromText "S"
+                       ]
+                   ],
+              "KeySchema"
+                .= [ object
+                       [ "AttributeName" .= fromText "frameId",
+                         "KeyType" .= fromText "HASH"
+                       ]
+                   ],
+              "BillingMode" .= fromText "PAY_PER_REQUEST"
+            ]
+      ]
 
 bucketFromScriptName :: T.Text -> Named PBucket
 bucketFromScriptName name =

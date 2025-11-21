@@ -172,6 +172,7 @@ elif [ "$UPDATE_LAMBDAS" = true ]; then
   done
   update_lambdas
 elif [ "$UPDATE_MODE" = true ]; then
+  upload_template
   update_cf_stack
 else
   upload_template

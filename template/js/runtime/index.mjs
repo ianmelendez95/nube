@@ -167,7 +167,7 @@ export class Context {
 
   static async saveResult(frameId, result) {
     console.trace('Context.saveResult', frameId, result);
-    await dynamoClient.send(new PutItemCommand({
+    return await dynamoClient.send(new PutItemCommand({
       TableName: 'result-table',
       Item: {
         frameId: { S: frameId },
