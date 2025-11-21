@@ -56,11 +56,7 @@ copyPath src_path dest_path = do
       src_subpaths <- listDirectory src_path
       mapM_ (\src_entry -> copyPath (src_path </> src_entry) (dest_path </> src_entry)) src_subpaths
     else do
-      dest_exists <- doesFileExist dest_path
-      if dest_exists
-        then pure ()
-        else do
-          copyFile (traceId src_path) dest_path
+      copyFile (traceId src_path) dest_path
 
 jsScriptToDeployScript :: S.Script -> T.Text
 jsScriptToDeployScript script =

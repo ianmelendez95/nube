@@ -188,6 +188,13 @@ export const eventHandler = (fn) => async (event) => {
     } else {
       console.info('Processing request event');
 
+      if (event.queryStringParameters?.check) {
+        const result = await checkResult(event.queryStringParameters.check);
+        return !!result
+          ? { statusCode: 200, body: result }
+          : { statusCode: 202 }
+      }
+
       const ctx = await Context.fromHttpReq(event.body);
       await fn(ctx);
 
@@ -213,4 +220,15 @@ export function parseHttpArgs(argsString) {
   }
 
   return args;
+}
+
+async function checkResult(frameId) {
+  const getItemResponse = await dynamoClient.send(new GetItemCommand({
+    TableName: 'result-table',
+    Key: {
+      frameId: { S: frameId }
+    }
+  }));
+
+  return getItemResponse?.Item?.result?.S;
 }
