@@ -56,7 +56,7 @@ concatContSplits fn_name cont_num splits =
     (block_stmts, ContCall var call_fn_name call_fn_args : rest_splits) ->
       let -- call the function with the next continuation
           cont_call :: S.Stmt
-          cont_call = ctxCallStmt call_fn_name call_fn_args (fn_name <> "C" <> T.show (cont_num + 1))
+          cont_call = ctxCallStmt call_fn_name call_fn_args fn_name (cont_num + 1)
 
           -- the final current block, with the call with continuation at the end
           block' :: [S.Stmt]

@@ -37,7 +37,10 @@ data Stmt
   | SAssign Expr Expr
   | SReturn Expr
   | SExpr Expr
+  | SSwitch Expr [SCase]
   deriving (Eq)
+
+data SCase = SCase Int [Stmt] deriving (Eq)
 
 data Expr
   = EVar T.Text
@@ -68,6 +71,9 @@ instance Show Stmt where
 
 instance Show Expr where
   show = T.unpack . exprText
+
+instance Show SCase where 
+  show = undefined
 
 scriptFns' :: Traversal' Script [Fn]
 scriptFns' = traversal (\fnsFnM (Script s_name s_fns) -> Script s_name <$> fnsFnM s_fns)
@@ -103,6 +109,7 @@ stmtText (SConst var rhs) = "const " <> var <> " = " <> exprText rhs
 stmtText (SReturn rhs) = "return " <> exprText rhs
 stmtText (SExpr e) = exprText e
 stmtText (SAssign lhs rhs) = exprText lhs <> " = " <> exprText rhs
+stmtText (SSwitch match cases) = undefined
 
 exprText :: Expr -> T.Text
 exprText (EVar v) = v
