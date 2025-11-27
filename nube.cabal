@@ -90,6 +90,7 @@ library
         Nube.JSCtx
         Nube.Parse
         Nube.Parser
+        Nube.PPrint
         Nube.Context
         Nube.Ret
         Nube.St
@@ -114,6 +115,7 @@ library
         , split
         , lens
         , optparse-applicative
+        , prettyprinter
 
     -- Directories containing source files.
     hs-source-dirs:   app
