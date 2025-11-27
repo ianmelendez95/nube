@@ -7,7 +7,7 @@ module Nube.Syntax
     mapScriptStmtsM,
     mapScriptFnsM,
     scriptText,
-    funText,
+    fnText,
     scriptFns',
     fnStmts',
     IOp (..),
@@ -62,19 +62,25 @@ data MAccess
   deriving (Show, Eq)
 
 instance Show Script where
-  show = T.unpack . scriptText
+  show = show . pretty
 
 instance Show Fn where
-  show = T.unpack . funText
+  show = show . pretty
 
 instance Show Stmt where
-  show = T.unpack . stmtText
+  show = show . pretty
 
 instance Show Expr where
-  show = T.unpack . exprText
+  show = show . pretty
 
 instance Show SCase where 
   show = show . pretty
+
+instance Pretty Script where 
+  pretty = pretty . scriptText
+
+instance Pretty Fn where 
+  pretty = pretty . fnText
 
 instance Pretty Stmt where 
   pretty = pretty . stmtText
@@ -106,10 +112,10 @@ mapFnStmtsM stmt_fn_m (Fn f_name f_params f_stmts) =
   Fn f_name f_params <$> mapM stmt_fn_m f_stmts
 
 scriptText :: Script -> T.Text
-scriptText (Script name funcs) = T.unlines $ name : map funText funcs
+scriptText (Script name funcs) = T.unlines $ name : map fnText funcs
 
-funText :: Fn -> T.Text
-funText (Fn name params body) = "function " <> name <> params_text <> " {\n  " <> body_text <> ";\n}"
+fnText :: Fn -> T.Text
+fnText (Fn name params body) = "function " <> name <> params_text <> " {\n  " <> body_text <> ";\n}"
   where
     params_text = "(" <> T.intercalate ", " params <> ")"
     body_text = T.intercalate ";\n  " (map stmtText body)

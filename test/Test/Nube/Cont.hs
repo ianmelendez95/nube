@@ -3,10 +3,6 @@ module Test.Nube.Cont (jsCompileContSpec) where
 import Data.Either (either)
 import Data.Text qualified as T
 import Nube.Cont
-import Nube.Cont
-  ( splitFnContinuations,
-    splitStmtContinuations,
-  )
 import Nube.Context
   ( NContext (..),
   )
@@ -64,5 +60,5 @@ capitalizeTwoWords_fn_prim_text =
     \  const words = string.split(' ');\n\
     \  const word1 = words[0];\n\
     \  const word2 = words[1];\n\
-    \  _ctx.callCC('capitalizeWord', [word1], 'capitalizeTwoWordsC1');\n\
+    \  _ctx.callCC('capitalizeWord', [word1], 'capitalizeTwoWords', 1);\n\
     \}"
