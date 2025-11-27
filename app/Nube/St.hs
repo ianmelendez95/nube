@@ -29,25 +29,25 @@ compileStmts = undefined
 -- splitStateInScript :: S.Script -> Compiler S.Script
 -- splitStateInScript (S.Script s_name s_fns) = S.Script s_name . concat <$> mapM splitFnState s_fns
 
--- splitFnStateinuations :: S.Fn -> Compiler [S.Fn]
--- splitFnStateinuations fn@(S.Fn _ _ []) = pure [fn]
--- splitFnStateinuations (S.Fn fn_name fn_params fn_stmts) = do
---   split_blocks <- splitStmtStateinuations fn_name fn_stmts
---   case split_blocks of
---     [] -> throwError "Stateinuation splitting returned empty result"
---     (first_block : rest_blocks) ->
---       let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
---           primary_fn = S.Fn fn_name [ctx_var_text] (arg_stmts ++ first_block)
---           cont_fns = zipWith mkFnFromBlock [1 ..] rest_blocks
---        in pure $ primary_fn : cont_fns
---   where
---     mkFnFromBlock :: Int -> [S.Stmt] -> S.Fn
---     mkFnFromBlock cont_num = S.Fn (fn_name <> "C" <> T.show cont_num) [ctx_var_text]
+splitFnStateinuations :: S.Fn -> Compiler [S.Fn]
+splitFnStateinuations fn@(S.Fn _ _ []) = pure [fn]
+splitFnStateinuations (S.Fn fn_name fn_params fn_stmts) = do
+  split_blocks <- splitStmtStates fn_name fn_stmts
+  case split_blocks of
+    [] -> throwError "Stateinuation splitting returned empty result"
+    (first_block : rest_blocks) ->
+      let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
+          primary_fn = S.Fn fn_name [ctx_var_text] (arg_stmts ++ first_block)
+          cont_fns = zipWith mkFnFromBlock [1 ..] rest_blocks
+       in pure $ primary_fn : cont_fns
+  where
+    mkFnFromBlock :: Int -> [S.Stmt] -> S.Fn
+    mkFnFromBlock cont_num = S.Fn (fn_name <> "C" <> T.show cont_num) [ctx_var_text]
 
--- splitStmtStates :: [S.Stmt] -> Compiler [[S.Stmt]]
--- splitStmtStates stmts = do
---   cont_splits <- mapM stmtToStateSplit stmts
---   pure $ concatStateSplits 0 cont_splits
+splitStmtStates :: T.Text -> [S.Stmt] -> Compiler [[S.Stmt]]
+splitStmtStates fn_name stmts = do
+  cont_splits <- mapM stmtToStateSplit stmts
+  pure $ concatStateSplits fn_name 0 cont_splits
 
 concatStateSplits :: T.Text -> Int -> [StateSplit] -> [[S.Stmt]]
 concatStateSplits fn_name cont_num splits =
@@ -57,7 +57,7 @@ concatStateSplits fn_name cont_num splits =
     (block_stmts, StateCall var call_fn_name call_fn_args : rest_splits) ->
       let -- call the function with the next continuation
           cont_call :: S.Stmt
-          cont_call = ctxCallStmt call_fn_name call_fn_args (fn_name <> "C" <> T.show (cont_num + 1))
+          cont_call = ctxCallStmt call_fn_name call_fn_args fn_name (cont_num + 1)
 
           -- the final current block, with the call with continuation at the end
           block' :: [S.Stmt]
