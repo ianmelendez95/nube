@@ -19,6 +19,7 @@ where
 
 import Control.Lens (Traversal', traversal)
 import Data.Text qualified as T
+import Prettyprinter
 
 data Script = Script
   { scriptName :: T.Text, -- file basename
@@ -73,7 +74,19 @@ instance Show Expr where
   show = T.unpack . exprText
 
 instance Show SCase where 
-  show = undefined
+  show = show . pretty
+
+instance Pretty Stmt where 
+  pretty = pretty . stmtText
+
+instance Pretty Expr where 
+  pretty = pretty . exprText
+
+instance Pretty IOp where 
+  pretty IPlus = "+"
+
+instance Pretty SCase where 
+  pretty _ = undefined
 
 scriptFns' :: Traversal' Script [Fn]
 scriptFns' = traversal (\fnsFnM (Script s_name s_fns) -> Script s_name <$> fnsFnM s_fns)
@@ -91,9 +104,6 @@ mapScriptFnsM fn_m (Script s_name s_fns) =
 mapFnStmtsM :: (Monad m) => (Stmt -> m Stmt) -> Fn -> m Fn
 mapFnStmtsM stmt_fn_m (Fn f_name f_params f_stmts) =
   Fn f_name f_params <$> mapM stmt_fn_m f_stmts
-
-renameInFn :: (Monad m) => (Stmt -> m Stmt) -> Fn -> m Fn
-renameInFn fM (Fn f_name f_params f_stmts) = Fn f_name f_params <$> mapM fM f_stmts
 
 scriptText :: Script -> T.Text
 scriptText (Script name funcs) = T.unlines $ name : map funText funcs
