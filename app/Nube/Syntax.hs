@@ -81,7 +81,19 @@ instance Pretty Script where
   pretty = pretty . scriptText
 
 instance Pretty Fn where
-  pretty = pretty . fnText
+  pretty (Fn name params body) = 
+    fn_sig <> line <> pretty_body <> line <> rbrace
+    where
+      fn_sig :: Doc a
+      fn_sig = "function" <+> pretty name <> params_doc <> lbrace
+
+      params_doc :: Doc a
+      params_doc = parens $ prettyCSV params
+
+      pretty_body :: Doc a
+      pretty_body = vsep (map ((<>semi) . pretty) body)
+
+      body_text = T.intercalate ";\n  " (map stmtText body)
 
 instance Pretty Stmt where
   pretty (SConst var rhs) = "const" <+> pretty var <+> equals <+> pretty rhs
@@ -109,7 +121,7 @@ instance Pretty IOp where
 instance Pretty SCase where
   pretty _ = undefined
 
-prettyCSV :: [Expr] -> Doc a
+prettyCSV :: Pretty a => [a] -> Doc b
 prettyCSV xs = concatWith (\l r -> l <> comma <+> r) (map pretty xs)
 
 scriptFns' :: Traversal' Script [Fn]
