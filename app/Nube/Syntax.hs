@@ -20,6 +20,7 @@ where
 import Control.Lens (Traversal', traversal)
 import Data.Text qualified as T
 import Prettyprinter
+import Prettyprinter.Symbols.Ascii
 
 data Script = Script
   { scriptName :: T.Text, -- file basename
@@ -73,26 +74,43 @@ instance Show Stmt where
 instance Show Expr where
   show = show . pretty
 
-instance Show SCase where 
+instance Show SCase where
   show = show . pretty
 
-instance Pretty Script where 
+instance Pretty Script where
   pretty = pretty . scriptText
 
-instance Pretty Fn where 
+instance Pretty Fn where
   pretty = pretty . fnText
 
-instance Pretty Stmt where 
-  pretty = pretty . stmtText
+instance Pretty Stmt where
+  pretty (SConst var rhs) = "const" <+> pretty var <+> equals <+> pretty rhs
+  pretty (SReturn rhs) = "return" <+> pretty rhs
+  pretty (SExpr e) = pretty e
+  pretty (SAssign lhs rhs) = pretty lhs <+> equals <+> pretty rhs
+  pretty (SSwitch match cases) = undefined
 
-instance Pretty Expr where 
-  pretty = pretty . exprText
+instance Pretty Expr where
+  pretty (EVar v) = pretty v
+  pretty (EStringLit s) = squotes (pretty s)
+  pretty (ENumberLit n) = pretty $ T.show n
+  pretty (ECall lhs args) = pretty lhs <> parens (prettyCSV args)
+  pretty (EMember lhs rhs) = pretty lhs <> pretty rhs
+  pretty (EInfix op lhs rhs) = pretty lhs <+> pretty op <+> pretty rhs
+  pretty (EListLit xs) = brackets $ prettyCSV xs
 
-instance Pretty IOp where 
+instance Pretty MAccess where 
+  pretty (MDotAccess v) = dot <> pretty v
+  pretty (MBracketAccess rhs) = brackets $ pretty rhs
+
+instance Pretty IOp where
   pretty IPlus = "+"
 
-instance Pretty SCase where 
+instance Pretty SCase where
   pretty _ = undefined
+
+prettyCSV :: [Expr] -> Doc a
+prettyCSV xs = concatWith (\l r -> l <> comma <+> r) (map pretty xs)
 
 scriptFns' :: Traversal' Script [Fn]
 scriptFns' = traversal (\fnsFnM (Script s_name s_fns) -> Script s_name <$> fnsFnM s_fns)
