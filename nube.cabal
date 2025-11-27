@@ -92,6 +92,7 @@ library
         Nube.Parser
         Nube.Context
         Nube.Ret
+        Nube.St
         Gen.CF
         Gen.Lambda
         Util.Aeson
@@ -139,10 +140,11 @@ test-suite test
 
     other-modules: 
         Test.Nube.Cont
-        Test.Nube.Parse
-        Test.Nube.Rename
-        Test.Util.Parse
         Test.Util.Nube
+        Test.Nube.Parse
+        Test.Util.Parse
+        Test.Nube.Rename
+        Test.Nube.St
         Test.Example.CapitalizeTwoWords
 
     build-depends:  

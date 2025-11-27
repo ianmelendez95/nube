@@ -1,17 +1,16 @@
-module Test.Nube.Cont (jsCompileContSpec) where
+module Test.Nube.St (jsCompileContSpec) where
 
 import Data.Either (either)
 import Data.Text qualified as T
 import Nube.Cont
-import Nube.Cont
-  ( splitFnContinuations,
-    splitStmtContinuations,
-  )
 import Nube.Context
   ( NContext (..),
   )
 import Nube.JSCtx
 import Nube.Parse qualified as P
+import Nube.St
+  (
+  )
 import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text)
 import Test.Hspec
@@ -28,14 +27,14 @@ import Test.Util.Nube (testCompiler)
 import Test.Util.Parse (runParser, testParser)
 
 jsCompileContSpec = do
-  describe "splitFnContinuations" $ do
-    it "splits ctw fns" $ do
-      let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
-          res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
-       in do
-            length res `shouldBe` 3
-            let [prim_fn, cont_fn1, cont_fn2] = res
-            prim_fn `shouldBe` capitalizeTwoWords_fn_prim_ast
+  -- describe "splitFnContinuations" $ do
+  --   it "splits ctw fns" $ do
+  --     let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
+  --         res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
+  --      in do
+  --           length res `shouldBe` 3
+  --           let [prim_fn, cont_fn1, cont_fn2] = res
+  --           prim_fn `shouldBe` capitalizeTwoWords_fn_prim_ast
 
   describe "splitStmtContinuations" $ do
     it "splits capitalizeTwoWords stmts" $ do

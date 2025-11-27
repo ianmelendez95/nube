@@ -4,7 +4,6 @@ import Control.Monad
   ( unless,
     (>=>),
   )
-import Control.Monad.Except (runExcept)
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Char
 import Data.Text qualified as T
@@ -27,8 +26,6 @@ import System.FilePath
   )
 import Util.Aeson (writeFileJSON)
 
-type CompilerIO a = CompilerT IO a
-
 -- test_js_file = "example/capitalizeWords/capitalizeWords.js"
 
 compileFile :: FilePath -> IO ()
@@ -46,7 +43,7 @@ compileFile js_file = do
     scripts
 
   let template = CF.templateFromScript script
-  writeFileJSON (templateFilePath $ script_name) template
+  writeFileJSON (templateFilePath script_name) template
   where
     templateFilePath script_name =
       dist_dir </> T.unpack (GL.templateNameFromScriptName script_name)
