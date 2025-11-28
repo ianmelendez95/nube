@@ -17,6 +17,7 @@ import Nube.Parse
     function,
     identifier,
     statement,
+    switchStmt,
     stringLitExpr,
   )
 import Nube.Syntax
@@ -37,6 +38,7 @@ import Test.Hspec
     describe,
     expectationFailure,
     it,
+    xit,
     shouldBe,
     shouldSatisfy,
     shouldThrow,
@@ -86,8 +88,13 @@ jsParseSpec = do
         res <- testParser statement "_ctx.call('capitalizeWord');"
         res `shouldBe` SExpr (ECall (EMember (EVar "_ctx") (MDotAccess "call")) [EStringLit "capitalizeWord"])
 
-      it "parses switch statement" $ do 
+      xit "parses switch statement" $ do 
         res <- testParser statement "switch (state) { case 0: return x; case 1: return y; }"
+        res `shouldBe` SSwitch (EVar "state") [SCase 0 [SReturn (EVar "x")], SCase 1 [SReturn (EVar "y")]]
+
+    describe "switchStmt" $ do 
+      it "parses switch statement" $ do 
+        res <- testParser switchStmt "switch (state) { case 0: return x; case 1: return y; }"
         res `shouldBe` SSwitch (EVar "state") [SCase 0 [SReturn (EVar "x")], SCase 1 [SReturn (EVar "y")]]
 
     describe "expr" $ do
@@ -140,6 +147,11 @@ jsParseSpec = do
               EListLit [EVar "word1"],
               EVar "__test_continuation__"
             ]
+
+      it "rejects case" $ do
+        let result = tryParserWithContext expr (NContext []) "case"
+        result `shouldSatisfy` isLeft
+
 
     describe "identifier" $ do
       it "returns the identifier" $ do

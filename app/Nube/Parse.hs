@@ -8,6 +8,7 @@ module Nube.Parse
     bracketMember,
     expr,
     statement,
+    switchStmt,
     function,
     runParser,
   )
@@ -112,7 +113,7 @@ caseStmt = do
   _ <- symbol "case"
   state_num <- lexeme L.decimal
   _ <- symbol ":"
-  S.SCase state_num <$> many statement
+  S.SCase state_num <$> manyTill statement (symbol "case")
 
 expr :: Parser S.Expr
 expr = makeExprParser (lexeme term) exprTable
@@ -160,7 +161,11 @@ braces :: Parser a -> Parser a
 braces = between (symbol "{") (symbol "}") 
 
 varExpr :: Parser S.Expr
-varExpr = S.EVar <$> identifier
+varExpr = do
+  id_txt <- identifier 
+  if id_txt `elem` keywords
+    then fail $ "Keyword is reserved: " ++ show id_txt
+    else pure $ S.EVar id_txt
 
 listLitExpr :: Parser S.Expr
 listLitExpr = S.EListLit <$> between (symbol "[") (symbol "]") (sepBy expr (symbol ","))
@@ -185,6 +190,9 @@ identifier =
     T.cons
     <$> satisfy (\c -> c == '_' || isAlpha c)
     <*> takeWhileP (Just "identifier char") (\c -> c == '_' || isAlphaNum c)
+
+keywords :: [T.Text]
+keywords = ["case"]
 
 stringLiteral :: Parser T.Text
 stringLiteral = stringLiteral' (char '\'') <|> stringLiteral' (char '"')
