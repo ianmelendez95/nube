@@ -60,7 +60,6 @@ jsTranspileSpec = do
                 S.EStringLit "capitalizeWordsC2"
               ]
           res = testCompiler test_context (rExpr test_expr)
-      print test_expr
       res
         `shouldBe` S.ECall
           ( S.EMember

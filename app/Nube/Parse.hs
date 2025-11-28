@@ -29,10 +29,12 @@ import Text.Megaparsec
     errorBundlePretty,
     many,
     manyTill,
+    manyTill_,
     optional,
     satisfy,
     sepBy,
     (<|>),
+    lookAhead,
   )
 import Text.Megaparsec.Char (char, space1)
 import Text.Megaparsec.Char.Lexer qualified as L
@@ -81,7 +83,7 @@ function = do
           return fname
 
 statement :: Parser S.Stmt
-statement = (switchStmt <|> try const_assign <|> return_stmt <|> assign_or_expr) <* symbol ";"
+statement = (switchStmt <|> try const_assign <|> return_stmt <|> try assign_or_expr) <* symbol ";"
   where
     const_assign :: Parser S.Stmt
     const_assign = do
@@ -113,7 +115,7 @@ caseStmt = do
   _ <- symbol "case"
   state_num <- lexeme L.decimal
   _ <- symbol ":"
-  S.SCase state_num <$> manyTill statement (symbol "case")
+  S.SCase state_num <$> many statement
 
 expr :: Parser S.Expr
 expr = makeExprParser (lexeme term) exprTable
