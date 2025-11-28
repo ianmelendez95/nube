@@ -2,6 +2,7 @@ module Nube.Syntax
   ( Script (..),
     Fn (..),
     Stmt (..),
+    SCase (..),
     Expr (..),
     MAccess (..),
     mapScriptStmtsM,
@@ -40,6 +41,7 @@ data Stmt
   | SReturn Expr
   | SExpr Expr
   | SSwitch Expr [SCase]
+  | SBreak
   deriving (Eq)
 
 data SCase = SCase Int [Stmt] deriving (Eq)
@@ -81,7 +83,7 @@ instance Pretty Script where
   pretty = pretty . scriptText
 
 instance Pretty Fn where
-  pretty (Fn name params body) = 
+  pretty (Fn name params body) =
     vsep [nest 2 (vsep [fn_sig, pretty_body]), rbrace]
     where
       fn_sig :: Doc a
@@ -91,14 +93,20 @@ instance Pretty Fn where
       params_doc = parens $ prettyCSV params
 
       pretty_body :: Doc a
-      pretty_body = vsep (map ((<>semi) . pretty) body)
+      pretty_body = vsep (map pretty body)
 
 instance Pretty Stmt where
-  pretty (SConst var rhs) = "const" <+> pretty var <+> equals <+> pretty rhs
-  pretty (SReturn rhs) = "return" <+> pretty rhs
-  pretty (SExpr e) = pretty e
-  pretty (SAssign lhs rhs) = pretty lhs <+> equals <+> pretty rhs
-  pretty (SSwitch match cases) = undefined
+  pretty (SConst var rhs) = "const" <+> pretty var <+> equals <+> pretty rhs <> semi
+  pretty (SReturn rhs) = "return" <+> pretty rhs <> semi
+  pretty (SExpr e) = pretty e <> semi
+  pretty (SAssign lhs rhs) = pretty lhs <+> equals <+> pretty rhs <> semi
+  pretty (SSwitch match cases) =
+    nest 2 (vsep $ "switch" <+> parens (pretty match) <+> lbrace : map pretty cases) <> line <> rbrace
+  pretty SBreak = "break" <> semi
+
+instance Pretty SCase where
+  pretty (SCase state stmts) =
+    nest 2 (vsep $ "case" <+> pretty state <> colon : map pretty stmts)
 
 instance Pretty Expr where
   pretty (EVar v) = pretty v
@@ -109,17 +117,14 @@ instance Pretty Expr where
   pretty (EInfix op lhs rhs) = pretty lhs <+> pretty op <+> pretty rhs
   pretty (EListLit xs) = prettyList xs
 
-instance Pretty MAccess where 
+instance Pretty MAccess where
   pretty (MDotAccess v) = dot <> pretty v
   pretty (MBracketAccess rhs) = brackets $ pretty rhs
 
 instance Pretty IOp where
   pretty IPlus = "+"
 
-instance Pretty SCase where
-  pretty _ = undefined
-
-prettyCSV :: Pretty a => [a] -> Doc b
+prettyCSV :: (Pretty a) => [a] -> Doc b
 prettyCSV xs = concatWith (\l r -> l <> comma <+> r) (map pretty xs)
 
 scriptFns' :: Traversal' Script [Fn]

@@ -30,9 +30,11 @@ import Prettyprinter
 testSyntax = do
   describe "Nube.Syntax" $ do
     describe "stmtTextI" $ do 
-      it "indents simple switch" $ do 
-        let test_fn = Fn "testFn" ["x", "y"] [SReturn (EInfix IPlus (EVar "x") (EVar "y"))]
+      it "indents simple function" $ do 
         T.show (pretty _test_return_fn) `shouldBe` _test_return_fn_txt
+
+      it "indents simple switch" $ do 
+        T.show (pretty _test_switch_fn) `shouldBe` _test_switch_fn_txt
 
 _test_return_fn :: Fn
 _test_return_fn = Fn "testFn" ["x", "y"] [SReturn (EInfix IPlus (EVar "x") (EVar "y"))]
@@ -42,4 +44,26 @@ _test_return_fn_txt =
   "function testFn(x, y) {\n\
   \  return x + y;\n\
   \}"
+
+_test_switch_fn_txt :: T.Text
+_test_switch_fn_txt = 
+  "function testFn(state, x, y) {\n\
+  \  switch (state) {\n\
+  \    case 0:\n\
+  \      return x;\n\
+  \      break;\n\
+  \    case 1:\n\
+  \      return y;\n\
+  \      break;\n\
+  \  }\n\
+  \}"
+
+_test_switch_fn :: Fn
+_test_switch_fn = Fn "testFn" ["state", "x", "y"] [_switch]
+  where 
+    _switch = SSwitch (EVar "state") [_case_0, _case_1]
+    _case_0 = SCase 0 [SReturn (EVar "x"), SBreak]
+    _case_1 = SCase 1 [SReturn (EVar "y"), SBreak]
+
+
 
