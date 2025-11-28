@@ -7,9 +7,9 @@ import Nube.Compiler (Compiler)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Bifunctor (first)
 import Data.Text qualified as T
-import Nube.Compiler (Compiler)
 import Nube.Context (ctxAskIsFn)
-import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt, ctx_var_text)
+import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt, ctx_var_text, ctxDotMember)
+import Control.Lens ()
 
 data StateSplit
   = StateBlock [S.Stmt]
@@ -20,29 +20,17 @@ data StateSplit
       }
   deriving (Show)
 
-compileScriptSt :: S.Script -> IO S.Script
-compileScriptSt = undefined
+compileScriptSt :: S.Script -> Compiler S.Script
+compileScriptSt = S.scriptFns' . traverse $ splitFnStates
 
-compileStmts :: [S.Stmt] -> [S.Stmt]
-compileStmts = undefined
-
--- splitStateInScript :: S.Script -> Compiler S.Script
--- splitStateInScript (S.Script s_name s_fns) = S.Script s_name . concat <$> mapM splitFnState s_fns
-
-splitFnStateinuations :: S.Fn -> Compiler [S.Fn]
-splitFnStateinuations fn@(S.Fn _ _ []) = pure [fn]
-splitFnStateinuations (S.Fn fn_name fn_params fn_stmts) = do
-  split_blocks <- splitStmtStates fn_name fn_stmts
-  case split_blocks of
-    [] -> throwError "Stateinuation splitting returned empty result"
-    (first_block : rest_blocks) ->
-      let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
-          primary_fn = S.Fn fn_name [ctx_var_text] (arg_stmts ++ first_block)
-          cont_fns = zipWith mkFnFromBlock [1 ..] rest_blocks
-       in pure $ primary_fn : cont_fns
-  where
-    mkFnFromBlock :: Int -> [S.Stmt] -> S.Fn
-    mkFnFromBlock cont_num = S.Fn (fn_name <> "C" <> T.show cont_num) [ctx_var_text]
+splitFnStates :: S.Fn -> Compiler S.Fn
+splitFnStates fn@(S.Fn _ _ []) = pure fn
+splitFnStates (S.Fn fn_name fn_params fn_stmts) = do
+  blocks <- splitStmtStates fn_name fn_stmts
+  let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
+      cont_cases = zipWith S.SCase [1 ..] blocks
+      state_switch = S.SSwitch (ctxDotMember "state") cont_cases
+  pure $ S.Fn fn_name [ctx_var_text] (arg_stmts ++ [state_switch])
 
 splitStmtStates :: T.Text -> [S.Stmt] -> Compiler [[S.Stmt]]
 splitStmtStates fn_name stmts = do
