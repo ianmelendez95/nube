@@ -6,7 +6,3 @@ function capitalizeTwoWords(string) {
     const capitalizedWord2 = capitalizeWord(word2);
     return capitalizedWord1 + ' ' + capitalizedWord2;
 }
-
-function capitalizeWord(word) {
-    return word[0].toUpperCase() + word.slice(1);
-}

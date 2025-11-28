@@ -36,14 +36,15 @@ jsCompileContSpec = do
   --           let [prim_fn, cont_fn1, cont_fn2] = res
   --           prim_fn `shouldBe` capitalizeTwoWords_fn_prim_ast
 
-  describe "splitStmtContinuations" $ do
-    it "splits capitalizeTwoWords stmts" $ do
-      let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
-          res = testCompiler ctx (splitStmtContinuations "capitalizeTwoWords" (S.fnStmts capitalizeTwoWords_fn_ast))
-      -- print capitalizeTwoWords_fn_ast
-      -- mapM_ (printContSplit "  ") res
-      -- res `shouldSatisfy` [3, 1, 1, 1]
-      length res `shouldBe` 3
+  describe "Nube.St" $ do 
+    describe "compileScriptSt" $ do
+      it "compiles capitalizeTwoWords fn" $ do
+        let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
+            res = testCompiler ctx (splitStmtContinuations "capitalizeTwoWords" (S.fnStmts capitalizeTwoWords_fn_ast))
+        -- print capitalizeTwoWords_fn_ast
+        -- mapM_ (printContSplit "  ") res
+        -- res `shouldSatisfy` [3, 1, 1, 1]
+        length res `shouldBe` 3
 
 printContSplit :: String -> ContSplit -> IO ()
 printContSplit prefix (ContBlock stmts) = do
@@ -64,4 +65,18 @@ capitalizeTwoWords_fn_prim_text =
     \  const word1 = words[0];\n\
     \  const word2 = words[1];\n\
     \  _ctx.callCC('capitalizeWord', [word1], 'capitalizeTwoWordsC1');\n\
+    \}"
+
+capitalizeTwoWords_fn_state_text :: T.Text
+capitalizeTwoWords_fn_state_text = 
+  T.pack 
+    "function capitalizeTwoWords(_ctx) {\n\
+    \  switch (_ctx.state) {\n\
+    \    const words = string.split(' ');\n\
+    \    const word1 = words[0];\n\
+    \    const word2 = words[1];\n\
+    \    const capitalizedWord1 = capitalizeWord(word1);\n\
+    \    const capitalizedWord2 = capitalizeWord(word2);\n\
+    \    return capitalizedWord1 + ' ' + capitalizedWord2;\n\
+    \  }\n\
     \}"

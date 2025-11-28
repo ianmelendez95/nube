@@ -51,6 +51,7 @@ extra-doc-files:    CHANGELOG.md
 -- Extra source files to be distributed with the package, such as examples, or a tutorial module.
 extra-source-files:
     template/**/*.julius
+    test-files/**/*
 
 common warnings
     ghc-options: -Wall
@@ -147,6 +148,7 @@ test-suite test
         Test.Nube.Rename
         Test.Nube.Syntax
         Test.Nube.St
+        Test.Files
         Test.Example.CapitalizeTwoWords
 
     build-depends:  
@@ -157,6 +159,8 @@ test-suite test
         , megaparsec
         , text
         , prettyprinter
+        , filepath
+        , directory
     
     hs-source-dirs:     test
 

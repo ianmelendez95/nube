@@ -25,6 +25,7 @@ import Test.Hspec
   )
 import Test.Util.Nube (testCompiler)
 import Test.Util.Parse (runParser, testParser)
+import Test.Files (readTestFile)
 import Prettyprinter
 
 testSyntax = do
@@ -35,6 +36,9 @@ testSyntax = do
 
       it "indents simple switch" $ do 
         T.show (pretty _test_switch_fn) `shouldBe` _test_switch_fn_txt
+
+_capitalizeTwoWords_state_fn_text :: IO T.Text 
+_capitalizeTwoWords_state_fn_text = readTestFile "capitalizeTwoWords/capitalizeTwoWords_state_fn.js"
 
 _test_return_fn :: Fn
 _test_return_fn = Fn "testFn" ["x", "y"] [SReturn (EInfix IPlus (EVar "x") (EVar "y"))]
