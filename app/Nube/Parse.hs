@@ -83,7 +83,7 @@ function = do
           return fname
 
 statement :: Parser S.Stmt
-statement = (switchStmt <|> try const_assign <|> return_stmt <|> try assign_or_expr) <* symbol ";"
+statement = switchStmt <|> ((try const_assign <|> return_stmt <|> try assign_or_expr) <* symbol ";")
   where
     const_assign :: Parser S.Stmt
     const_assign = do
