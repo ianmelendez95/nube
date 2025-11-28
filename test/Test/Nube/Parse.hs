@@ -25,6 +25,7 @@ import Nube.Syntax
     IOp (..),
     MAccess (..),
     Stmt (..),
+    SCase (..)
   )
 import Test.Example.CapitalizeTwoWords
   ( capitalizeTwoWords_fn_ast,
@@ -84,6 +85,10 @@ jsParseSpec = do
       it "parses function call statement" $ do
         res <- testParser statement "_ctx.call('capitalizeWord');"
         res `shouldBe` SExpr (ECall (EMember (EVar "_ctx") (MDotAccess "call")) [EStringLit "capitalizeWord"])
+
+      it "parses switch statement" $ do 
+        res <- testParser statement "switch (state) { case 0: return x; case 1: return y; }"
+        res `shouldBe` SSwitch (EVar "state") [SCase 0 [SReturn (EVar "x")], SCase 1 [SReturn (EVar "y")]]
 
     describe "expr" $ do
       it "parses string literal" $ do

@@ -80,7 +80,7 @@ function = do
           return fname
 
 statement :: Parser S.Stmt
-statement = (try const_assign <|> return_stmt <|> assign_or_expr) <* symbol ";"
+statement = (switchStmt <|> try const_assign <|> return_stmt <|> assign_or_expr) <* symbol ";"
   where
     const_assign :: Parser S.Stmt
     const_assign = do
@@ -101,6 +101,18 @@ statement = (try const_assign <|> return_stmt <|> assign_or_expr) <* symbol ";"
       case eq_sign of
         Nothing -> pure $ S.SExpr lhs
         Just _ -> S.SAssign lhs <$> expr
+
+switchStmt :: Parser S.Stmt
+switchStmt = do
+  _ <- symbol "switch"
+  S.SSwitch <$> parens expr <*> braces (many caseStmt)
+
+caseStmt :: Parser S.SCase
+caseStmt = do 
+  _ <- symbol "case"
+  state_num <- lexeme L.decimal
+  _ <- symbol ":"
+  S.SCase state_num <$> many statement
 
 expr :: Parser S.Expr
 expr = makeExprParser (lexeme term) exprTable
@@ -139,7 +151,13 @@ exprTable =
     binary name f = InfixL (f <$ symbol name)
 
 callParens :: Parser [S.Expr]
-callParens = between (symbol "(") (symbol ")") (sepBy expr (symbol ","))
+callParens = parens (sepBy expr (symbol ","))
+
+parens :: Parser a -> Parser a 
+parens = between (symbol "(") (symbol ")") 
+
+braces :: Parser a -> Parser a 
+braces = between (symbol "{") (symbol "}") 
 
 varExpr :: Parser S.Expr
 varExpr = S.EVar <$> identifier
