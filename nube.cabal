@@ -145,6 +145,7 @@ test-suite test
         Test.Nube.Parse
         Test.Util.Parse
         Test.Nube.Rename
+        Test.Nube.Syntax
         Test.Nube.St
         Test.Example.CapitalizeTwoWords
 
@@ -155,6 +156,7 @@ test-suite test
         , hspec-contrib
         , megaparsec
         , text
+        , prettyprinter
     
     hs-source-dirs:     test
 

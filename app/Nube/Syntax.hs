@@ -82,18 +82,16 @@ instance Pretty Script where
 
 instance Pretty Fn where
   pretty (Fn name params body) = 
-    fn_sig <> line <> pretty_body <> line <> rbrace
+    vsep [nest 2 (vsep [fn_sig, pretty_body]), rbrace]
     where
       fn_sig :: Doc a
-      fn_sig = "function" <+> pretty name <> params_doc <> lbrace
+      fn_sig = "function" <+> pretty name <> params_doc <+> lbrace
 
       params_doc :: Doc a
       params_doc = parens $ prettyCSV params
 
       pretty_body :: Doc a
       pretty_body = vsep (map ((<>semi) . pretty) body)
-
-      body_text = T.intercalate ";\n  " (map stmtText body)
 
 instance Pretty Stmt where
   pretty (SConst var rhs) = "const" <+> pretty var <+> equals <+> pretty rhs
@@ -109,7 +107,7 @@ instance Pretty Expr where
   pretty (ECall lhs args) = pretty lhs <> parens (prettyCSV args)
   pretty (EMember lhs rhs) = pretty lhs <> pretty rhs
   pretty (EInfix op lhs rhs) = pretty lhs <+> pretty op <+> pretty rhs
-  pretty (EListLit xs) = brackets $ prettyCSV xs
+  pretty (EListLit xs) = prettyList xs
 
 instance Pretty MAccess where 
   pretty (MDotAccess v) = dot <> pretty v

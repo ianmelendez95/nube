@@ -11,7 +11,7 @@ import Nube.Parse qualified as P
 import Nube.St
   (
   )
-import Nube.Syntax qualified as S
+import Nube.Syntax
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text)
 import Test.Hspec
   ( Expectation,
@@ -25,9 +25,21 @@ import Test.Hspec
   )
 import Test.Util.Nube (testCompiler)
 import Test.Util.Parse (runParser, testParser)
+import Prettyprinter
 
 testSyntax = do
-  describe "stmtTextI" $ do 
-    it "indents simple switch" $ do 
-      undefined
+  describe "Nube.Syntax" $ do
+    describe "stmtTextI" $ do 
+      it "indents simple switch" $ do 
+        let test_fn = Fn "testFn" ["x", "y"] [SReturn (EInfix IPlus (EVar "x") (EVar "y"))]
+        T.show (pretty _test_return_fn) `shouldBe` _test_return_fn_txt
+
+_test_return_fn :: Fn
+_test_return_fn = Fn "testFn" ["x", "y"] [SReturn (EInfix IPlus (EVar "x") (EVar "y"))]
+
+_test_return_fn_txt :: T.Text
+_test_return_fn_txt = 
+  "function testFn(x, y) {\n\
+  \  return x + y;\n\
+  \}"
 
