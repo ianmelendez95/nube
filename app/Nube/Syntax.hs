@@ -7,8 +7,6 @@ module Nube.Syntax
     MAccess (..),
     mapScriptStmtsM,
     mapScriptFnsM,
-    scriptText,
-    fnText,
     scriptFns',
     fnStmts',
     IOp (..),
@@ -21,7 +19,6 @@ where
 import Control.Lens (Traversal', traversal)
 import Data.Text qualified as T
 import Prettyprinter
-import Prettyprinter.Symbols.Ascii
 
 data Script = Script
   { scriptName :: T.Text, -- file basename
@@ -80,7 +77,7 @@ instance Show SCase where
   show = show . pretty
 
 instance Pretty Script where
-  pretty = pretty . scriptText
+  pretty (Script name funcs) = vsep $ ("//" <+> pretty name) : map pretty funcs
 
 instance Pretty Fn where
   pretty (Fn name params body) =
@@ -144,38 +141,6 @@ mapFnStmtsM :: (Monad m) => (Stmt -> m Stmt) -> Fn -> m Fn
 mapFnStmtsM stmt_fn_m (Fn f_name f_params f_stmts) =
   Fn f_name f_params <$> mapM stmt_fn_m f_stmts
 
-scriptText :: Script -> T.Text
-scriptText (Script name funcs) = T.unlines $ name : map fnText funcs
-
-fnText :: Fn -> T.Text
-fnText (Fn name params body) = "function " <> name <> params_text <> " {\n  " <> body_text <> ";\n}"
-  where
-    params_text = "(" <> T.intercalate ", " params <> ")"
-    body_text = T.intercalate ";\n  " (map stmtText body)
-
-stmtText :: Stmt -> T.Text
-stmtText (SConst var rhs) = "const " <> var <> " = " <> exprText rhs
-stmtText (SReturn rhs) = "return " <> exprText rhs
-stmtText (SExpr e) = exprText e
-stmtText (SAssign lhs rhs) = exprText lhs <> " = " <> exprText rhs
-stmtText (SSwitch match cases) = undefined
-
-exprText :: Expr -> T.Text
-exprText (EVar v) = v
-exprText (EStringLit s) = "'" <> s <> "'"
-exprText (ENumberLit n) = T.show n
-exprText (ECall lhs args) = exprText lhs <> csExprs "(" ")" args
-exprText (EMember lhs rhs) = exprText lhs <> accessText rhs
-exprText (EInfix op lhs rhs) = exprText lhs <> " " <> opText op <> " " <> exprText rhs
-exprText (EListLit xs) = csExprs "[" "]" xs
-
-csExprs :: T.Text -> T.Text -> [Expr] -> T.Text
-csExprs bra cket xs = bra <> T.intercalate ", " (map exprText xs) <> cket
-
-accessText :: MAccess -> T.Text
-accessText (MDotAccess v) = "." <> v
-accessText (MBracketAccess rhs) = "[" <> exprText rhs <> "]"
-
 dotMembers :: Expr -> [T.Text] -> Expr
 dotMembers = foldl dotMemberExpr
 
@@ -185,5 +150,3 @@ dotMemberExpr lhs var = EMember lhs (MDotAccess var)
 mkBracketMember :: Expr -> Expr -> Expr
 mkBracketMember lhs member_epxr = EMember lhs (MBracketAccess member_epxr)
 
-opText :: IOp -> T.Text
-opText IPlus = "+"

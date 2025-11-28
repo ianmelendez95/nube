@@ -81,7 +81,7 @@ jsFunsToScript main_fun@(S.Fn fn_name _ _) =
         T.intercalate
           "\n\n"
           [ mkHandlerDecl fn_name,
-            S.fnText main_fun
+            T.show main_fun
           ]
    in Script fn_name content
 

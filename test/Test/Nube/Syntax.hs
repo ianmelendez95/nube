@@ -30,12 +30,17 @@ import Prettyprinter
 
 testSyntax = do
   describe "Nube.Syntax" $ do
-    describe "stmtTextI" $ do 
+    describe "Pretty" $ do 
       it "indents simple function" $ do 
         T.show (pretty _test_return_fn) `shouldBe` _test_return_fn_txt
 
       it "indents simple switch" $ do 
         T.show (pretty _test_switch_fn) `shouldBe` _test_switch_fn_txt
+
+      it "reprints capitalizeTwoWords_state" $ do 
+        fn_txt <- T.strip <$> _capitalizeTwoWords_state_fn_text
+        parsed <- testParser P.function fn_txt
+        (T.strip . T.show . pretty $ parsed) `shouldBe` fn_txt 
 
 _capitalizeTwoWords_state_fn_text :: IO T.Text 
 _capitalizeTwoWords_state_fn_text = readTestFile "capitalizeTwoWords/capitalizeTwoWords_state_fn.js"
