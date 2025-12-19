@@ -14,6 +14,7 @@ import Gen.Lambda qualified as GL
 import Nube.Compiler (Compiler, CompilerT, runCompiler, runCompilerT)
 import Nube.Cont (ContSplit, splitContInScript)
 import Nube.Context (NContext (NContext))
+import Nube.St (compileScriptSt)
 import Nube.Parse qualified as P
 import Nube.Rename (renameInScript)
 import Nube.Ret (compileReturns)
@@ -68,4 +69,4 @@ compileScript :: NContext -> S.Script -> IO S.Script
 compileScript ctx = either fail pure . runCompiler ctx . compileScriptC
 
 compileScriptC :: S.Script -> Compiler S.Script
-compileScriptC = splitContInScript >=> renameInScript >=> compileReturns
+compileScriptC = compileScriptSt >=> renameInScript >=> compileReturns

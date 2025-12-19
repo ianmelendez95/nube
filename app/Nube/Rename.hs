@@ -20,6 +20,11 @@ renameInStatement (S.SReturn e) = rReturn e
 renameInStatement (S.SConst var rhs) = rAssign var rhs
 renameInStatement (S.SAssign lhs rhs) = S.SAssign <$> rExpr lhs <*> rExpr rhs
 renameInStatement (S.SExpr e) = S.SExpr <$> rExpr e
+renameInStatement (S.SSwitch match_e s_cases) = S.SSwitch <$> rExpr match_e <*> mapM rCase s_cases
+  where 
+    rCase :: S.SCase -> Compiler S.SCase
+    rCase (S.SCase c_idx c_stmts) = S.SCase c_idx <$> mapM renameInStatement c_stmts
+renameInStatement S.SBreak = pure S.SBreak
 
 rExpr :: S.Expr -> Compiler S.Expr
 rExpr (S.EVar v) = rVar v
