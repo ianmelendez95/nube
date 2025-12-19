@@ -102,6 +102,8 @@ userFnCallsInStmt e@(S.SReturn rhs) = do
     else pure fn_calls
 userFnCallsInStmt (S.SAssign _ _) = throwError "Reassignment is not allowed, use a new const var"
 userFnCallsInStmt (S.SExpr _) = throwError "Expression statements are not allowed"
+userFnCallsInStmt (S.SSwitch{}) = throwError "Switch statements not allowed"
+userFnCallsInStmt S.SBreak = throwError "Break statements not allowed"
 
 userFnCallsInExpr :: S.Expr -> Compiler [T.Text]
 userFnCallsInExpr (S.EVar v) = do
