@@ -4,16 +4,13 @@ import Control.Monad
   ( unless,
     (>=>),
   )
-import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Char
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import Debug.Trace (trace, traceShowId)
 import Gen.CF qualified as CF
 import Gen.Lambda qualified as GL
-import Nube.Compiler (Compiler, CompilerT, runCompiler, runCompilerT)
-import Nube.Cont (ContSplit, splitContInScript)
-import Nube.Context (NContext (NContext))
+import Nube.Compiler (Compiler, runCompiler)
+import Nube.Context (NContext)
 import Nube.St (compileScriptSt)
 import Nube.Parse qualified as P
 import Nube.Rename (renameInScript)
@@ -26,6 +23,8 @@ import System.FilePath
     (</>),
   )
 import Util.Aeson (writeFileJSON)
+
+-- import Debug.Trace (trace, traceShowId)
 
 -- test_js_file = "example/capitalizeWords/capitalizeWords.js"
 

@@ -85,7 +85,6 @@ library
     exposed-modules: 
         Nube
         Nube.Cli
-        Nube.Cont
         Nube.Compiler
         Nube.Rename
         Nube.JSCtx
@@ -141,7 +140,6 @@ test-suite test
     main-is:            Test.hs
 
     other-modules: 
-        Test.Nube.Cont
         Test.Util.Nube
         Test.Nube.Parse
         Test.Util.Parse

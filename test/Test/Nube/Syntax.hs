@@ -2,7 +2,6 @@ module Test.Nube.Syntax (testSyntax) where
 
 import Data.Either (either)
 import Data.Text qualified as T
-import Nube.Cont
 import Nube.Context
   ( NContext (..),
   )
