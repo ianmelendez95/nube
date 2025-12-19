@@ -173,7 +173,7 @@ varExpr = do
     else pure $ S.EVar id_txt
 
 listLitExpr :: Parser S.Expr
-listLitExpr = S.EListLit <$> between (symbol "[") (symbol "]") (sepBy expr (symbol ","))
+listLitExpr = S.EArrLit <$> between (symbol "[") (symbol "]") (sepBy expr (symbol ","))
 
 stringLitExpr :: Parser S.Expr
 stringLitExpr = S.EStringLit <$> stringLiteral

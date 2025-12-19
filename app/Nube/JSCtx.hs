@@ -22,14 +22,14 @@ ctxCallStmt fn_name args cont_name cont_state =
   S.SExpr
     ( S.ECall
         (S.dotMemberExpr ctx_var_name "callCC")
-        [S.EStringLit fn_name, S.EListLit args, S.EStringLit cont_name, S.ENumberLit cont_state]
+        [S.EStringLit fn_name, S.EArrLit args, S.EStringLit cont_name, S.ENumberLit cont_state]
     )
 
 ctxCallExpr :: T.Text -> [S.Expr] -> T.Text -> Int -> S.Expr
 ctxCallExpr fn_name args cont_name cont_state =
   S.ECall
     (S.dotMemberExpr ctx_var_name "callCC")
-    [S.EStringLit fn_name, S.EListLit args, S.EStringLit cont_name, S.ENumberLit cont_state]
+    [S.EStringLit fn_name, S.EArrLit args, S.EStringLit cont_name, S.ENumberLit cont_state]
 
 -- | ctxFrameVar "foo" = _ctx.frame.foo
 ctxFrameVar :: T.Text -> S.Expr

@@ -144,7 +144,7 @@ jsParseSpec = do
           `shouldBe` ECall
             (EMember (EVar "_ctx") (MDotAccess "call"))
             [ EStringLit "capitalizeWord",
-              EListLit [EVar "word1"],
+              EArrLit [EVar "word1"],
               EVar "__test_continuation__"
             ]
 

@@ -36,7 +36,7 @@ rExpr (S.EMember lhs dotAccess) =
   S.EMember <$> rExpr lhs <*> pure dotAccess
 rExpr (S.EInfix op lhs rhs) =
   S.EInfix op <$> rExpr lhs <*> rExpr rhs
-rExpr (S.EListLit arg_exprs) = S.EListLit <$> mapM rExpr arg_exprs
+rExpr (S.EArrLit arg_exprs) = S.EArrLit <$> mapM rExpr arg_exprs
 rExpr s@(S.EStringLit _) = pure s
 rExpr n@(S.ENumberLit _) = pure n
 

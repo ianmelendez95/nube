@@ -115,7 +115,7 @@ userFnCallsInExpr (S.EMember lhs _) = userFnCallsInExpr lhs
 userFnCallsInExpr (S.EInfix _ lhs rhs) = userFnCallsInExprs [lhs, rhs]
 userFnCallsInExpr (S.EStringLit _) = pure []
 userFnCallsInExpr (S.ENumberLit _) = pure []
-userFnCallsInExpr (S.EListLit es) =
+userFnCallsInExpr (S.EArrLit es) =
   concat <$> traverse userFnCallsInExpr es
 
 userFnCallsInExprs :: [S.Expr] -> Compiler [T.Text]

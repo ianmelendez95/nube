@@ -56,7 +56,7 @@ jsTranspileSpec = do
             S.ECall
               (S.EMember (S.EVar "_ctx") (S.MDotAccess "call"))
               [ S.EStringLit "capitalizeWord",
-                S.EListLit [S.EVar "word1"],
+                S.EArrLit [S.EVar "word1"],
                 S.EStringLit "capitalizeWordsC2"
               ]
           res = testCompiler test_context (rExpr test_expr)
@@ -67,7 +67,7 @@ jsTranspileSpec = do
               (S.MDotAccess "call")
           )
           [ S.EStringLit "capitalizeWord",
-            S.EListLit [S.EMember (S.EMember (S.EVar "_ctx") (S.MDotAccess "frame")) (S.MDotAccess "word1")],
+            S.EArrLit [S.EMember (S.EMember (S.EVar "_ctx") (S.MDotAccess "frame")) (S.MDotAccess "word1")],
             S.EStringLit "capitalizeWordsC2"
           ]
 

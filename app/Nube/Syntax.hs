@@ -46,7 +46,7 @@ data SCase = SCase Int [Stmt] deriving (Eq)
 
 data Expr
   = EVar T.Text
-  | EListLit [Expr]
+  | EArrLit [Expr]
   | EStringLit T.Text
   | ENumberLit Int
   | ECall Expr [Expr]
@@ -113,7 +113,7 @@ instance Pretty Expr where
   pretty (ECall lhs args) = pretty lhs <> parens (prettyCSV args)
   pretty (EMember lhs rhs) = pretty lhs <> pretty rhs
   pretty (EInfix op lhs rhs) = pretty lhs <+> pretty op <+> pretty rhs
-  pretty (EListLit xs) = prettyList xs
+  pretty (EArrLit xs) = prettyList xs
 
 instance Pretty MAccess where
   pretty (MDotAccess v) = dot <> pretty v
