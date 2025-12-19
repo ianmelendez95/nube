@@ -30,7 +30,7 @@ splitFnStates fn@(S.Fn _ _ []) = pure fn
 splitFnStates (S.Fn fn_name fn_params fn_stmts) = do
   blocks <- splitStmtStates fn_name fn_stmts
   let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
-      cont_cases = zipWith S.SCase [1 ..] blocks
+      cont_cases = zipWith S.SCase [0..] blocks
       state_switch = S.SSwitch (ctxDotMember "state") cont_cases
   pure $ S.Fn fn_name [ctx_var_text] (arg_stmts ++ [state_switch])
 

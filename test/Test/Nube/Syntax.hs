@@ -41,6 +41,9 @@ testSyntax = do
         parsed <- testParser P.function fn_txt
         (T.strip . T.show . pretty $ parsed) `shouldBe` fn_txt 
 
+      -- it "array lit no space" $ do 
+        -- return _ctx.callCC('capitalizeWord', [ _ctx.frame.word2 ], 'capitalizeTwoWords', 2);
+
 _capitalizeTwoWords_state_fn_text :: IO T.Text 
 _capitalizeTwoWords_state_fn_text = readTestFile "capitalizeTwoWords/capitalizeTwoWords_state_fn.js"
 
