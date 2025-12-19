@@ -14,6 +14,7 @@ import Test.Nube.Cont (jsCompileContSpec)
 import Test.Nube.Parse (jsParseSpec)
 import Test.Nube.Rename (jsTranspileSpec)
 import Test.Nube.Syntax (testSyntax)
+import Test.Nube.St (testSt)
 
 main :: IO ()
 main = hspec $ do
@@ -21,3 +22,4 @@ main = hspec $ do
   jsTranspileSpec
   jsCompileContSpec
   testSyntax
+  testSt

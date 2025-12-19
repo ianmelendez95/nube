@@ -1,15 +1,17 @@
-module Nube.St 
-  (compileScriptSt) where  
+module Nube.St
+  ( compileScriptSt,
+    splitFnStates,
+  )
+where
 
-import Nube.Syntax qualified as S
-import Nube.Compiler (Compiler)
-
+import Control.Lens ()
 import Control.Monad.Except (MonadError (throwError))
 import Data.Bifunctor (first)
 import Data.Text qualified as T
+import Nube.Compiler (Compiler)
 import Nube.Context (ctxAskIsFn)
-import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt, ctx_var_text, ctxDotMember)
-import Control.Lens ()
+import Nube.JSCtx (ctxAssignArgStmt, ctxCallStmt, ctxDotMember, ctx_var_text)
+import Nube.Syntax qualified as S
 
 data StateSplit
   = StateBlock [S.Stmt]
@@ -116,4 +118,3 @@ userFnCallsInExpr (S.EListLit es) =
 
 userFnCallsInExprs :: [S.Expr] -> Compiler [T.Text]
 userFnCallsInExprs es = concat <$> traverse userFnCallsInExpr es
-

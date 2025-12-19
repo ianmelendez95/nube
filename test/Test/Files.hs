@@ -1,4 +1,4 @@
-module Test.Files (readTestFile) where 
+module Test.Files (readTestFile, parseTestFile) where 
 
 import Prelude hiding (readFile)
 

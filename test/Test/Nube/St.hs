@@ -1,16 +1,14 @@
-module Test.Nube.St (jsCompileContSpec) where
+module Test.Nube.St (testSt) where
 
 import Data.Either (either)
 import Data.Text qualified as T
-import Nube.Cont
+import Nube.St (compileScriptSt)
 import Nube.Context
   ( NContext (..),
   )
 import Nube.JSCtx
 import Nube.Parse qualified as P
 import Nube.St
-  (
-  )
 import Nube.Syntax qualified as S
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text)
 import Test.Hspec
@@ -25,8 +23,9 @@ import Test.Hspec
   )
 import Test.Util.Nube (testCompiler)
 import Test.Util.Parse (runParser, testParser)
+import Test.Files (parseTestFile)
 
-jsCompileContSpec = do
+testSt = do
   -- describe "splitFnContinuations" $ do
   --   it "splits ctw fns" $ do
   --     let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
@@ -38,20 +37,23 @@ jsCompileContSpec = do
 
   describe "Nube.St" $ do 
     describe "compileScriptSt" $ do
-      it "compiles capitalizeTwoWords fn" $ do
+      it "compiles capitalizeTwoWords fn state" $ do
+        before_script <- parseTestFile "capitalizeTwoWords/capitalizeTwoWords_fn.js" (P.script "test_file.js")
+
         let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
-            res = testCompiler ctx (splitStmtContinuations "capitalizeTwoWords" (S.fnStmts capitalizeTwoWords_fn_ast))
+            res = testCompiler ctx (compileScriptSt before_script)
         -- print capitalizeTwoWords_fn_ast
         -- mapM_ (printContSplit "  ") res
         -- res `shouldSatisfy` [3, 1, 1, 1]
-        length res `shouldBe` 3
+        print res
+        length (S.scriptFns res) `shouldBe` 1
 
-printContSplit :: String -> ContSplit -> IO ()
-printContSplit prefix (ContBlock stmts) = do
-  putStrLn "--- BLOCK ---"
-  mapM_ (\stmt -> putStr prefix >> print stmt) stmts
-  putStrLn "--- END BLOCK ---"
-printContSplit prefix cont_call = putStrLn "--- CONT ---" >> putStr prefix >> print cont_call
+-- printContSplit :: String -> ContSplit -> IO ()
+-- printContSplit prefix (ContBlock stmts) = do
+--   putStrLn "--- BLOCK ---"
+--   mapM_ (\stmt -> putStr prefix >> print stmt) stmts
+--   putStrLn "--- END BLOCK ---"
+-- printContSplit prefix cont_call = putStrLn "--- CONT ---" >> putStr prefix >> print cont_call
 
 capitalizeTwoWords_fn_prim_ast :: S.Fn
 capitalizeTwoWords_fn_prim_ast = runParser P.function capitalizeTwoWords_fn_prim_text

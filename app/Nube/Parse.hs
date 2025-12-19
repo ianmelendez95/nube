@@ -11,6 +11,7 @@ module Nube.Parse
     switchStmt,
     function,
     runParser,
+    script,
   )
 where
 
@@ -54,9 +55,11 @@ parseJsFile path = parseJsContent path =<< TIO.readFile path
 
 parseJsContent :: (MonadFail m) => FilePath -> T.Text -> m (S.Script, NContext)
 parseJsContent path content = do
-  let run_res = runParser (NContext []) jsFunctions path content
-  (result, ctx) <- either (fail . errorBundlePretty) pure run_res
-  pure (S.Script (T.pack $ takeBaseName path) result, ctx)
+  let run_res = runParser (NContext []) (script path) path content
+  either (fail . errorBundlePretty) pure run_res
+
+script :: FilePath -> Parser S.Script
+script script_path = S.Script (T.pack $ takeBaseName script_path) <$> jsFunctions
 
 jsFunctions :: Parser [S.Fn]
 jsFunctions = many function
