@@ -23,37 +23,23 @@ import Test.Hspec
   )
 import Test.Util.Nube (testCompiler)
 import Test.Util.Parse (runParser, testParser)
-import Test.Files (parseTestFile)
+import Test.Files (parseTestFile, readTestFile)
 
 testSt = do
-  -- describe "splitFnContinuations" $ do
-  --   it "splits ctw fns" $ do
-  --     let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
-  --         res = testCompiler ctx (splitFnContinuations capitalizeTwoWords_fn_ast)
-  --      in do
-  --           length res `shouldBe` 3
-  --           let [prim_fn, cont_fn1, cont_fn2] = res
-  --           prim_fn `shouldBe` capitalizeTwoWords_fn_prim_ast
-
   describe "Nube.St" $ do 
     describe "compileScriptSt" $ do
       it "compiles capitalizeTwoWords fn state" $ do
-        before_script <- parseTestFile "capitalizeTwoWords/capitalizeTwoWords_fn.js" (P.script "test_file.js")
+        before_script <- parseTestFile "capitalizeTwoWords/capitalizeTwoWords_fn.js" (P.script "capitalizeTwoWords_fn.js")
+        after_script_js <- T.strip <$> readTestFile "capitalizeTwoWords/capitalizeTwoWords_state_fn.js"
 
         let ctx = NContext ["capitalizeTwoWords", "capitalizeWord"]
-            res = testCompiler ctx (compileScriptSt before_script)
-        -- print capitalizeTwoWords_fn_ast
-        -- mapM_ (printContSplit "  ") res
-        -- res `shouldSatisfy` [3, 1, 1, 1]
-        print res
-        length (S.scriptFns res) `shouldBe` 1
 
--- printContSplit :: String -> ContSplit -> IO ()
--- printContSplit prefix (ContBlock stmts) = do
---   putStrLn "--- BLOCK ---"
---   mapM_ (\stmt -> putStr prefix >> print stmt) stmts
---   putStrLn "--- END BLOCK ---"
--- printContSplit prefix cont_call = putStrLn "--- CONT ---" >> putStr prefix >> print cont_call
+            res :: S.Script
+            res = testCompiler ctx (compileScriptSt before_script)
+
+            res_js = show res
+
+        res_js `shouldBe` T.unpack after_script_js
 
 capitalizeTwoWords_fn_prim_ast :: S.Fn
 capitalizeTwoWords_fn_prim_ast = runParser P.function capitalizeTwoWords_fn_prim_text

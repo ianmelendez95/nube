@@ -4,7 +4,7 @@ module Nube.St
   )
 where
 
-import Control.Lens ()
+import Control.Lens ((%%~))
 import Control.Monad.Except (MonadError (throwError))
 import Data.Bifunctor (first)
 import Data.Text qualified as T
@@ -23,7 +23,7 @@ data StateSplit
   deriving (Show)
 
 compileScriptSt :: S.Script -> Compiler S.Script
-compileScriptSt = S.scriptFns' . traverse $ splitFnStates
+compileScriptSt = S.scriptFns' %%~ traverse splitFnStates
 
 splitFnStates :: S.Fn -> Compiler S.Fn
 splitFnStates fn@(S.Fn _ _ []) = pure fn

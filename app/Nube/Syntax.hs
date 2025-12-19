@@ -13,6 +13,7 @@ module Nube.Syntax
     dotMemberExpr,
     dotMembers,
     mkBracketMember,
+    caseStmts'
   )
 where
 
@@ -23,7 +24,7 @@ import Prettyprinter
 data Script = Script
   { scriptName :: T.Text, -- file basename
     scriptFns :: [Fn]
-  }
+  } deriving Eq
 
 data Fn = Fn
   { fnName :: T.Text,
@@ -77,7 +78,7 @@ instance Show SCase where
   show = show . pretty
 
 instance Pretty Script where
-  pretty (Script name funcs) = vsep $ ("//" <+> pretty name) : map pretty funcs
+  pretty (Script _ funcs) = vsep $ map pretty funcs
 
 instance Pretty Fn where
   pretty (Fn name params body) =
@@ -125,10 +126,13 @@ prettyCSV :: (Pretty a) => [a] -> Doc b
 prettyCSV xs = concatWith (\l r -> l <> comma <+> r) (map pretty xs)
 
 scriptFns' :: Traversal' Script [Fn]
-scriptFns' = traversal (\fnsFnM (Script s_name s_fns) -> Script s_name <$> fnsFnM s_fns)
+scriptFns' = traversal $ \fnsFnM (Script s_name s_fns) -> Script s_name <$> fnsFnM s_fns
 
 fnStmts' :: Traversal' Fn [Stmt]
-fnStmts' = traversal (\stmtsFnM (Fn f_name f_args f_stmts) -> Fn f_name f_args <$> stmtsFnM f_stmts)
+fnStmts' = traversal $ \stmtsFnM (Fn f_name f_args f_stmts) -> Fn f_name f_args <$> stmtsFnM f_stmts
+
+caseStmts' :: Traversal' SCase [Stmt]
+caseStmts' = traversal $ \stmtsFnM (SCase case_i case_stmts) -> SCase case_i <$> stmtsFnM case_stmts
 
 mapScriptStmtsM :: (Monad m) => (Stmt -> m Stmt) -> Script -> m Script
 mapScriptStmtsM = mapScriptFnsM . mapFnStmtsM

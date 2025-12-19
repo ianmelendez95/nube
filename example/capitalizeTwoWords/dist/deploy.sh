@@ -7,8 +7,6 @@ TEMPLATE="capitalizeTwoWords-template.json"
 STACK_NAME="capitalizeTwoWords-stack"
 LAYER="capitalizeTwoWords-layer"
 FUN_NAMES="capitalizeTwoWords
-capitalizeTwoWordsC1
-capitalizeTwoWordsC2
 capitalizeWord
 "
 
