@@ -42,7 +42,7 @@ export class Context {
 
     const args = JSON.parse(message.body);
 
-    const state = parseInt(message.messageAttributes.frameId.stringValue);
+    const state = parseInt(message.messageAttributes.state.stringValue);
 
     return Context.fromArgsAndFrameItem(args, frameItem);
   }
@@ -52,7 +52,6 @@ export class Context {
     return new Context(
       state,
       args,
-      state,
       frameItem.frameId.S,
       JSON.parse(frameItem.frame.S),
       frameItem.contFrameId?.S,
@@ -86,8 +85,11 @@ export class Context {
   async return(result) {
     console.trace('Context.return', result);
     if (this.contFnName) {
+      // we have a continuation, so continue on that continuation
       return Context.invoke(this.contFnName, [result], this.contFrameId, this.contState);
     } else {
+      // no continuation, meaning this is the root, so we are done.
+      // save the result
       return Context.saveResult(this.frameId, result);
     }
   }
@@ -141,7 +143,7 @@ export class Context {
   }
 
   static async makeNewFrameItem(contFrameId, contFnName, contState) {
-    console.trace('Context.makeNewFrameItem', contFrameId, contFnName);
+    console.trace('Context.makeNewFrameItem', contFrameId, contFnName, contState);
     const newFrame = {
       frameId: { S: crypto.randomUUID() },
       frame: { S: "{}" }
