@@ -13,7 +13,8 @@ module Nube.Syntax
     dotMemberExpr,
     dotMembers,
     mkBracketMember,
-    caseStmts'
+    caseStmts',
+    toJS
   )
 where
 
@@ -21,18 +22,19 @@ import Control.Lens (Traversal', traversal)
 import Data.Text qualified as T
 import Prettyprinter
 import Nube.ToJS (ToJS (..))
+import Prettyprinter.Render.Text (renderStrict)
 
 data Script = Script
   { scriptName :: T.Text, -- file basename
     scriptFns :: [Fn]
-  } deriving Eq
+  } deriving (Eq, Show)
 
 data Fn = Fn
   { fnName :: T.Text,
     fnParams :: [T.Text],
     fnStmts :: [Stmt]
   }
-  deriving (Eq)
+  deriving (Eq, Show)
 
 data Stmt
   = SConst T.Text Expr
@@ -41,9 +43,9 @@ data Stmt
   | SExpr Expr
   | SSwitch Expr [SCase]
   | SBreak
-  deriving (Eq)
+  deriving (Eq, Show)
 
-data SCase = SCase Int [Stmt] deriving (Eq)
+data SCase = SCase Int [Stmt] deriving (Eq, Show)
 
 data Expr
   = EVar T.Text
@@ -53,7 +55,7 @@ data Expr
   | ECall Expr [Expr]
   | EMember Expr MAccess
   | EInfix IOp Expr Expr
-  deriving (Eq)
+  deriving (Eq, Show)
 
 data IOp = IPlus
   deriving (Show, Eq)
@@ -63,20 +65,29 @@ data MAccess
   | MBracketAccess Expr
   deriving (Show, Eq)
 
-instance Show Script where
-  show = show . pretty
+instance ToJS Script where
+  toJS = renderJS . pretty
 
-instance Show Fn where
-  show = show . pretty
+instance ToJS Fn where
+  toJS = renderJS . pretty
 
-instance Show Stmt where
-  show = show . pretty
+instance ToJS Stmt where
+  toJS = renderJS . pretty
 
-instance Show Expr where
-  show = show . pretty
+instance ToJS SCase where
+  toJS = renderJS . pretty
 
-instance Show SCase where
-  show = show . pretty
+instance ToJS Expr where
+  toJS = renderJS . pretty
+
+instance ToJS MAccess where
+  toJS = renderJS . pretty
+
+instance ToJS IOp where
+  toJS = renderJS . pretty
+
+renderJS :: Doc a -> T.Text 
+renderJS = renderStrict . layoutPretty defaultLayoutOptions
 
 instance Pretty Script where
   pretty (Script _ funcs) = vsep $ map pretty funcs
@@ -122,9 +133,6 @@ instance Pretty MAccess where
 
 instance Pretty IOp where
   pretty IPlus = "+"
-
-instance ToJS IOp where 
-  toJS IPlus = "+"
 
 prettyCSV :: (Pretty a) => [a] -> Doc b
 prettyCSV xs = concatWith (\l r -> l <> comma <+> r) (map pretty xs)

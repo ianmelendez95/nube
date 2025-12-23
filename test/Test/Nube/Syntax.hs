@@ -8,8 +8,7 @@ import Nube.Context
 import Nube.JSCtx
 import Nube.Parse qualified as P
 import Nube.St
-  (
-  )
+import Nube.ToJS
 import Nube.Syntax
 import Test.Example.CapitalizeTwoWords (capitalizeTwoWords_fn_ast, capitalizeTwoWords_fn_text)
 import Test.Hspec
@@ -39,13 +38,13 @@ testSyntax = do
       it "reprints capitalizeTwoWords_state" $ do 
         fn_txt <- T.strip <$> _capitalizeTwoWords_state_fn_text
         parsed <- testParser P.function fn_txt
-        (T.strip . T.show . pretty $ parsed) `shouldBe` fn_txt 
+        (T.strip . toJS $ parsed) `shouldBe` fn_txt 
 
       it "array lit no space" $ do 
         -- return _ctx.callCC('capitalizeWord', [ _ctx.frame.word2 ], 'capitalizeTwoWords', 2);
         let arr_mem :: Expr
             arr_mem = EArrLit [EMember (EVar "_ctx") (MDotAccess "frame")]
-        show arr_mem `shouldBe` "[_ctx.frame]"
+        toJS arr_mem `shouldBe` "[_ctx.frame]"
 
 _capitalizeTwoWords_state_fn_text :: IO T.Text 
 _capitalizeTwoWords_state_fn_text = readTestFile "capitalizeTwoWords/capitalizeTwoWords_state_fn.js"

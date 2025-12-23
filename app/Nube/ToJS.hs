@@ -10,4 +10,3 @@ import Data.Text (Text)
 class ToJS a where 
   toJS :: a -> Text
 
-

@@ -37,9 +37,9 @@ testSt = do
             res :: S.Script
             res = testCompiler ctx (compileScriptSt before_script)
 
-            res_js = show res
+            res_js = S.toJS res
 
-        res_js `shouldBe` T.unpack after_script_js
+        res_js `shouldBe` after_script_js
 
 capitalizeTwoWords_fn_prim_ast :: S.Fn
 capitalizeTwoWords_fn_prim_ast = runParser P.function capitalizeTwoWords_fn_prim_text

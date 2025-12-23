@@ -16,6 +16,7 @@ import Debug.Trace (traceId)
 import Gen.CF qualified as CF
 import Nube.Syntax (Fn (fnName))
 import Nube.Syntax qualified as S
+import Nube.ToJS (toJS)
 import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory)
 import System.FilePath (takeDirectory, (</>))
 import Text.Julius hiding (renderJavascript)
@@ -81,7 +82,7 @@ jsFunsToScript main_fun@(S.Fn fn_name _ _) =
         T.intercalate
           "\n\n"
           [ mkHandlerDecl fn_name,
-            T.show main_fun
+            toJS main_fun
           ]
    in Script fn_name content
 
