@@ -7,6 +7,7 @@ export const sqsClient = new SQSClient();
 export const dynamoClient = new DynamoDBClient();
 
 export class Context {
+  state;
   args;
 
   frameId;
@@ -14,13 +15,16 @@ export class Context {
 
   contFrameId;
   contFnName;
+  contState;
 
-  constructor(args, frameId, frame, contFrameId, contFnName) {
+  constructor(state, args, frameId, frame, contFrameId, contFnName, contState) {
+    this.state = state;
     this.args = args;
     this.frameId = frameId;
     this.frame = frame;
     this.contFrameId = contFrameId;
     this.contFnName = contFnName;
+    this.contState = contState;
   }
 
   static async fromHttpReq(body) {
@@ -38,17 +42,22 @@ export class Context {
 
     const args = JSON.parse(message.body);
 
+    const state = parseInt(message.messageAttributes.frameId.stringValue);
+
     return Context.fromArgsAndFrameItem(args, frameItem);
   }
 
-  static fromArgsAndFrameItem(args, frameItem) {
-    console.trace('Context.fromArgsAndFrameItem', args, frameItem);
+  static fromArgsAndFrameItem(state, args, frameItem) {
+    console.trace('Context.fromArgsAndFrameItem', state, args, frameItem);
     return new Context(
+      state,
       args,
+      state,
       frameItem.frameId.S,
       JSON.parse(frameItem.frame.S),
       frameItem.contFrameId?.S,
       frameItem.contFnName?.S
+      frameItem.contState?.N
     )
   }
 
@@ -56,18 +65,19 @@ export class Context {
    * Call with current continuation.
    * Essentially, call the function and when it 'returns', call with the current frame.
    */
-  async callCC(fnName, args, contFnName) {
-    console.trace('Context.callCC', fnName, args, contFnName);
+  async callCC(fnName, args, contFnName, contState) {
+    console.trace('Context.callCC', fnName, args, contFnName, contState);
     await this.saveFrame(); // commit current frame updates
 
     // 'push' the current frame onto the 'stack' (even in this stretched analogy it's more of a 'heap' but whatever)
     const nextFrameItem = await Context.makeNewFrameItem(
       this.frameId,
       contFnName,
+      contState
     );
 
     // invoke the function by sending a message to its SQS queue
-    return Context.invoke(fnName, args, nextFrameItem.frameId.S);
+    return Context.invoke(fnName, args, nextFrameItem.frameId.S, 0);
   }
 
   /**
@@ -76,7 +86,7 @@ export class Context {
   async return(result) {
     console.trace('Context.return', result);
     if (this.contFnName) {
-      return Context.invoke(this.contFnName, [result], this.contFrameId);
+      return Context.invoke(this.contFnName, [result], this.contFrameId, this.contState);
     } else {
       return Context.saveResult(this.frameId, result);
     }
@@ -86,7 +96,7 @@ export class Context {
     return Context.updateFrame(this.frameId, this.frame);
   }
 
-  static async invoke(fnName, args, frameId) {
+  static async invoke(fnName, args, frameId, state) {
     console.trace('Context.invoke', fnName, args, frameId);
     const queueUrl = `${process.env.SQS_BASE_URL}/${fnName}-request-queue`;
     console.trace('Context.invoke queueUrl', queueUrl);
@@ -97,6 +107,10 @@ export class Context {
           DataType: 'String',
           StringValue: frameId,
         },
+        state: {
+          DataType: 'Number',
+          StringValue: state.toString()
+        }
       },
       MessageBody: JSON.stringify([args])
     }));
@@ -126,11 +140,11 @@ export class Context {
     }));
   }
 
-  static async makeNewFrameItem(contFrameId, contFnName) {
+  static async makeNewFrameItem(contFrameId, contFnName, contState) {
     console.trace('Context.makeNewFrameItem', contFrameId, contFnName);
     const newFrame = {
       frameId: { S: crypto.randomUUID() },
-      frame: { S: "{}" },
+      frame: { S: "{}" }
     }
 
     if (contFrameId) {
@@ -139,6 +153,10 @@ export class Context {
 
     if (contFnName) {
       newFrame.contFnName = { S: contFnName };
+    }
+
+    if (contState) {
+      newFrame.contState = { N: contState };
     }
 
     await dynamoClient.send(new PutItemCommand({
