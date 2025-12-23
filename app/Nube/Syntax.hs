@@ -18,7 +18,7 @@ module Nube.Syntax
   )
 where
 
-import Control.Lens (Traversal', traversal)
+import Control.Lens (Traversal', traversal, Setter', sets)
 import Data.Text qualified as T
 import Prettyprinter
 import Nube.ToJS (ToJS (..))

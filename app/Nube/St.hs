@@ -4,7 +4,7 @@ module Nube.St
   )
 where
 
-import Control.Lens ((%%~))
+import Control.Lens ((&), (%%~), (%~))
 import Control.Monad.Except (MonadError (throwError))
 import Data.Bifunctor (first)
 import Data.Text qualified as T
@@ -29,10 +29,16 @@ splitFnStates :: S.Fn -> Compiler S.Fn
 splitFnStates fn@(S.Fn _ _ []) = pure fn
 splitFnStates (S.Fn fn_name fn_params fn_stmts) = do
   blocks <- splitStmtStates fn_name fn_stmts
-  let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
-      cont_cases = zipWith S.SCase [0..] blocks
-      state_switch = S.SSwitch (ctxDotMember "state") cont_cases
-  pure $ S.Fn fn_name [ctx_var_text] (arg_stmts ++ [state_switch])
+  case zipWith S.SCase [0..] blocks of 
+    [] -> error "splitStmtStates did not chunk correctly"
+    (cont_case_0 : cont_case_rest) -> do
+      let arg_stmts = zipWith ctxAssignArgStmt fn_params [0 ..]
+          state_switch = S.SSwitch (ctxDotMember "state") (consCaseStmts arg_stmts cont_case_0 : cont_case_rest)
+      pure $ S.Fn fn_name [ctx_var_text] [state_switch]
+
+consCaseStmts :: [S.Stmt] -> S.SCase -> S.SCase
+consCaseStmts car_stmts cdr_case = 
+  cdr_case & S.caseStmts' %~ (car_stmts ++)
 
 splitStmtStates :: T.Text -> [S.Stmt] -> Compiler [[S.Stmt]]
 splitStmtStates fn_name stmts = do
