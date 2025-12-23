@@ -1,0 +1,29 @@
+{
+  "name": "nube",
+  "version": "1.0.0",
+  "description": "`nube` is your new favorite, _absurdly_ cloud native, JavaScript compiler.",
+  "homepage": "https://github.com/ianmelendez95/nube#readme",
+  "bugs": {
+    "url": "https://github.com/ianmelendez95/nube/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianmelendez95/nube.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "example": "example",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0"
+  }
+}

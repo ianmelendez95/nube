@@ -32,7 +32,7 @@ export class Context {
     const args = parseHttpArgs(body);
     const frameItem = await Context.makeNewFrameItem(undefined, undefined);
 
-    return Context.fromArgsAndFrameItem(args, frameItem);
+    return Context.fromArgsAndFrameItem(0, args, frameItem);
   }
 
   static async fromMessage(message) {
@@ -44,7 +44,7 @@ export class Context {
 
     const state = parseInt(message.messageAttributes.state.stringValue);
 
-    return Context.fromArgsAndFrameItem(args, frameItem);
+    return Context.fromArgsAndFrameItem(state, args, frameItem);
   }
 
   static fromArgsAndFrameItem(state, args, frameItem) {
@@ -55,7 +55,7 @@ export class Context {
       frameItem.frameId.S,
       JSON.parse(frameItem.frame.S),
       frameItem.contFrameId?.S,
-      frameItem.contFnName?.S
+      frameItem.contFnName?.S,
       frameItem.contState?.N
     )
   }
@@ -99,9 +99,11 @@ export class Context {
   }
 
   static async invoke(fnName, args, frameId, state) {
-    console.trace('Context.invoke', fnName, args, frameId);
+    console.trace('Context.invoke', fnName, args, frameId, state);
     const queueUrl = `${process.env.SQS_BASE_URL}/${fnName}-request-queue`;
     console.trace('Context.invoke queueUrl', queueUrl);
+    const body = JSON.stringify(args);
+    console.trace('Context.invoke serialized args', body)
     return sqsClient.send(new SendMessageCommand({
       QueueUrl: queueUrl,
       MessageAttributes: {
@@ -114,7 +116,7 @@ export class Context {
           StringValue: state.toString()
         }
       },
-      MessageBody: JSON.stringify([args])
+      MessageBody: body
     }));
   }
 
@@ -158,7 +160,7 @@ export class Context {
     }
 
     if (contState) {
-      newFrame.contState = { N: contState };
+      newFrame.contState = { N: contState.toString() };
     }
 
     await dynamoClient.send(new PutItemCommand({
@@ -210,7 +212,7 @@ export const eventHandler = (fn) => async (event) => {
 
       if (event.queryStringParameters?.check) {
         const result = await checkResult(event.queryStringParameters.check);
-        return !!result
+        return result
           ? { statusCode: 200, body: result }
           : { statusCode: 202 }
       }
