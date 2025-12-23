@@ -20,6 +20,7 @@ where
 import Control.Lens (Traversal', traversal)
 import Data.Text qualified as T
 import Prettyprinter
+import Nube.ToJS (ToJS (..))
 
 data Script = Script
   { scriptName :: T.Text, -- file basename
@@ -121,6 +122,9 @@ instance Pretty MAccess where
 
 instance Pretty IOp where
   pretty IPlus = "+"
+
+instance ToJS IOp where 
+  toJS IPlus = "+"
 
 prettyCSV :: (Pretty a) => [a] -> Doc b
 prettyCSV xs = concatWith (\l r -> l <> comma <+> r) (map pretty xs)

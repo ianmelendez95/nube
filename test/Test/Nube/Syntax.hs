@@ -41,8 +41,11 @@ testSyntax = do
         parsed <- testParser P.function fn_txt
         (T.strip . T.show . pretty $ parsed) `shouldBe` fn_txt 
 
-      -- it "array lit no space" $ do 
+      it "array lit no space" $ do 
         -- return _ctx.callCC('capitalizeWord', [ _ctx.frame.word2 ], 'capitalizeTwoWords', 2);
+        let arr_mem :: Expr
+            arr_mem = EArrLit [EMember (EVar "_ctx") (MDotAccess "frame")]
+        show arr_mem `shouldBe` "[_ctx.frame]"
 
 _capitalizeTwoWords_state_fn_text :: IO T.Text 
 _capitalizeTwoWords_state_fn_text = readTestFile "capitalizeTwoWords/capitalizeTwoWords_state_fn.js"

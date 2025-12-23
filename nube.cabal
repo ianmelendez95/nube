@@ -93,6 +93,7 @@ library
         Nube.Context
         Nube.Ret
         Nube.St
+        Nube.ToJS
         Gen.CF
         Gen.Lambda
         Util.Aeson
