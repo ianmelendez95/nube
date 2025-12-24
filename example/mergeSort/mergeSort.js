@@ -1,9 +1,9 @@
-async function testMergeSort(len, min, max) {
+function testMergeSort(len, min, max) {
   len = typeof len === 'undefined' ? 8 : len
   min = typeof min === 'undefined' ? 0 : min
   max = typeof max === 'undefined' ? 64 : max
 
-  return mergeSort(await getRandomIntArray(len, min, max))
+  return mergeSort(getRandomIntArray(len, min, max))
 }
 
 async function getRandomIntArray(len, min, max) {
@@ -13,14 +13,14 @@ async function getRandomIntArray(len, min, max) {
     res.push(getRandomInt(min, max))
   }
 
-  return Promise.all(res)
+  return res
 }
 
-async function getRandomInt(min, max) {
+function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
 }
 
-async function mergeSort(arr) {
+function mergeSort(arr) {
   if (arr.length <= 1) {
     return arr
   } 
@@ -33,9 +33,9 @@ async function mergeSort(arr) {
   )
 }
 
-async function mergeSortPair(arr1, arr2) {
-  const arr1Sorted = await mergeSort(arr1)
-  const arr2Sorted = await mergeSort(arr2)
+function mergeSortPair(arr1, arr2) {
+  const arr1Sorted = mergeSort(arr1)
+  const arr2Sorted = mergeSort(arr2)
 
   let i1 = 0
   let i2 = 0

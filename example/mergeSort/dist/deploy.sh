@@ -6,12 +6,33 @@ BUCKET="mergesort-bucket"
 TEMPLATE="mergeSort-template.json"
 STACK_NAME="mergeSort-stack"
 LAYER="mergeSort-layer"
-FUN_NAMES="testMergeSort
-getRandomIntArray
-getRandomInt
-mergeSort
-mergeSortPair
-"
+FUN_NAMES=""
+
+# Parse command line arguments
+UPDATE_MODE=false
+UPDATE_LAMBDAS=false
+UPDATE_LAYER=false
+for arg in "$@"; do
+  case $arg in
+    --update-cf)
+      UPDATE_MODE=true
+      shift
+      ;;
+    --update-lambdas)
+      UPDATE_LAMBDAS=true
+      shift
+      ;;
+    --update-layer)
+      UPDATE_LAYER=true
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $arg"
+      echo "Usage: $0 [--update]"
+      exit 1
+      ;;
+  esac
+done
 
 assert_bucket () {
   if ! aws s3api head-bucket --bucket "$BUCKET" 2>&1 > /dev/null; then 
@@ -37,8 +58,78 @@ upload_template () {
 }
 
 create_cf_stack () {
-  echo "creating stack: $TEMPLATE"
+  echo "creating stack: $STACK_NAME"
   aws cloudformation create-stack \
+    --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
+    --capabilities CAPABILITY_NAMED_IAM \
+    --stack-name "$STACK_NAME" \
+    --disable-rollback
+}
+
+update_lambda () {
+  f="$1"
+
+  echo "updating function code: $f"
+  aws lambda update-function-code \
+    --no-cli-pager \
+    --function-name "$f" \
+    --s3-bucket "$BUCKET" \
+    --s3-key "$f-code.zip" > /dev/null
+
+  aws lambda wait function-updated --function-name "$f"
+}
+
+update_layer_for_lambda () {
+  f="$1"
+
+  echo "updating function layer: $f"
+  aws lambda update-function-configuration \
+    --no-cli-pager \
+    --function-name "$f" \
+    --layers "$layer_arn" > /dev/null
+
+  aws lambda wait function-updated --function-name "$f"
+}
+
+update_layer () {
+  echo "updating layer: $LAYER"
+  layer_response=$(aws lambda publish-layer-version \
+    --no-cli-pager \
+    --layer-name "$LAYER" \
+    --content S3Bucket="$BUCKET",S3Key="$LAYER.zip")
+
+  layer_arn=$(echo "$layer_response" | jq -r '.LayerVersionArn')
+  if [ -z "$layer_arn" ] || [ "$layer_arn" = "null" ]; then
+    echo "ERROR: failed to publish layer version"
+    exit 1
+  fi
+
+  for f in $FUN_NAMES; do
+    update_layer_for_lambda "$f" &
+  done
+
+  wait
+  echo "DONE: updating layers"
+}
+
+update_lambdas () {
+  layer_arn=$(echo "$layer_response" | jq -r '.LayerVersionArn')
+  if [ -z "$layer_arn" ] || [ "$layer_arn" = "null" ]; then
+    echo "ERROR: failed to publish layer version"
+    exit 1
+  fi
+
+  for f in $FUN_NAMES; do
+    update_lambda "$f" &
+  done
+
+  wait
+}
+
+update_cf_stack () {
+  echo "updating stack: $STACK_NAME"
+
+  aws cloudformation update-stack \
     --template-url "https://$BUCKET.s3.us-east-2.amazonaws.com/$TEMPLATE" \
     --capabilities CAPABILITY_NAMED_IAM \
     --stack-name "$STACK_NAME" 
@@ -60,19 +151,31 @@ upload_fun_code () {
   ZIP_FILE="$FUN_NAME-code.zip"
 
   echo "packaging: $ZIP_FILE"
-  zip "$ZIP_FILE" "$FUN_NAME.js"
+  zip -j "$ZIP_FILE" "$FUN_NAME/index.mjs"
 
   echo "uploading: $ZIP_FILE s3://$BUCKET"
   aws s3 cp "$ZIP_FILE" "s3://$BUCKET"
 }
 
 assert_bucket
-upload_template
-upload_layer
 
-for f in $FUN_NAMES; do 
-  upload_fun_code "$f"
-done
-
-create_cf_stack
+if [ "$UPDATE_LAYER" = true ]; then
+  upload_layer
+  update_layer
+elif [ "$UPDATE_LAMBDAS" = true ]; then
+  for f in $FUN_NAMES; do 
+    upload_fun_code "$f"
+  done
+  update_lambdas
+elif [ "$UPDATE_MODE" = true ]; then
+  upload_template
+  update_cf_stack
+else
+  upload_template
+  upload_layer
+  for f in $FUN_NAMES; do 
+    upload_fun_code "$f"
+  done
+  create_cf_stack
+fi
 
