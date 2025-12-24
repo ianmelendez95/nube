@@ -6,7 +6,7 @@ function testMergeSort(len, min, max) {
   return mergeSort(getRandomIntArray(len, min, max))
 }
 
-async function getRandomIntArray(len, min, max) {
+function getRandomIntArray(len, min, max) {
   let res = []
 
   for (let i = 0; i < len; i++) {
