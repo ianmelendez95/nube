@@ -345,13 +345,28 @@ thoroughly painful idea.
 
 ## Room for Improvement
 
+# Features
+
 - implement map/reduce support
+
+# Optimization
+
+- optimize stack DB creation/update
+  - do not save/update stack to db until call/cc
+  - do not save/update stack to db if call/cc is tail call
+- optimize map/reduce DB/Lambda interactions
+  - inline mapping operations in the user lambdas, instead of special map/reduce lambda
+
+# Reliability
+
 - handle SQS request duplication
   - enforce continuation state sequencing
-- add random string to bucket name (help avoid conflicts)
 - error handling
   - javascript errors could be caught and line numbers returned instead of a
     generic 500
   - source line number mappings
   - request handlers check argument count
+- monitoring/telemetry
+  - implement some way to implement a high-level 'stack trace' of executing lambdas
+- add random string to bucket name (help avoid conflicts)
 
