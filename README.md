@@ -348,6 +348,9 @@ thoroughly painful idea.
 # Features
 
 - implement map/reduce support
+- type system
+- memoization
+- S3 file system
 
 # Optimization
 
